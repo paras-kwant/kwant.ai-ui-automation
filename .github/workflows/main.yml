@@ -43,13 +43,12 @@ jobs:
           fi
 
           TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          WORKFLOW="${GITHUB_WORKFLOW}"
 
           PAYLOAD="{
             \"attachments\": [
               {
                 \"color\": \"$COLOR\",
-                \"title\": \"$WORKFLOW - Cypress Test Results\",
+                \"title\": \"Cypress Test Results\",
                 \"fields\": [
                   {\"title\": \"Status\", \"value\": \"$STATUS\", \"short\": true},
                   {\"title\": \"Last Checked\", \"value\": \"$TIME\", \"short\": true}
