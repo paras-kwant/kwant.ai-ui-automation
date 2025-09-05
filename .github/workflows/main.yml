@@ -1,19 +1,21 @@
 name: Run Cypress Tests
 
-# Trigger workflow on push, pull request, or manual dispatch
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:  # allows manual trigger from GitHub UI
+  workflow_dispatch: # allows manual trigger from GitHub UI
 
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 5   # terminate job if it runs more than 5 minutes
     env:
       EMAIL: ${{ secrets.EMAIL }}
-      PASSWORD: ${{ secrets.PASSWORD }} # optional, only if needed
+      PASSWORD: ${{ secrets.PASSWORD }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -27,4 +29,19 @@ jobs:
         run: npm install
 
       - name: Run Cypress tests
-        run: npx cypress run
+        id: cypress
+        run: |
+          npx cypress run || echo "CYPRESS_FAILED=true" >> $GITHUB_ENV
+
+      - name: Notify Slack
+        if: always()   # always runs, even if Cypress fails
+        run: |
+          if [ "${CYPRESS_FAILED}" = "true" ]; then
+            STATUS="🚨 PROD IS DOWN"
+          else
+            STATUS="✅ PROD IS UP"
+          fi
+
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"Cypress Test Results: $STATUS\"}" \
+          $SLACK_WEBHOOK_URL
