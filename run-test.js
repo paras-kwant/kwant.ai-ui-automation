@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 
 const slackWebhook = process.env.SLACK_WEBHOOK_URL;
 
-let lastTestFailed = false;
+let lastTestFailed = false; // Track previous test status to avoid duplicate notifications
 
 async function runTest() {
   exec('npx cypress run --spec "cypress/e2e/check_table.cy.js"', async (err, stdout, stderr) => {
@@ -15,7 +15,7 @@ async function runTest() {
       const currentFailed = !!err;
 
       if (currentFailed && !lastTestFailed) {
-        // Notify only on new failure
+        // Only notify on a new failure
         const payload = {
           attachments: [
             {
@@ -45,4 +45,6 @@ async function runTest() {
 
 // Run every 30 seconds
 setInterval(runTest, 30000);
+
+// Run immediately on start
 runTest();
