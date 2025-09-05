@@ -2,7 +2,7 @@ name: Run Cypress Tests
 
 on:
   schedule:
-    - cron: "*/10 * * * *"  # runs every 10 minutes (adjust as needed)
+    - cron: "*/10 * * * *" 
   workflow_dispatch:
 
 jobs:
@@ -31,17 +31,11 @@ jobs:
         run: |
           npx cypress run || echo "CYPRESS_FAILED=true" >> $GITHUB_ENV
 
-      - name: Notify Slack
-        if: always()
+      - name: Notify Slack (only on failure)
+        if: env.CYPRESS_FAILED == 'true'
         run: |
-          if [ "${CYPRESS_FAILED}" = "true" ]; then
-            STATUS="🚨 *PROD IS DOWN*"
-            COLOR="danger"
-          else
-            STATUS="✅ *PROD IS UP*"
-            COLOR="good"
-          fi
-
+          STATUS="🚨 *PROD IS DOWN*"
+          COLOR="danger"
           TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
           PAYLOAD="{
