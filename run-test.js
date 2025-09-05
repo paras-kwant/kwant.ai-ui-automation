@@ -3,11 +3,19 @@ const { exec } = require('child_process');
 
 const slackWebhook = process.env.SLACK_WEBHOOK_URL;
 
+let lastTestFailed = false;
+
 async function runTest() {
   exec('npx cypress run --spec "cypress/e2e/check_table.cy.js"', async (err, stdout, stderr) => {
     try {
-      if (err) {
-        // Test failed → send Slack notification
+      // Print Cypress output to Render logs
+      console.log(stdout);
+      if (stderr) console.error(stderr);
+
+      const currentFailed = !!err;
+
+      if (currentFailed && !lastTestFailed) {
+        // Notify only on new failure
         const payload = {
           attachments: [
             {
@@ -22,11 +30,13 @@ async function runTest() {
         };
         await axios.post(slackWebhook, payload);
         console.log("Slack notification sent due to failure.");
-        return;
       }
 
-      // Test passed
-      console.log('Table check passed ✅');
+      if (!currentFailed) {
+        console.log('Table check passed ✅');
+      }
+
+      lastTestFailed = currentFailed;
     } catch (err) {
       await axios.post(slackWebhook, { text: `🚨 Script error: ${err.message}` });
     }
@@ -35,6 +45,4 @@ async function runTest() {
 
 // Run every 30 seconds
 setInterval(runTest, 30000);
-
-// Run immediately on start
 runTest();
