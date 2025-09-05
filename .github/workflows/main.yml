@@ -37,11 +37,31 @@ jobs:
         if: always()   # always runs, even if Cypress fails
         run: |
           if [ "${CYPRESS_FAILED}" = "true" ]; then
-            STATUS="🚨 PROD IS DOWN"
+            STATUS="🚨 *PROD IS DOWN*"
+            COLOR="danger"
           else
-            STATUS="✅ PROD IS UP"
+            STATUS="✅ *PROD IS UP*"
+            COLOR="good"
           fi
 
+          TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          COMMIT_MESSAGE="$(git log -1 --pretty=%B | tr -d '"')"
+          COMMIT_URL="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+
+          PAYLOAD="{
+            \"attachments\": [
+              {
+                \"color\": \"$COLOR\",
+                \"title\": \"Cypress Test Results\",
+                \"fields\": [
+                  {\"title\": \"Status\", \"value\": \"$STATUS\", \"short\": true},
+                  {\"title\": \"Last Checked\", \"value\": \"$TIME\", \"short\": true},
+                  {\"title\": \"Commit\", \"value\": \"<$COMMIT_URL|$COMMIT_MESSAGE>\", \"short\": false}
+                ]
+              }
+            ]
+          }"
+
           curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"Cypress Test Results: $STATUS\"}" \
+          --data "$PAYLOAD" \
           $SLACK_WEBHOOK_URL
