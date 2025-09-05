@@ -7,6 +7,6 @@ describe('template spec', () => {
     cy.get('button p').click()
     cy.get('#project-card-container').eq(0).click()
     cy.get('a > .sc-djTQaJ > .icon-button').click()
-    cy.get('a').contains('Team').click()
+    cy.get('a').contains('Teamsss').click()
   })
 })
