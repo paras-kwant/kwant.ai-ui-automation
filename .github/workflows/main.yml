@@ -48,7 +48,7 @@ jobs:
             \"attachments\": [
               {
                 \"color\": \"$COLOR\",
-                \"title\": \"Cypress Test Results\",
+                \"title\": \"Prod health checkup\",
                 \"fields\": [
                   {\"title\": \"Status\", \"value\": \"$STATUS\", \"short\": true},
                   {\"title\": \"Last Checked\", \"value\": \"$TIME\", \"short\": true}
