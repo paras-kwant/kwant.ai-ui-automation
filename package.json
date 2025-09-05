@@ -10,5 +10,8 @@
   "license": "ISC",
   "devDependencies": {
     "cypress-dotenv": "^3.0.1"
+  },
+  "dependencies": {
+    "cypress": "^14.5.4"
   }
 }
