@@ -1,16 +1,14 @@
 name: Run Cypress Tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  schedule:
+    - cron: "*/10 * * * *"  # runs every 10 minutes (adjust as needed)
   workflow_dispatch:
 
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    timeout-minutes: 5   # terminate job if it runs more than 5 minutes
+    timeout-minutes: 5
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
@@ -45,7 +43,6 @@ jobs:
           fi
 
           TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          BRANCH="${GITHUB_REF_NAME}"
           WORKFLOW="${GITHUB_WORKFLOW}"
 
           PAYLOAD="{
@@ -55,8 +52,7 @@ jobs:
                 \"title\": \"$WORKFLOW - Cypress Test Results\",
                 \"fields\": [
                   {\"title\": \"Status\", \"value\": \"$STATUS\", \"short\": true},
-                  {\"title\": \"Last Checked\", \"value\": \"$TIME\", \"short\": true},
-                  {\"title\": \"Branch\", \"value\": \"$BRANCH\", \"short\": true}
+                  {\"title\": \"Last Checked\", \"value\": \"$TIME\", \"short\": true}
                 ]
               }
             ]
