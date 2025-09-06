@@ -3,6 +3,24 @@ const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
 
+// Add this to fix port issue
+const http = require('http');
+const PORT = process.env.PORT || 10000;
+
+// Create simple server for Render
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ 
+    status: 'Monitoring running', 
+    lastTest: lastTestFailed ? 'FAILED' : 'PASSED',
+    uptime: process.uptime() 
+  }));
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 const slackWebhook = process.env.SLACK_WEBHOOK_URL;
 let lastTestFailed = false;
 
