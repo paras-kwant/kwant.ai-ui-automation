@@ -5,7 +5,6 @@
   "main": "cypress.config.js",
   "scripts": {
     "postinstall": "cypress install",
-    "start": "node run-test.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
