@@ -40,7 +40,11 @@ async function runTest() {
     console.log('✅ Cypress binary installed successfully');
     
     console.log('\n🧪 Running Cypress tests...');
-    const { stdout, stderr } = await execPromise('npx cypress run');
+    
+    // Add timeout to prevent hanging
+    const { stdout, stderr } = await execPromise('timeout 120s npx cypress run', {
+      timeout: 130000 // 130 seconds timeout
+    });
     
     // Log all Cypress output
     console.log('\n📊 CYPRESS OUTPUT:');
@@ -67,15 +71,18 @@ async function runTest() {
     lastTestFailed = false;
     
   } catch (error) {
-    console.log('\n❌ TESTS FAILED!');
+    console.log('\n❌ TESTS FAILED OR TIMED OUT!');
     console.log('-------------------');
-    console.log('Error:', error.message);
+    console.log('Error code:', error.code);
+    console.log('Error signal:', error.signal);
+    console.log('Error message:', error.message);
+    
     if (error.stdout) {
-      console.log('\nCypress output:');
+      console.log('\nCypress stdout:');
       console.log(error.stdout);
     }
     if (error.stderr) {
-      console.log('\nStderr:');
+      console.log('\nCypress stderr:');
       console.log(error.stderr);
     }
     console.log('-------------------');
@@ -83,13 +90,15 @@ async function runTest() {
     testResults = {
       status: 'FAILED ❌',
       lastRun: new Date().toISOString(),
-      details: error.message
+      details: `Error: ${error.message} | Code: ${error.code}`
     };
     
     // Send Slack notification only on NEW failure
     if (!lastTestFailed) {
       console.log('\n📨 SENDING SLACK NOTIFICATION (New failure detected)');
       try {
+        const errorMsg = error.code === 124 ? 'Test timed out after 2 minutes' : error.message;
+        
         await axios.post(slackWebhook, {
           attachments: [{
             color: "danger",
@@ -97,13 +106,14 @@ async function runTest() {
             fields: [
               { title: "Status", value: "Test Failed", short: true },
               { title: "Time", value: new Date().toUTCString(), short: true },
-              { title: "Error", value: error.message.substring(0, 100), short: false }
+              { title: "Error", value: errorMsg.substring(0, 200), short: false }
             ]
           }]
         });
         console.log('✅ Slack notification sent successfully!');
       } catch (slackError) {
         console.log('❌ Failed to send Slack notification:', slackError.message);
+        console.log('Slack error details:', slackError.response?.data);
       }
     } else {
       console.log('📵 Skipping Slack notification (already notified about this failure)');
