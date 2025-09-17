@@ -7,15 +7,18 @@ const xlsx = require("xlsx");
 module.exports = defineConfig({
   e2e: {
     baseUrl: "https://uat.kwant.ai",
-    //  defaultCommandTimeout: 60000,
-    // requestTimeout: 60000,
-    // responseTimeout: 60000,
-    // pageLoadTimeout: 60000,
+    chromeWebSecurity: false,
+    defaultCommandTimeout: 60000,
+    requestTimeout: 60000,
+    responseTimeout: 60000,
+    pageLoadTimeout: 60000,
     retries: { runMode: 2, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
 
+
+    experimentalSessionAndOrigin: true,
+
     setupNodeEvents(on, config) {
-      // Environment variables
       config.env.EMAIL = process.env.EMAIL;
       config.env.PASSWORD = process.env.PASSWORD;
 
@@ -68,5 +71,6 @@ module.exports = defineConfig({
 
       return config;
     },
+    testIsolation: false,
   },
 });

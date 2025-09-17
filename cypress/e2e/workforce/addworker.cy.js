@@ -5,17 +5,19 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 
 
-describe("worker", () => {
-  beforeEach(() => { 
-    cy.login();
-    cy.get('.card-title').contains('Regression test').click();
-    cy.visit('/projects/94049707/workers');
+describe("Worker Module - Add Worker Tests", () => {
+  beforeEach(() => {
+    cy.session('userSession', () => {
+      cy.login();
+      cy.get('.card-title').contains('Regression test').click();
+    });
   });
   const randomNum = Math.floor(Math.random() * 10000);
   const firstName = `John${randomNum}`;
   const lastName = "Doe";
   
   it("Validate adding a worker with only mandatory fields", () => {
+    cy.visit('/projects/94049707/workers');
     cy.get(workforceSelector.addWorkerButton).click();
     cy.get(workforceSelector.profileImageUploadButton).click();
     cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
@@ -33,6 +35,7 @@ describe("worker", () => {
   });
 
   it("Validate worker photo capture via camera works", () => {
+    cy.visit('/projects/94049707/workers');
     cy.get(workforceSelector.addWorkerButton).click();
     cy.get(workforceSelector.profileImageUploadButton).click();
     cy.get('.upload-button__upload-options__option').eq(1).click();
@@ -46,12 +49,14 @@ describe("worker", () => {
   
 
   it('Validate the "Add More Details" and "Add worker" buttons are disabled when mandatory fields are empty', () => {
+    cy.visit('/projects/94049707/workers');
     cy.get('button').contains('Add Worker').click();
     cy.get('[label="Add Worker"]>button').should('be.disabled');
     cy.get('[label="Add More Details"]>button').should('be.disabled');
   });
 
   it('should validate existing worker warning', () => {
+    cy.visit('/projects/94049707/workers');
     cy.get('.personal-info-content__title')
       .first()
       .invoke('text')
@@ -69,6 +74,7 @@ describe("worker", () => {
   });
 
   it('Validate adding a worker with all fields filled', () => {
+    cy.visit('/projects/94049707/workers');
     
     cy.get('button').contains('Add Worker').click();
     cy.get('.upload-button__camera-icon').click();

@@ -1,12 +1,18 @@
 
 import { workforceSelector } from './workforceSelector';  
 
+
 Cypress.Commands.add('login', () => {
-    cy.visit('/')
+  cy.session([Cypress.env('EMAIL'), Cypress.env('PASSWORD')], () => {
+    cy.visit('/') 
     cy.get('[name="email"]').type(Cypress.env('EMAIL'))
     cy.get('[name="password"]').type(Cypress.env('PASSWORD'))
     cy.get('button p').click()
+  
+  }, {
+    cacheAcrossSpecs: true 
   })
+})
 
 
   Cypress.Commands.add("searchAndDeleteWorker", (firstName, lastName) => {
@@ -35,11 +41,4 @@ Cypress.Commands.add('login', () => {
   });
 
 
-  Cypress.Commands.add('logintest', () => {
-    cy.visit('/')
-    cy.get('[name="email"]').type(Cypress.env('EMAIL'))
-    cy.get('[name="password"]').type(Cypress.env('PASSWORD'))
-    cy.get('button p').click()
-  })
-  
-  
+
