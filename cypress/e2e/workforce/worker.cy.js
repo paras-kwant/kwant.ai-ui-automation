@@ -1,0 +1,313 @@
+/// <reference types="cypress" />
+const path = require("path");
+const fs = require("fs");
+
+
+
+describe("worker", () => {
+  beforeEach(() => { 
+    cy.login();
+  })
+  
+  
+  
+  it("Validate adding a worker", () => {
+    const randomNum = Math.floor(Math.random() * 10000);
+    const firstName = `John${randomNum}`;
+    const lastName = "Doe";
+    cy.get('.card-title').contains('Regression test').click();
+    cy.visit('/projects/94049707/workers');
+
+   cy.
+    cy.get('.upload-button__camera-icon').click();
+    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
+    cy.get('input[name=firstName]').type(firstName);
+    cy.get('input[name=lastName]').type(lastName);
+    cy.get('input[name="company"]').type('Micron');
+    cy.get('.sc-fhzFiK').click();
+    cy.get('input[name=address]').type('Kathmandu');
+    cy.get('input[name=zipCode]').type('44600');
+    cy.get('.hdcwLk > button > p').click();
+    cy.get('h4').contains('successfully added as a worker.').should('be.visible');
+
+    cy.get('header>button').click();
+    cy.get('#search-input').type(firstName);
+    cy.get('.personal-info-content__title')
+      .contains(`${firstName} ${lastName}`)
+      .should('be.visible');
+
+    // Cleanup: delete worker
+    cy.get('.checkboxCheckmark').click();
+    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get('.delete-btn').click();
+    cy.get('button>p').contains('Delete').click();
+    cy.get('.sc-kOPcWz').contains('Successfully added employee.').should('be.visible');
+  });
+
+  it("Validate worker download matches UI", () => {
+    const FILE_NAME = 'Ontarget-Employee-Report.csv';
+    const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
+    const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
+
+    cy.get('.card-title').contains('Regression test').click();
+    cy.visit('/projects/94049707/workers');
+    cy.wait(10000);
+  
+    cy.get('.personal-info-content__title').then(($els) => {
+      // Extract UI worker names
+      const uiNames = [...$els].map(el => el.innerText.trim());
+      uiNames.forEach((name, i) => cy.log(`UI Worker ${i + 1}: ${name}`));
+
+      cy.wait(20000)
+  
+      // Clean up existing downloads
+      cy.task("deleteDownloadedFiles", {
+        downloadsFolder: DOWNLOADS_FOLDER,
+        pattern: "Ontarget-Employee-Report",
+        extension: ".csv"
+      });
+  
+      // Download worker report
+      cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+      cy.get('.dropdown-option').contains('Download').click();
+  
+      // Parse and validate downloaded file
+      cy.readFile(FILE_PATH, { timeout: 30000 }).then(() => {
+        cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
+          const csvNames = extractWorkerNamesFromCSV(rows);
+          
+          logComparisonResults(uiNames, csvNames);
+          validateNamesMatch(uiNames, csvNames);
+        });
+      });
+    });
+  });
+  
+  // Helper functions
+  function extractWorkerNamesFromCSV(rows) {
+    const header = rows[1];
+    const firstNameIndex = header.indexOf("First Name");
+    const lastNameIndex = header.indexOf("Last Name");
+  
+    if (firstNameIndex === -1 || lastNameIndex === -1) {
+      throw new Error("Required columns not found in CSV");
+    }
+  
+    return rows.slice(2)
+      .map(row => {
+        const firstName = row[firstNameIndex]?.toString().trim() || "";
+        const lastName = row[lastNameIndex]?.toString().trim() || "";
+        return [firstName, lastName].filter(Boolean).join(" ");
+      })
+      .filter(name => name !== "");
+  }
+  
+  function logComparisonResults(uiNames, csvNames) {
+    csvNames.forEach((name, i) => cy.log(`CSV Worker ${i + 1}: ${name}`));
+    cy.log(`UI Names: ${uiNames.length}, CSV Names: ${csvNames.length}`);
+
+    
+  
+    uiNames.forEach(uiName => {
+      const found = csvNames.includes(uiName) ? "✓" : "✗";
+      cy.log(`${found} ${uiName}`);
+    });
+  }
+  
+  function validateNamesMatch(uiNames, csvNames) {
+    const missingNames = uiNames.filter(name => !csvNames.includes(name));
+    
+    if (missingNames.length > 0) {
+      expect(missingNames.length).to.equal(0, 
+        `UI names not found in CSV: ${missingNames.join(', ')}`
+      );
+    }
+  }
+
+  it('Validating the search functionality - run twice', () => {
+    cy.login();
+    cy.get('.card-title').contains('Regression test').click();
+    cy.visit('/projects/94049707/workers');
+    cy.intercept('POST', '/api/filterProjectWorker*').as('workersApi');
+  
+    cy.reload();
+  
+    cy.wait('@workersApi').then((interception) => {
+      const workers = interception.response.body.projectWorkerDTOS;
+      const firstNames = workers.map(worker => worker.firstName).filter(Boolean);
+      cy.log(`First names: ${firstNames.join(', ')}`);
+  
+      const randomNames = Cypress._.sampleSize(firstNames, 2);
+      randomNames.forEach((name, index) => {
+        cy.log(`Search attempt ${index + 1}: ${name}`);
+        cy.get('#search-input').clear().type(name);
+        cy.get('.sc-laNGHT.gmshSv')
+          .should('contain.text', name);
+      });
+    });
+  });
+
+  it.only('Validating Adding adding a column functionality', ()=>{
+    cy.login();
+    cy.get('.card-title').contains('Regression test').click();
+    cy.visit('/projects/94049707/workers');
+    cy.get('.icon-button >.sc-aXZVg> button').click();
+    cy.get('[data-rbd-drag-handle-draggable-id="automation_test_filter"]')
+  .find('input[type="checkbox"]')     
+  .should('exist').click()
+  cy.get('button>p').contains('Save').click();
+  cy.get('.sc-gdfaqJ').contains('automation test filter'); 
+
+  cy.get('.icon-button >.sc-aXZVg> button').click();
+  cy.get('[data-rbd-drag-handle-draggable-id="automation_test_filter"]')
+  .find('input[type="checkbox"]')     
+  .should('exist').click()
+  cy.get('button>p').contains('Save').click();
+
+
+
+  })
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  it.skip("Validate the search functionality", () => {
+    cy.get('.card-title').contains('Regression test').click();
+    cy.visit('/projects/94049707/workers');
+    cy.wait(10000);
+    
+    let allWorkerNames = new Set();
+    let consecutiveNoNewWorkers = 0;
+    let lastScrollPosition = 0;
+    
+    function scrollAndCollectWorkers(attempt = 1, maxAttempts = 20) {
+      cy.log(`=== Attempt ${attempt} ===`);
+      
+      // Get current workers and add to our collection
+      cy.get('.personal-info-content__title').then(($els) => {
+        const currentWorkers = [...$els].map(el => el.innerText.trim());
+        const beforeSize = allWorkerNames.size;
+        
+        // Add all current workers to our set
+        currentWorkers.forEach(name => allWorkerNames.add(name));
+        
+        const newWorkersFound = allWorkerNames.size - beforeSize;
+        
+        cy.log(`Current visible workers: ${currentWorkers.length}`);
+        cy.log(`New workers found in this attempt: ${newWorkersFound}`);
+        cy.log(`Total unique workers collected: ${allWorkerNames.size}`);
+        
+        // Log current visible workers
+        cy.log(`=== Currently visible workers: ===`);
+        currentWorkers.forEach((name, index) => {
+          cy.log(`  ${index + 1}: ${name}`);
+        });
+        
+        if (newWorkersFound > 0) {
+          consecutiveNoNewWorkers = 0;
+          cy.log(`✓ Found ${newWorkersFound} new workers`);
+        } else {
+          consecutiveNoNewWorkers++;
+          cy.log(`✗ No new workers (${consecutiveNoNewWorkers} consecutive attempts)`);
+        }
+        
+        // Continue if we found new workers OR haven't tried enough times yet
+        if ((newWorkersFound > 0 || consecutiveNoNewWorkers < 5) && attempt < maxAttempts) {
+          // Try different scrolling strategies
+          cy.log('Scrolling to load more workers...');
+          
+          // Strategy 1: Scroll the main container
+          cy.get('body').then(($body) => {
+            const scrollHeight = $body[0].scrollHeight;
+            const currentScroll = $body[0].scrollTop;
+            cy.log(`Current scroll position: ${currentScroll}, Total height: ${scrollHeight}`);
+            
+            if (currentScroll === lastScrollPosition) {
+              cy.log('No scroll progress detected, trying different approach');
+            }
+            lastScrollPosition = currentScroll;
+          });
+          
+          // Try scrolling window with ensureScrollable false
+          cy.scrollTo('bottom', { duration: 1000, ensureScrollable: false });
+          cy.wait(1000);
+          
+          // Scroll the workers container
+          cy.get('.workers-body div').then(($divs) => {
+            const scrollableDiv = $divs.filter((i, div) => div.scrollHeight > div.clientHeight)[0];
+            if (scrollableDiv) {
+              cy.log('Scrolling workers container');
+              cy.wrap(scrollableDiv).scrollTo('bottom', { duration: 500, ensureScrollable: false });
+              cy.wait(500);
+              // Try scrolling past bottom to trigger more loading
+              cy.wrap(scrollableDiv).scrollTo(0, 999999, { ensureScrollable: false });
+              cy.wait(500);
+            } else {
+              cy.log('No scrollable div found in workers-body');
+            }
+          });
+          
+          // Try scrolling the table wrapper specifically
+          cy.get('.table-wrapper').then(($wrapper) => {
+            if ($wrapper.length > 0) {
+              cy.log('Scrolling table wrapper');
+              cy.wrap($wrapper).scrollTo('bottom', { duration: 500, ensureScrollable: false });
+              cy.wait(500);
+            }
+          });
+          
+          // Alternative: Try scrolling the last worker element into view
+          cy.get('.personal-info-content__title').last().then(($lastWorker) => {
+            if ($lastWorker.length > 0) {
+              cy.log('Scrolling last worker into view');
+              cy.wrap($lastWorker).scrollIntoView({ duration: 500 });
+              cy.wait(500);
+            }
+          });
+          
+          // Try different scroll approaches
+          cy.get('.workers-body').then(($workersBody) => {
+            if ($workersBody.length > 0) {
+              cy.log('Scrolling workers-body');
+              cy.wrap($workersBody).scrollTo('bottom', { ensureScrollable: false });
+              cy.wait(500);
+            }
+          });
+          
+          cy.wait(2000);
+          
+          scrollAndCollectWorkers(attempt + 1, maxAttempts);
+        } else {
+          // Final results
+          const finalWorkers = Array.from(allWorkerNames).sort();
+          cy.log(`\n=== FINAL RESULTS ===`);
+          cy.log(`Total unique workers found: ${finalWorkers.length}`);
+          cy.log(`Total attempts made: ${attempt}`);
+          cy.log(`\n=== Complete list of workers: ===`);
+          finalWorkers.forEach((name, index) => {
+            cy.log(`${index + 1}. ${name}`);
+          });
+          
+          // Verify we got a reasonable number of workers
+          expect(finalWorkers.length).to.be.greaterThan(0);
+        }
+      });
+    }
+    
+    // Start the process
+    scrollAndCollectWorkers();
+  });
+});
