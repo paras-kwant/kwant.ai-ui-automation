@@ -143,6 +143,7 @@ describe("worker", () => {
         cy.get('#search-input').clear().type(name);
         cy.get('.sc-laNGHT.gmshSv')
           .should('contain.text', name);
+          
       });
     });
   });

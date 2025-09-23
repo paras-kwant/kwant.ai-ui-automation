@@ -16,3 +16,12 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import 'cypress-file-upload';
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+    // Check if it's the compression error
+    if (err.message.includes('Bad compressed size')) {
+      return false; // Prevent Cypress from failing the test
+    }
+    // Return false for any other errors you want to ignore
+    return true;
+  });

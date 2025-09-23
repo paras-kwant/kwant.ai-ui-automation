@@ -39,6 +39,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get(workforceSelector.addWorkerButton).click();
     cy.get(workforceSelector.profileImageUploadButton).click();
     cy.get('.upload-button__upload-options__option').eq(1).click();
+    cy.wait(2000); 
     cy.get('.hdcwLk > button > p').click();
     cy.get('button>p').contains('Submit Photo').click();
   
@@ -242,7 +243,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('.sc-jXbUNg>.jmJtNV').eq(4).click();
     cy.get('.empty-body__title').should('have.text', 'No safety notifications yet!');
 
-    // Go back and delete worker
+
     cy.get('.hHDUMJ').click();
 
     cy.searchAndDeleteWorker(firstName, lastName);

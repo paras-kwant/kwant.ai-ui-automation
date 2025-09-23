@@ -5,6 +5,8 @@ export const workforceSelector = {
     firstNameInput: 'input[name=firstName]',
     lastNameInput:'input[name=lastName]',
     companyNameInput:'input[name="company"]',
-    searchInput:'#search-input'
+    searchInput:'#search-input',
+    updateButton:'button >p:contains("Update")',
+    submitButton:'button >p:contains("Submit")'
   };
-  
+   

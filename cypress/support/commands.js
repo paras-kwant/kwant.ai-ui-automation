@@ -10,7 +10,7 @@ Cypress.Commands.add('login', () => {
     cy.get('button p').click()
   
   }, {
-    cacheAcrossSpecs: true 
+    cacheAcrossSpecs: false 
   })
 })
 
