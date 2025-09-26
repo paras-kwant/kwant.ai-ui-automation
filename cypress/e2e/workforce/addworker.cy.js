@@ -135,7 +135,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('[name="expiresInPeriods"]').click();
     cy.get('[role="button"]').contains('Day(s)').click();
     cy.fixture('file.pdf', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl.kUWesp').attachFile(
+      cy.get('.sc-gObJpS').attachFile(
         { fileContent, fileName: 'file.pdf', mimeType: 'application/pdf' },
         { subjectType: 'drag-n-drop' }
       );
@@ -232,7 +232,7 @@ describe("Worker Module - Add Worker Tests", () => {
     ];
 
     expectedValuesDocuments.forEach(val => {
-      cy.get('.kuEPea>.cell-content').should('contain.text', val);
+      cy.get('.sc-kufkCr .cell-content').should('contain.text', val);
     });
 
     // Verify Beacon Settings
@@ -244,7 +244,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('.empty-body__title').should('have.text', 'No safety notifications yet!');
 
 
-    cy.get('.hHDUMJ').click();
+    cy.get('.sc-CCtys.bfwwiC').click();
 
     cy.searchAndDeleteWorker(firstName, lastName);
   });

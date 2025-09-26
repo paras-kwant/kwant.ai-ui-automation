@@ -24,7 +24,7 @@ Cypress.Commands.add('login', () => {
       .should("be.visible");
   
     // Validate worker details
-    cy.get(".sc-cHMHOW.jSllKi")
+    cy.get(workforceSelector.tableRow)
       .should("contain.text", firstName)
       .and("contain.text", "Micron");
   
@@ -39,6 +39,26 @@ Cypress.Commands.add('login', () => {
       .contains("1 worker was successfully deleted")
       .should("be.visible");
   });
+
+
+
+Cypress.Commands.add(
+  'verifyTableorEmptyState',
+  ({ tableRowSelector, cellSelector, expectedText }) => {
+    cy.get('body').then(($body) => {
+      cy.wait(2000); // Wait for 2 seconds to allow content to load
+      if ($body.find(tableRowSelector).length > 0) {
+        cy.get(cellSelector)
+          .contains(expectedText)
+          .should('be.visible');
+      } else {
+        cy.get('.empty-body').should(
+            'have.text',
+            'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
+          );}
+    });
+  }
+);
 
 
 

@@ -6,13 +6,20 @@
   "scripts": {
     "postinstall": "cypress install",
     "start": "node run-test.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:parallel": "concurrently \"npx cypress run --spec cypress/e2e/workforce/addworker.cy.js\" \"npx cypress run --spec cypress/e2e/workforce/filter.cy.js\" \"npx cypress run --spec 'cypress/e2e/workforce/column.cy.js,cypress/e2e/workforce/search.cy.js,cypress/e2e/workforce/fileUpload&Download.cy.js'\""
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "cypress-dotenv": "^3.0.1",
     "cypress-file-upload": "^5.0.8",
+    "cypress-multi-reporters": "^2.0.5",
+    "cypress-parallel": "^0.15.0",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^5.0.0",
+    "mochawesome-report-generator": "^6.3.0",
     "neat-csv": "^7.0.0",
     "xlsx": "^0.18.5"
   },

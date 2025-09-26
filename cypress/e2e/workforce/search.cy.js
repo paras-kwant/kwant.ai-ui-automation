@@ -32,8 +32,8 @@ describe("Worker Module - Search", () => {
         cy.wait(3000)
   
         cy.get('body').then(($body) => {
-          if ($body.find('.sc-laNGHT').length) {
-            cy.get('.sc-laNGHT').contains(name).should('be.visible');
+          if ($body.find(workforceSelector.tableRow).length) {
+            cy.get(workforceSelector.tableRow).contains(name).should('be.visible');
         
           } else {
             throw new Error(`Neither worker list nor alternate element found for "${name}"`);
@@ -47,7 +47,7 @@ describe("Worker Module - Search", () => {
   it('Search triggers API only when at least 3 letters are entered', () => {
     cy.visit('/projects/94049707/workers');
     cy.wait(3000)
-    cy.get('.sc-laNGHT')
+    cy.get(workforceSelector.tableRow)
     .then(($els) => {
       const initialList = [...$els].map(el => el.innerText.trim());
       cy.log('Initial List:', JSON.stringify(initialList));
@@ -55,7 +55,7 @@ describe("Worker Module - Search", () => {
 
       cy.get(workforceSelector.searchInput).clear().type('a');
 
-      cy.get('.sc-laNGHT').then(($newEls) => {
+      cy.get(workforceSelector.tableRow).then(($newEls) => {
         const newList = [...$newEls].map(el => el.innerText.trim());
         cy.log('New List:', JSON.stringify(newList));
         console.log('New List:', newList); 
@@ -64,7 +64,7 @@ describe("Worker Module - Search", () => {
       });
     });
 
-    cy.get('.sc-laNGHT')
+    cy.get(workforceSelector.tableRow)
     .then(($els) => {
       const initialList = [...$els].map(el => el.innerText.trim());
       cy.log('Initial List:', JSON.stringify(initialList));
@@ -72,7 +72,7 @@ describe("Worker Module - Search", () => {
 
       cy.get(workforceSelector.searchInput).clear().type('aa');
 
-      cy.get('.sc-laNGHT').then(($newEls) => {
+      cy.get(workforceSelector.tableRow).then(($newEls) => {
         const newList = [...$newEls].map(el => el.innerText.trim());
         cy.log('New List:', JSON.stringify(newList));
         console.log('New List:', newList); 
@@ -81,7 +81,7 @@ describe("Worker Module - Search", () => {
       });
     });
 
-    cy.get('.sc-laNGHT')
+    cy.get(workforceSelector.tableRow)
     .then(($els) => {
       const initialList = [...$els].map(el => el.innerText.trim());
       cy.log('Initial List:', JSON.stringify(initialList));
@@ -91,8 +91,8 @@ describe("Worker Module - Search", () => {
       cy.wait(3000)
 
       cy.get('body').then(($body) => {
-        if ($body.find('.sc-laNGHT').length > 0) {
-          cy.get('.sc-laNGHT').then(($newEls) => {
+        if ($body.find(workforceSelector.tableRow).length > 0) {
+          cy.get(workforceSelector.tableRow).then(($newEls) => {
             const newList = [...$newEls].map(el => el.innerText.trim());
             console.log('New List:', newList);
   
@@ -108,9 +108,6 @@ describe("Worker Module - Search", () => {
     });
 
   });
-  
-  
-  
   
 
 

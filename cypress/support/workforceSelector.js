@@ -7,6 +7,9 @@ export const workforceSelector = {
     companyNameInput:'input[name="company"]',
     searchInput:'#search-input',
     updateButton:'button >p:contains("Update")',
-    submitButton:'button >p:contains("Submit")'
+    submitButton:'button >p:contains("Submit")',
+    tableRow:'.sc-cRmqLi',
+    tableColumn :'.sc-gwZKzw',
+    clearFilterButton: '.label.default__label:contains("Clear All")',
   };
    

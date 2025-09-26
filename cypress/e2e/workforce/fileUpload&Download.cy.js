@@ -71,7 +71,7 @@ it('Vaidate adding a worker by uploading .csv file', () => {
   cy.get('.dropdown-option').contains('Upload').click();
 
   cy.fixture('employeeUpload.csv', 'base64').then(fileContent => {
-    cy.get('.sc-futREh.cZIcZb').attachFile(
+    cy.get('.sc-ewBhFl').attachFile(
       {
         fileContent,
         fileName: 'employeeUpload.csv',

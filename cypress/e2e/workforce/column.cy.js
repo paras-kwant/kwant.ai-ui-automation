@@ -20,10 +20,10 @@ describe("Worker Module - column", () => {
   cy.get('button p').contains('Reset to default').click();
   cy.get('button.sc-krNlru').click();
   cy.get('.sc-kOPcWz').should('have.text', 'Column settings reset successfully! ');
-  cy.get('.sc-gdfaqJ').should('have.length', 11);
-  cy.get('.sc-gdfaqJ').invoke('text').then((text) => {
+  cy.get(workforceSelector.tableColumn).should('have.length', 11);
+  cy.get(workforceSelector.tableColumn).invoke('text').then((text) => {
     cy.log('Column Text:', text);
-    cy.get('.sc-gdfaqJ').should('contain.text', 'S.NoNameCompany NameJob TitleSite StatusPhoneDeviceLast Seen Location');
+    cy.get(workforceSelector.tableColumn).should('contain.text', 'S.NoNameCompany NameJob TitleSite StatusPhoneDeviceLast Seen Location');
   });
 })
 
@@ -36,9 +36,9 @@ it('Validate adding and updating column settings', () => {
   cy.get('[data-rbd-draggable-id="automation_test_filter"] [type="checkbox"]').click()
   cy.get('button p').contains('Save').click();
   cy.get('.sc-kOPcWz').should('have.text', 'Column settings updated successfully! ');
-  cy.get('.sc-gdfaqJ').should('have.length', 12);
+  cy.get(workforceSelector.tableColumn).should('have.length', 12);
 
-  cy.get('.sc-gdfaqJ').invoke('text').then((text) => {
+  cy.get(workforceSelector.tableColumn).invoke('text').then((text) => {
     expect(text.trim()).to.eq(
       'S.NoNameCompany NameJob TitleSite StatusPhoneDeviceLast Seen Locationautomation test filter'
     );
