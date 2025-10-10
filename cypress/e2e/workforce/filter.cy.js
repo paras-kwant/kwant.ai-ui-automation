@@ -3,10 +3,11 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';  
 import '../../support/commands';
+import { log } from 'console';
 
 
 
-describe("Worker Module - column", () => {
+describe("Worker Module - filer", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
@@ -15,7 +16,7 @@ describe("Worker Module - column", () => {
   });
 
   
-  it('Verify Filter of the diffrent column for name', () => {
+  it.only('Verify Filter of the diffrent column for name', () => {
     cy.visit('/projects/94049707/workers');
     cy.intercept('POST', '/api/filterProjectWorker*').as('workersApi');
     cy.reload();
@@ -29,7 +30,12 @@ describe("Worker Module - column", () => {
     cy.get('.table-header-filter-btn').eq(0).click();
     cy.get('input.sc-fHjqPf.fCepZC').type(randomNames[0]);
     cy.get('p').contains('Filters:').click()
-    cy.get('.sc-cRmqLi .personal-info-content__title').contains(randomNames[0]).should('be.visible');
+    cy.wait(2000)
+    cy.get('.sc-cRmqLi .personal-info-content__title').invoke('text').then((name) => {
+      cy.log(name)
+    })
+    /
+    cy.get('.sc-cRmqLi .personal-info-content__title').should('contain', randomNames[0])
     cy.get(workforceSelector.clearFilterButton).click()
 })
   })

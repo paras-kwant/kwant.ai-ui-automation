@@ -7,7 +7,7 @@ Cypress.Commands.add('login', () => {
     cy.visit('/') 
     cy.get('[name="email"]').type(Cypress.env('EMAIL'))
     cy.get('[name="password"]').type(Cypress.env('PASSWORD'))
-    cy.get('button p').click()
+    cy.get('button p').contains('Login').click()
   
   }, {
     cacheAcrossSpecs: false 

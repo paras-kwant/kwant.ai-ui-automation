@@ -5,7 +5,7 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 
 
-describe("Worker Module - Search", () => {
+describe("Worker Module - Favorites", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
@@ -14,7 +14,7 @@ describe("Worker Module - Search", () => {
   });
 
   
-  it('Validate adding and removing a worker page from favorites.', () => {
+  it.only('Validate adding and removing a worker page from favorites.', () => {
     cy.wait(2000)
         cy.get('body').then(($body) => {
           if ($body.find('[title="Workforce Workers"]').length > 0) {

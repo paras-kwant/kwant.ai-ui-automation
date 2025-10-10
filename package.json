@@ -7,11 +7,14 @@
     "postinstall": "cypress install",
     "start": "node run-test.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:parallel": "concurrently \"npx cypress run --spec cypress/e2e/workforce/addworker.cy.js\" \"npx cypress run --spec cypress/e2e/workforce/filter.cy.js\" \"npx cypress run --spec 'cypress/e2e/workforce/column.cy.js,cypress/e2e/workforce/search.cy.js,cypress/e2e/workforce/fileUpload&Download.cy.js'\""
+    "test:parallel": "concurrently \"npx cypress run --spec cypress/e2e/workforce/addworker.cy.js\" \"npx cypress run --spec cypress/e2e/workforce/filter.cy.js\" \"npx cypress run --spec 'cypress/e2e/workforce/column.cy.js,cypress/e2e/workforce/search.cy.js,cypress/e2e/workforce/fileUpload&Download.cy.js'\"",
+     "cypress:report": "npx cypress run && npx allure generate allure-results --clean -o allure-report && npx surge ./allure-report https://kwant-ui-automation-dashboard.surge.sh"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@shelex/cypress-allure-plugin": "^2.41.2",
+    "allure-commandline": "^2.34.1",
     "concurrently": "^9.2.1",
     "cypress-dotenv": "^3.0.1",
     "cypress-file-upload": "^5.0.8",

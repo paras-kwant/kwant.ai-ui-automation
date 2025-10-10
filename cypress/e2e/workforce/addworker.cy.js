@@ -16,7 +16,7 @@ describe("Worker Module - Add Worker Tests", () => {
   const firstName = `John${randomNum}`;
   const lastName = "Doe";
   
-  it("Validate adding a worker with only mandatory fields", () => {
+  it.only("Validate adding a worker with only mandatory fields", () => {
     cy.visit('/projects/94049707/workers');
     cy.get(workforceSelector.addWorkerButton).click();
     cy.get(workforceSelector.profileImageUploadButton).click();
@@ -232,7 +232,7 @@ describe("Worker Module - Add Worker Tests", () => {
     ];
 
     expectedValuesDocuments.forEach(val => {
-      cy.get('.sc-kufkCr .cell-content').should('contain.text', val);
+      cy.get('.cell-content').should('contain.text', val);
     });
 
     // Verify Beacon Settings

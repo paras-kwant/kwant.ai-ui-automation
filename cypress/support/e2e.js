@@ -16,6 +16,8 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import 'cypress-file-upload';
+import '@shelex/cypress-allure-plugin';
+
 
 Cypress.on('uncaught:exception', (err, runnable) => {
     // Check if it's the compression error

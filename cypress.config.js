@@ -3,6 +3,7 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const xlsx = require("xlsx");
+const allureWriter = require("@shelex/cypress-allure-plugin/writer");
 
 module.exports = defineConfig({
   e2e: {
@@ -14,11 +15,22 @@ module.exports = defineConfig({
     pageLoadTimeout: 30000,
     retries: { runMode: 2, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
-
-
-    experimentalSessionAndOrigin: true,
+    testIsolation: false,
 
     setupNodeEvents(on, config) {
+      // Clean allure-results before test run
+      on('before:run', () => {
+        const allureResultsPath = path.join(__dirname, 'allure-results');
+        if (fs.existsSync(allureResultsPath)) {
+          fs.rmSync(allureResultsPath, { recursive: true, force: true });
+          console.log('🧹 Cleaned old allure-results');
+        }
+      });
+
+      // Allure plugin
+      allureWriter(on, config);
+
+      // Environment variables
       config.env.EMAIL = process.env.EMAIL;
       config.env.PASSWORD = process.env.PASSWORD;
 
@@ -27,15 +39,18 @@ module.exports = defineConfig({
         getLatestDownloadedFile({ downloadsFolder, prefix = "" }) {
           const files = fs
             .readdirSync(downloadsFolder)
-            .filter(f => f.includes(prefix) && (f.endsWith(".csv") || f.endsWith(".xlsx")))
-            .map(file => ({
+            .filter(
+              (f) =>
+                f.includes(prefix) &&
+                (f.endsWith(".csv") || f.endsWith(".xlsx"))
+            )
+            .map((file) => ({
               name: file,
               time: fs.statSync(path.join(downloadsFolder, file)).mtime.getTime(),
             }))
             .sort((a, b) => b.time - a.time);
 
-          // Clean up older files
-          files.slice(1).forEach(file => 
+          files.slice(1).forEach((file) =>
             fs.unlinkSync(path.join(downloadsFolder, file.name))
           );
 
@@ -53,12 +68,9 @@ module.exports = defineConfig({
 
           const filesToDelete = fs
             .readdirSync(downloadsFolder)
-            .filter(f => f.includes(pattern) && f.endsWith(extension));
-          
-          filesToDelete.forEach(file => {
-            fs.unlinkSync(path.join(downloadsFolder, file));
-            console.log(`Deleted: ${file}`);
-          });
+            .filter((f) => f.includes(pattern) && f.endsWith(extension));
+
+          filesToDelete.forEach((file) => fs.unlinkSync(path.join(downloadsFolder, file)));
 
           return filesToDelete.length;
         },
@@ -71,6 +83,14 @@ module.exports = defineConfig({
 
       return config;
     },
-    testIsolation: false,
+
+    env: {
+      allure: true,
+      allureResultsPath: "allure-results",
+      allureSkipCommands: "wrap",
+      allureAddVideoOnPass: false,
+      allureSkipAutomaticScreenshots: false,
+      allureLogCypress: false,
+    },
   },
 });

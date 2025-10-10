@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","11520","Validate adding and removing a worker page from favorites.","","Fri Oct 10 16:35:53 NPT 2025","passed","Fri Oct 10 16:36:05 NPT 2025","","Worker Module - Favorites","",""
+"","21532","Validating Uploading profile picture functionality","","Fri Oct 10 16:36:07 NPT 2025","passed","Fri Oct 10 16:36:29 NPT 2025","","Worker Module - file upload and download","",""
+"","29902","Validate adding a worker with only mandatory fields","","Fri Oct 10 16:35:09 NPT 2025","passed","Fri Oct 10 16:35:39 NPT 2025","","Worker Module - Add Worker Tests","",""
+"","14235","Verify Filter of the diffrent column for name","","Fri Oct 10 16:36:30 NPT 2025","passed","Fri Oct 10 16:36:44 NPT 2025","","Worker Module - filer","",""
+"","12713","Verify Colum settings reset functionality","","Fri Oct 10 16:35:40 NPT 2025","passed","Fri Oct 10 16:35:53 NPT 2025","","Worker Module - column","",""
+"","19240","Validating the search functionality - run twice","","Fri Oct 10 16:36:45 NPT 2025","passed","Fri Oct 10 16:37:04 NPT 2025","","Worker Module - Search","",""
