@@ -1,10 +1,10 @@
-name: Run Cypress UI Tests
+name: Run Cypress Tests
 
 on:
+  workflow_dispatch:
   schedule:
     # Nepali 10:02 AM → UTC 04:17 AM
     - cron: "17 4 * * *"
-  workflow_dispatch:
 
 jobs:
   cypress-run:
@@ -28,41 +28,29 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Cypress tests and capture results
+      - name: Run Cypress tests
         id: cypress
         continue-on-error: true
         run: |
-          npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter spec | tee cypress_output.txt
-
-          # Did tests run?
-          if grep -q "All specs passed!" cypress_output.txt || grep -q "failing" cypress_output.txt; then
-            echo "tests_ran=true" >> $GITHUB_OUTPUT
-          else
-            echo "tests_ran=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Extract summary line
-          SUMMARY_LINE=$(grep "All specs passed!" cypress_output.txt || grep "failing" cypress_output.txt | tail -1)
-
-          TOTAL=$(echo "$SUMMARY_LINE" | awk '{print $(NF-4)+0}')
-          PASSED=$(echo "$SUMMARY_LINE" | awk '{print $(NF-3)+0}')
-          FAILED=$(echo "$SUMMARY_LINE" | awk '{print $(NF-2)+0}')
-          SKIPPED=$(echo "$SUMMARY_LINE" | awk '{print $(NF-1)+0}')
-          TOTAL_TIME=$(echo "$SUMMARY_LINE" | awk '{print $2}')
-
-          # Calculate success rate
-          if [[ $TOTAL -gt 0 ]]; then
-            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
-          else
-            SUCCESS_RATE=0
-          fi
-
+          mkdir -p cypress/results
+          npx cypress run --env email=$EMAIL,password=$PASSWORD \
+            --reporter mochawesome \
+            --reporter-options reportDir=cypress/results,overwrite=true,html=false,json=true
+          
+          TOTAL=$(jq '[.results[].suites[].tests[]] | length' cypress/results/mochawesome.json)
+          PASSED=$(jq '[.results[].suites[].tests[] | select(.state=="passed")] | length' cypress/results/mochawesome.json)
+          FAILED=$(jq '[.results[].suites[].tests[] | select(.state=="failed")] | length' cypress/results/mochawesome.json)
+          SKIPPED=$(jq '[.results[].suites[].tests[] | select(.state=="pending")] | length' cypress/results/mochawesome.json)
+          SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          TOTAL_TIME=$(jq '[.results[].stats.duration] | add/1000' cypress/results/mochawesome.json)
+          
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
           echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
           echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
-          echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
+          echo "total_time=${TOTAL_TIME}s" >> $GITHUB_OUTPUT
+          echo "tests_ran=$([[ $TOTAL -gt 0 ]] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
 
       - name: Generate Allure Report
         run: |
@@ -86,13 +74,13 @@ jobs:
           TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
           if [[ "$TESTS_RAN" == "false" ]]; then
-            STATUS="⚠️ UAT test automation didn't run properly"
+            STATUS="⚠️ PROD test automation didn't run properly"
             COLOR="warning"
-          elif [[ "$FAILED" -eq 0 && "$TOTAL" -gt 0 ]]; then
-            STATUS="✅ UAT test automation completed successfully"
+          elif [[ "$FAILED" -eq 0 ]]; then
+            STATUS="✅ PROD test automation completed successfully"
             COLOR="good"
           else
-            STATUS="🚨 UAT test automation- Health Check tests failed"
+            STATUS="🚨 PROD test automation failed"
             COLOR="danger"
           fi
 
