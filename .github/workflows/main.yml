@@ -31,13 +31,18 @@ jobs:
         id: cypress
         continue-on-error: true
         run: |
+          # Run Cypress tests
           npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter mochawesome --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true
           
-          TOTAL=$(jq '.stats.tests' cypress/results/mochawesome.json)
-          PASSED=$(jq '.stats.passes' cypress/results/mochawesome.json)
-          FAILED=$(jq '.stats.failures' cypress/results/mochawesome.json)
-          SKIPPED=$(jq '.stats.pending' cypress/results/mochawesome.json)
-          TOTAL_TIME=$(jq '.stats.duration' cypress/results/mochawesome.json)
+          # Merge all mochawesome JSON reports into one
+          npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
+          
+          # Extract stats from merged report
+          TOTAL=$(jq '.stats.tests' cypress/results/merged-report.json)
+          PASSED=$(jq '.stats.passes' cypress/results/merged-report.json)
+          FAILED=$(jq '.stats.failures' cypress/results/merged-report.json)
+          SKIPPED=$(jq '.stats.pending' cypress/results/merged-report.json)
+          TOTAL_TIME=$(jq '.stats.duration' cypress/results/merged-report.json)
           SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
 
