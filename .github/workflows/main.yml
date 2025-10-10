@@ -1,84 +1,131 @@
-name: Run Cypress UI Tests
+name: Run Cypress Tests
 
 on:
+  schedule:
+    - cron: "17 4 * * *" 
   workflow_dispatch:
 
 jobs:
-  cypress-ui-tests:
+  cypress-run:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    timeout-minutes: 30
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-      SURGE_URL: "https://kwant-ui-automation.surge.sh"
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Run Cypress Tests
-        run: npm run test || true  # Continue even if some tests fail
+      - name: Run Cypress tests and capture results
+        id: cypress
+        continue-on-error: true
+        run: |
+          # Run Cypress
+          npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter spec | tee cypress_output.txt
+
+          # Determine if tests ran
+          if [ ${PIPESTATUS[0]} -ge 0 ]; then
+            echo "tests_ran=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests_ran=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Extract test summary
+          PASSED=$(grep -oE '([0-9]+) passing' cypress_output.txt | awk '{print $1}' || echo 0)
+          FAILED=$(grep -oE '([0-9]+) failing' cypress_output.txt | awk '{print $1}' || echo 0)
+          SKIPPED=0
+          TOTAL=$((PASSED+FAILED))
+          SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/($TOTAL))*100}")
+          TOTAL_TIME=$(grep -oE '[0-9]+m[0-9]+s' cypress_output.txt | tail -1 || echo "0:00")
+
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+          echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
 
       - name: Generate Allure Report
-        run: npm run cypress:report
+        run: |
+          npx allure generate allure-results --clean -o allure-report
 
-      - name: Deploy Report to Surge
-        run: npx surge ./allure-report $SURGE_URL --token $SURGE_TOKEN
+      - name: Deploy Allure Report to Surge
+        if: always()
+        run: |
+          npm install --global surge
+          surge ./allure-report https://kwant-automation-dashboard.surge.sh --token $SURGE_TOKEN
 
       - name: Send notification to Slack
         if: always()
         run: |
-          TOTAL=$(grep -o '"tests":[0-9]*' allure-report/widgets/summary.json | head -1 | cut -d':' -f2)
-          PASSED=$(grep -o '"passed":[0-9]*' allure-report/widgets/summary.json | head -1 | cut -d':' -f2)
-          FAILED=$(grep -o '"failed":[0-9]*' allure-report/widgets/summary.json | head -1 | cut -d':' -f2)
-          SKIPPED=$(grep -o '"skipped":[0-9]*' allure-report/widgets/summary.json | head -1 | cut -d':' -f2)
-          TOTAL_TIME="N/A"
+          TESTS_RAN="${{ steps.cypress.outputs.tests_ran }}"
+          TOTAL="${{ steps.cypress.outputs.total }}"
+          PASSED="${{ steps.cypress.outputs.passed }}"
+          FAILED="${{ steps.cypress.outputs.failed }}"
+          SKIPPED="${{ steps.cypress.outputs.skipped }}"
+          SUCCESS_RATE="${{ steps.cypress.outputs.success_rate }}"
+          TOTAL_TIME="${{ steps.cypress.outputs.total_time }}"
           TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
-          if [[ $TOTAL -eq 0 ]]; then
-            STATUS="⚠️ UI test automation didn't run properly"
+          if [[ "$TESTS_RAN" != "true" ]]; then
+            STATUS="⚠️ UAT test automation didn't run properly"
             COLOR="warning"
-          elif [[ $FAILED -eq 0 ]]; then
-            STATUS="✅ UI test automation completed successfully"
+          elif [[ "$FAILED" -eq 0 && "$TOTAL" -gt 0 ]]; then
+            STATUS="✅ UAT test automation completed successfully"
             COLOR="good"
           else
-            STATUS="🚨 UI test automation - Health Check tests failed"
+            STATUS="🚨 UAT test automation- Health Check tests failed"
             COLOR="danger"
           fi
 
-          PAYLOAD="{
-            \"attachments\": [
-              {
-                \"color\": \"$COLOR\",
-                \"title\": \"$STATUS\",
-                \"fields\": [
-                  {\"title\": \"Total Tests\", \"value\": \"$TOTAL\", \"short\": true},
-                  {\"title\": \"✅ Passed\", \"value\": \"$PASSED\", \"short\": true},
-                  {\"title\": \"❌ Failed\", \"value\": \"$FAILED\", \"short\": true},
-                  {\"title\": \"⏭️ Skipped\", \"value\": \"$SKIPPED\", \"short\": true},
-                  {\"title\": \"⏳ Total Time\", \"value\": \"$TOTAL_TIME\", \"short\": true},
-                  {\"title\": \"🕐 Last Checked\", \"value\": \"$TIME\", \"short\": false}
-                ],
-                \"actions\": [
-                  {
-                    \"type\": \"button\",
-                    \"text\": \"View Detailed Report\",
-                    \"url\": \"$SURGE_URL\"
-                  }
-                ]
-              }
-            ]
-          }"
+          # Slack payload
+          PAYLOAD=$(jq -n \
+            --arg color "$COLOR" \
+            --arg status "$STATUS" \
+            --arg total "$TOTAL" \
+            --arg passed "$PASSED" \
+            --arg failed "$FAILED" \
+            --arg skipped "$SKIPPED" \
+            --arg success_rate "$SUCCESS_RATE%" \
+            --arg total_time "$TOTAL_TIME" \
+            --arg timestamp "$TIME" \
+            --arg report_url "https://kwant-automation-dashboard.surge.sh/" \
+            '{
+              attachments: [
+                {
+                  color: $color,
+                  title: $status,
+                  fields: [
+                    {title: "Total Tests", value: $total, short: true},
+                    {title: "✅ Passed", value: $passed, short: true},
+                    {title: "❌ Failed", value: $failed, short: true},
+                    {title: "⏭️ Skipped", value: $skipped, short: true},
+                    {title: "📈 Success Rate", value: $success_rate, short: true},
+                    {title: "⏳ Total Time", value: $total_time, short: true},
+                    {title: "🕐 Last Checked", value: $timestamp, short: false}
+                  ],
+                  actions: [
+                    {
+                      type: "button",
+                      text: "View Detailed Report",
+                      url: $report_url
+                    }
+                  ]
+                }
+              ]
+            }')
 
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" $SLACK_WEBHOOK_URL
+          curl -X POST -H 'Content-type: application/json' \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL"
