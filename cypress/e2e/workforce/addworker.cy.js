@@ -20,7 +20,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.visit('/projects/94049707/workers');
     cy.get(workforceSelector.addWorkerButton).click();
     cy.get(workforceSelector.profileImageUploadButton).click();
-    cy.get('#worker_image_uploadersss').selectFile('cypress/fixtures/profile.png', { force: true });
+    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
     
     cy.get(workforceSelector.firstNameInput).type(firstName);
     cy.get(workforceSelector.lastNameInput).type(lastName);
