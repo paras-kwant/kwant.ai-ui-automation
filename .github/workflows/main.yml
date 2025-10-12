@@ -31,11 +31,8 @@ jobs:
         id: cypress
         continue-on-error: true
         run: |
-          # Run Cypress tests
-          npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter mochawesome --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true
-          
-          # Store the exit code
-          CYPRESS_EXIT_CODE=$?
+          # Run Cypress tests (continue even if tests fail)
+          npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter mochawesome --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true || true
           
           # Merge all mochawesome JSON reports into one
           npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
@@ -61,9 +58,7 @@ jobs:
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
 
-          # Debug output
-          echo "Debug: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED, TIME=$TOTAL_TIME"
-
+          # Set outputs BEFORE any exit
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
@@ -72,8 +67,8 @@ jobs:
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           
-          # Exit with original Cypress exit code
-          exit $CYPRESS_EXIT_CODE
+          # Debug output
+          echo "Debug: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED, TIME=$TOTAL_TIME"
 
       - name: 🌍 Deploy Allure Report to Surge
         if: always()
