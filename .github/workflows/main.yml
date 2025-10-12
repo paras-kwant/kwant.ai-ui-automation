@@ -43,7 +43,14 @@ jobs:
           FAILED=$(jq '.stats.failures' cypress/results/merged-report.json)
           SKIPPED=$(jq '.stats.pending' cypress/results/merged-report.json)
           TOTAL_TIME_MS=$(jq '.stats.duration' cypress/results/merged-report.json)
-          SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          
+          # Calculate success rate (handle division by zero)
+          if [ "$TOTAL" -gt 0 ]; then
+            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          else
+            SUCCESS_RATE="0.00"
+          fi
+          
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           
           # Convert milliseconds to minutes and seconds
@@ -61,6 +68,7 @@ jobs:
 
       - name: 🌍 Deploy Allure Report to Surge
         if: always()
+        continue-on-error: true
         run: |
           npx allure generate allure-results --clean -o allure-report
           npm install --global surge
@@ -77,14 +85,27 @@ jobs:
           TOTAL_TIME="${{ steps.cypress.outputs.total_time }}"
           TIMESTAMP="${{ steps.cypress.outputs.timestamp }}"
 
-          if [[ "$FAILED" -eq 0 && "$TOTAL" -gt 0 ]]; then
-            STATUS="✅ All Cypress UI tests passed successfully"
-            COLOR="good"
-          elif [[ "$TOTAL" -eq 0 ]]; then
+          # Set defaults if values are empty
+          TOTAL="${TOTAL:-0}"
+          PASSED="${PASSED:-0}"
+          FAILED="${FAILED:-0}"
+          SKIPPED="${SKIPPED:-0}"
+          SUCCESS_RATE="${SUCCESS_RATE:-0.00}"
+          TOTAL_TIME="${TOTAL_TIME:-0m 0s}"
+          TIMESTAMP="${TIMESTAMP:-N/A}"
+
+          # Determine status and color
+          if [[ "$TOTAL" -eq 0 ]]; then
             STATUS="⚠️ Cypress UI tests did not run properly"
             COLOR="warning"
+          elif [[ "$FAILED" -eq 0 ]]; then
+            STATUS="✅ All Cypress UI tests passed successfully"
+            COLOR="good"
+          elif [[ "$FAILED" -eq 1 ]]; then
+            STATUS="🚨 $FAILED test failed out of $TOTAL tests"
+            COLOR="danger"
           else
-            STATUS="🚨 $FAILED out of $TOTAL Cypress UI tests failed"
+            STATUS="🚨 $FAILED tests failed out of $TOTAL tests"
             COLOR="danger"
           fi
 
