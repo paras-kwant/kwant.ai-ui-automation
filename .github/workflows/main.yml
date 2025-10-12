@@ -34,6 +34,9 @@ jobs:
           # Run Cypress tests
           npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter mochawesome --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true
           
+          # Store the exit code
+          CYPRESS_EXIT_CODE=$?
+          
           # Merge all mochawesome JSON reports into one
           npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
           
@@ -58,6 +61,9 @@ jobs:
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
 
+          # Debug output
+          echo "Debug: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED, TIME=$TOTAL_TIME"
+
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
@@ -65,6 +71,9 @@ jobs:
           echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          
+          # Exit with original Cypress exit code
+          exit $CYPRESS_EXIT_CODE
 
       - name: 🌍 Deploy Allure Report to Surge
         if: always()
@@ -84,6 +93,9 @@ jobs:
           SUCCESS_RATE="${{ steps.cypress.outputs.success_rate }}"
           TOTAL_TIME="${{ steps.cypress.outputs.total_time }}"
           TIMESTAMP="${{ steps.cypress.outputs.timestamp }}"
+
+          # Debug: Show what we received
+          echo "Debug Slack: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED"
 
           # Set defaults if values are empty
           TOTAL="${TOTAL:-0}"
