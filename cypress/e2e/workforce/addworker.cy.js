@@ -16,7 +16,7 @@ describe("Worker Module - Add Worker Tests", () => {
   const firstName = `John${randomNum}`;
   const lastName = "Doe";
   
-  it.only("Validate adding a worker with only mandatory fields", () => {
+  it("Validate adding a worker with only mandatory fields", () => {
     cy.visit('/projects/94049707/workers');
     cy.get(workforceSelector.addWorkerButton).click();
     cy.get(workforceSelector.profileImageUploadButton).click();

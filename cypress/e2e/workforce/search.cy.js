@@ -14,7 +14,7 @@ describe("Worker Module - Search", () => {
   });
 
   
-  it.only('Validating the search functionality - run twice', () => {
+  it('Validating the search functionality - run twice', () => {
     cy.visit('/projects/94049707/workers');
     cy.intercept('POST', '/api/filterProjectWorker*').as('workersApi');
     cy.reload();

@@ -14,7 +14,7 @@ describe("Worker Module - Favorites", () => {
   });
 
   
-  it.only('Validate adding and removing a worker page from favorites.', () => {
+  it('Validate adding and removing a worker page from favorites.', () => {
     cy.wait(2000)
         cy.get('body').then(($body) => {
           if ($body.find('[title="Workforce Workers"]').length > 0) {

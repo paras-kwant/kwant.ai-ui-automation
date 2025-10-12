@@ -16,7 +16,7 @@ describe("Worker Module - filer", () => {
   });
 
   
-  it.only('Verify Filter of the diffrent column for name', () => {
+  it('Verify Filter of the diffrent column for name', () => {
     cy.visit('/projects/94049707/workers');
     cy.intercept('POST', '/api/filterProjectWorker*').as('workersApi');
     cy.reload();

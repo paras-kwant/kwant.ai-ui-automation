@@ -14,7 +14,7 @@ describe("Worker Module - column", () => {
   });
 
   
-  it.only('Verify Colum settings reset functionality', () => {
+  it('Verify Colum settings reset functionality', () => {
     cy.visit('/projects/94049707/workers');
   cy.get('.icon-button button').eq(0).click();
   cy.get('button p').contains('Reset to default').click();
