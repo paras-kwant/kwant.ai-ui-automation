@@ -103,16 +103,16 @@ jobs:
 
           # Determine status and color
           if [[ "$TOTAL" -eq 0 ]]; then
-            STATUS="⚠️ Cypress UI tests did not run properly"
+            STATUS="⚠️ UI tests did not run properly"
             COLOR="warning"
           elif [[ "$FAILED" -eq 0 ]]; then
-            STATUS="✅ All Cypress UI tests passed successfully"
+            STATUS="✅  UI tests completed successfully"
             COLOR="good"
           elif [[ "$FAILED" -eq 1 ]]; then
-            STATUS="🚨 $FAILED test failed out of $TOTAL tests"
+            STATUS="🚨 $FAILED test failed out of $TOTAL tests in UI"
             COLOR="danger"
           else
-            STATUS="🚨 $FAILED tests failed out of $TOTAL tests"
+            STATUS="🚨 $FAILED tests failed out of $TOTAL tests in UI"
             COLOR="danger"
           fi
 
