@@ -42,9 +42,14 @@ jobs:
           PASSED=$(jq '.stats.passes' cypress/results/merged-report.json)
           FAILED=$(jq '.stats.failures' cypress/results/merged-report.json)
           SKIPPED=$(jq '.stats.pending' cypress/results/merged-report.json)
-          TOTAL_TIME=$(jq '.stats.duration' cypress/results/merged-report.json)
+          TOTAL_TIME_MS=$(jq '.stats.duration' cypress/results/merged-report.json)
           SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          # Convert milliseconds to minutes and seconds
+          MINUTES=$((TOTAL_TIME_MS / 60000))
+          SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
+          TOTAL_TIME="${MINUTES}m ${SECONDS}s"
 
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
@@ -73,13 +78,13 @@ jobs:
           TIMESTAMP="${{ steps.cypress.outputs.timestamp }}"
 
           if [[ "$FAILED" -eq 0 && "$TOTAL" -gt 0 ]]; then
-            STATUS="✅ Cypress UI tests completed successfully"
+            STATUS="✅ All Cypress UI tests passed successfully"
             COLOR="good"
           elif [[ "$TOTAL" -eq 0 ]]; then
             STATUS="⚠️ Cypress UI tests did not run properly"
             COLOR="warning"
           else
-            STATUS="🚨 PROD Health Check tests failed"
+            STATUS="🚨 $FAILED out of $TOTAL Cypress UI tests failed"
             COLOR="danger"
           fi
 
@@ -104,7 +109,7 @@ jobs:
                     {title: "❌ Failed", value: $failed, short: true},
                     {title: "⏭️ Skipped", value: $skipped, short: true},
                     {title: "📈 Success Rate", value: $success_rate, short: true},
-                    {title: "⏳ Total Time (ms)", value: $total_time, short: true},
+                    {title: "⏱️ Duration", value: $total_time, short: true},
                     {title: "🕐 Last Checked", value: $timestamp, short: false}
                   ],
                   actions: [
