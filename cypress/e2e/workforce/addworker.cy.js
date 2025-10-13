@@ -91,13 +91,13 @@ describe("Worker Module - Add Worker Tests", () => {
 
     // Personal Details Page
     cy.get('button>p').contains('Add More Details').click();
-    cy.get('p').contains('Personal Details').should('be.visible');
+    cy.get('p').contains('Personal Details').scrollIntoView().should('be.visible');
     cy.get('[name="phone"]').type('9888747777');
-    cy.get('[name="email"]').type('demo@gmail.com');
+    cy.get('[name="email"]').type('paras+45@kwant.ai');
     cy.get('[placeholder="Select Date of Birth"]').clear().type('01/01/2001');
     cy.get('[name="raceName"]').click();
     cy.get('[role="button"]').contains('Asian').click();
-    cy.get('[name="sex"]').click();
+    cy.get('[name="sex"]').click({force:true});
     cy.get('[role="button"]').contains('Male').click();
     cy.get('[name="mwbe"]').click();
     cy.get('[role="button"]').contains('MWBE').click();
@@ -121,7 +121,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('[role="button"]').contains('Union').click();
 
     cy.get('[name="title"]').click();
-    cy.get('[role="button"]').contains('Laborer').click();
+    cy.get('[role="button"]').contains('engineer').click();
     cy.get('[name="projectTaskCategoryName"]').click();
     cy.get('[role="button"]').contains('Management').click();
 
@@ -153,6 +153,11 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('.hdcwLk > button > p').click();
     cy.get('h4').contains('successfully added as a worker.').should('be.visible');
 
+    cy.writeFile('cypress/fixtures/createdWorker.json', {
+      firstName,
+      lastName
+    });
+
     // Search and Navigate to Worker Details
     cy.get('header>button').click();
     cy.get('#search-input').type(firstName);
@@ -180,7 +185,7 @@ describe("Worker Module - Add Worker Tests", () => {
 
     let expectedValuesPersonalDetails = [
       '988-8747777',
-      'demo@gmail.com',
+      'paras+45@kwant.ai',
       '01/01/2001',
       'Asian',
       'Male',
@@ -216,7 +221,7 @@ describe("Worker Module - Add Worker Tests", () => {
       'Union',
       formattedDate,
       '-',
-      'Laborer',
+      'engineer',
       'Management'
     ];
 
@@ -245,7 +250,5 @@ describe("Worker Module - Add Worker Tests", () => {
 
 
     cy.get('.sc-CCtys.bfwwiC').click();
-
-    cy.searchAndDeleteWorker(firstName, lastName);
   });
 });
