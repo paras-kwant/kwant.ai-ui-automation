@@ -5,7 +5,7 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 
 
-describe("Worker Module - select", () => {
+describe("Worker Module - overflowMenu", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
