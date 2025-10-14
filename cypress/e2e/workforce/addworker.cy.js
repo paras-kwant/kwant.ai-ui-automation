@@ -3,8 +3,6 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';  
 
-
-
 describe("Worker Module - Add Worker Tests", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
@@ -12,72 +10,15 @@ describe("Worker Module - Add Worker Tests", () => {
       cy.get('.card-title').contains('Regression test').click();
     });
   });
-  const randomNum = Math.floor(Math.random() * 10000);
-  const firstName = `John${randomNum}`;
-  const lastName = "Doe";
-  
-  it("Validate adding a worker with only mandatory fields", () => {
-    cy.visit('/projects/94049707/workers');
-    cy.get(workforceSelector.addWorkerButton).click();
-    cy.get(workforceSelector.profileImageUploadButton).click();
-    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
-    
-    cy.get(workforceSelector.firstNameInput).type(firstName);
-    cy.get(workforceSelector.lastNameInput).type(lastName);
-    cy.get(workforceSelector.companyNameInput).type('Micron');
-    cy.get('.sc-fhzFiK').click();
-    cy.get(workforceSelector.submitWorkerButton).click();
-    
-    cy.get('h4').contains('successfully added as a worker.').should('be.visible');
-
-    cy.get('header>button').click();
-    cy.searchAndDeleteWorker(firstName, lastName);
-  });
-
-  it("Validate worker photo capture via camera works", () => {
-    cy.visit('/projects/94049707/workers');
-    cy.get(workforceSelector.addWorkerButton).click();
-    cy.get(workforceSelector.profileImageUploadButton).click();
-    cy.get('.upload-button__upload-options__option').eq(1).click();
-    cy.wait(2000); 
-    cy.get('.hdcwLk > button > p').click();
-    cy.get('button>p').contains('Submit Photo').click();
-  
-    cy.get('.upload-avatar img')
-      .should('have.attr', 'src')
-      .and('not.contain', 'https://uat.kwant.ai/assets/personbg-2f058cfa');
-  });
-  
-
-  it('Validate the "Add More Details" and "Add worker" buttons are disabled when mandatory fields are empty', () => {
-    cy.visit('/projects/94049707/workers');
-    cy.get('button').contains('Add Worker').click();
-    cy.get('[label="Add Worker"]>button').should('be.disabled');
-    cy.get('[label="Add More Details"]>button').should('be.disabled');
-  });
-
-  it('should validate existing worker warning', () => {
-    cy.visit('/projects/94049707/workers');
-    cy.get('.personal-info-content__title')
-      .first()
-      .invoke('text')
-      .then((fullName) => {
-        const [firstName, lastName] = fullName.trim().split(" ");
-  
-        cy.get(workforceSelector.addWorkerButton).contains('Add Worker').click();
-        cy.get(workforceSelector.firstNameInput).type(firstName);
-        cy.get(workforceSelector.lastNameInput).type(lastName);
-  
-        cy.get('.sc-kOPcWz')
-          .contains('This worker name may already be in your system.')
-          .should('be.visible');
-      });
-  });
 
   it('Validate adding a worker with all fields filled', () => {
+    const randomNum = Math.floor(Math.random() * 100000000);
+    const firstName = `John${randomNum}`;
+    const lastName = "Doe";
+    
     cy.visit('/projects/94049707/workers');
     
-    cy.get('button').contains('Add Worker').click();
+    cy.get('button').contains('Add Worker').click(); 
     cy.get('.upload-button__camera-icon').click();
     cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
     cy.get('input[name=firstName]').type(firstName);
@@ -85,6 +26,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('input[name="company"]').type('Micron');
     cy.get('.sc-fhzFiK').click();
     cy.get('input[name=address]').type('Kathmandu');
+    cy.wait(1000)
     cy.get('input[name=zipCode]').type('44600');
     cy.get('[name="drop_test"]').click();
     cy.get('[role="button"]').contains('Drop').click();
@@ -94,7 +36,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('p').contains('Personal Details').scrollIntoView().should('be.visible');
     cy.get('[name="phone"]').type('9888747777');
     cy.get('[name="email"]').type('paras+45@kwant.ai');
-    cy.get('[placeholder="Select Date of Birth"]').clear().type('01/01/2001');
+    cy.get('[placeholder="Select Date of Birth"]').clear({ force: true }).type('01/01/2001', { force: true });
     cy.get('[name="raceName"]').click();
     cy.get('[role="button"]').contains('Asian').click();
     cy.get('[name="sex"]').click({force:true});
@@ -104,6 +46,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('[name="emergencyContactName"]').type('Emergency Contact Name');
     cy.get('[name="emergencyContactPhone"]').type('9876543210');
     cy.get('[name="emergencyContactAddress"]').type('Kathmandu');
+    cy.wait(1000)
     cy.get('[name="new_text"]').type('This is added new text');
     cy.get('[name="lalal"]').type('Test is added new lalal');
 
@@ -167,6 +110,7 @@ describe("Worker Module - Add Worker Tests", () => {
       .click();
 
     // Verify General Details
+    cy.wait(2000)
     let expectedValuesGeneralDetails = [
       firstName,
       lastName,
@@ -248,7 +192,72 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('.sc-jXbUNg>.jmJtNV').eq(4).click();
     cy.get('.empty-body__title').should('have.text', 'No safety notifications yet!');
 
-
     cy.get('.sc-CCtys.bfwwiC').click();
+  });
+
+  it("Validate adding a worker with only mandatory fields", () => {
+    // Generate unique name for this test
+    const randomNum = Math.floor(Math.random() * 100000000);
+    const firstName = `Jane${randomNum}`;
+    const lastName = "Smith";
+    
+    cy.visit('/projects/94049707/workers');
+    cy.get(workforceSelector.addWorkerButton).click();
+    cy.get(workforceSelector.profileImageUploadButton).click();
+    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
+    
+    cy.get(workforceSelector.firstNameInput).type(firstName);
+    cy.get(workforceSelector.lastNameInput).type(lastName);
+    cy.get(workforceSelector.companyNameInput).type('Micron');
+    cy.get('.sc-fhzFiK').click();
+    cy.get(workforceSelector.submitWorkerButton).click();
+    
+    cy.get('h4').contains('successfully added as a worker.').should('be.visible');
+    cy.writeFile('cypress/fixtures/noEmailWorker.json', {
+      firstName,
+      lastName
+    });
+
+    // cy.get('header>button').click();
+    // cy.searchAndDeleteWorker(firstName, lastName);
+  });
+
+  it("Validate worker photo capture via camera works", () => {
+    cy.visit('/projects/94049707/workers');
+    cy.get(workforceSelector.addWorkerButton).click();
+    cy.get(workforceSelector.profileImageUploadButton).click();
+    cy.get('.upload-button__upload-options__option').eq(1).click();
+    cy.wait(2000); 
+    cy.get('.hdcwLk > button > p').click();
+    cy.get('button>p').contains('Submit Photo').click();
+  
+    cy.get('.upload-avatar img')
+      .should('have.attr', 'src')
+      .and('not.contain', 'https://uat.kwant.ai/assets/personbg-2f058cfa');
+  });
+
+  it('Validate the "Add More Details" and "Add worker" buttons are disabled when mandatory fields are empty', () => {
+    cy.visit('/projects/94049707/workers');
+    cy.get('button').contains('Add Worker').click();
+    cy.get('[label="Add Worker"]>button').should('be.disabled');
+    cy.get('[label="Add More Details"]>button').should('be.disabled');
+  });
+
+  it('should validate existing worker warning', () => {
+    cy.visit('/projects/94049707/workers');
+    cy.get('.personal-info-content__title')
+      .first()
+      .invoke('text')
+      .then((fullName) => {
+        const [firstName, lastName] = fullName.trim().split(" ");
+  
+        cy.get(workforceSelector.addWorkerButton).contains('Add Worker').click();
+        cy.get(workforceSelector.firstNameInput).type(firstName);
+        cy.get(workforceSelector.lastNameInput).type(lastName);
+  
+        cy.get('.sc-kOPcWz')
+          .contains('This worker name may already be in your system.')
+          .should('be.visible');
+      });
   });
 });

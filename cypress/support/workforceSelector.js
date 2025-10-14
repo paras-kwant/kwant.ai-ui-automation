@@ -8,8 +8,10 @@ export const workforceSelector = {
     searchInput:'#search-input',
     updateButton:'button >p:contains("Update")',
     submitButton:'button >p:contains("Submit")',
+    saveButton:'button >p:contains("Save")',
     tableRow:'.sc-cRmqLi',
     tableColumn :'.sc-gwZKzw',
     clearFilterButton: '.label.default__label:contains("Clear All")',
+    overflowMenu:'.icon-button .sc-cfxfcM.ibPbMT'
   };
    

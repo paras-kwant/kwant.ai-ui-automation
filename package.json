@@ -8,7 +8,7 @@
     "start": "node run-test.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:parallel": "concurrently \"npx cypress run --spec cypress/e2e/workforce/addworker.cy.js\" \"npx cypress run --spec cypress/e2e/workforce/filter.cy.js\" \"npx cypress run --spec 'cypress/e2e/workforce/column.cy.js,cypress/e2e/workforce/search.cy.js,cypress/e2e/workforce/fileUpload&Download.cy.js'\"",
-     "cypress:report": "npx allure generate allure-results --clean -o allure-report && npx allure open allure-report"
+    "cypress:report": "npx allure generate allure-results --clean -o allure-report && npx allure open allure-report"
   },
   "author": "",
   "license": "ISC",
@@ -20,14 +20,18 @@
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^2.0.5",
     "cypress-parallel": "^0.15.0",
+    "dotenv": "^17.2.3",
+    "imap-simple": "^5.1.0",
     "mochawesome": "^7.1.4",
     "mochawesome-merge": "^5.0.0",
     "mochawesome-report-generator": "^6.3.0",
     "neat-csv": "^7.0.0",
+    "nodemailer": "^7.0.9",
     "xlsx": "^0.18.5"
   },
   "dependencies": {
     "axios": "^1.11.0",
-    "cypress": "^14.5.4"
+    "cypress": "^14.5.4",
+    "googleapis": "^162.0.0"
   }
 }
