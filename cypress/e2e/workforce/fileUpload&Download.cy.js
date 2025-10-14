@@ -14,7 +14,7 @@ describe("Worker Module - file upload and download", () => {
   });
 
  
-it.only('Validating Uploading profile picture functionality', () => {
+it('Validating Uploading profile picture functionality', () => {
   cy.visit('/projects/94049707/workers');
   cy.get('.personal-info-content__title').eq(0).click();
   cy.wait(3000)

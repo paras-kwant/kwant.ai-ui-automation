@@ -116,7 +116,7 @@ describe("Worker Onboarding Email Validation", () => {
     });
   });
 
-  it.only('Send Onboarding Invite - No Worker Selected',()=>{
+  it('Send Onboarding Invite - No Worker Selected',()=>{
     cy.visit('/projects/94049707/workers');
     cy.wait(3000)
     cy.get(workforceSelector.overflowMenu).click()

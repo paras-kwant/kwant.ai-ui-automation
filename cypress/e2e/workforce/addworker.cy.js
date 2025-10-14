@@ -11,7 +11,7 @@ describe("Worker Module - Add Worker Tests", () => {
     });
   });
 
-  it.only('Validate adding a worker with all fields filled', () => {
+  it('Validate adding a worker with all fields filled', () => {
     const randomNum = Math.floor(Math.random() * 100000000);
     const firstName = `John${randomNum}`;
     const lastName = "Doe";

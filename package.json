@@ -7,7 +7,6 @@
     "postinstall": "cypress install",
     "start": "node run-test.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:parallel": "concurrently \"npx cypress run --spec cypress/e2e/workforce/addworker.cy.js\" \"npx cypress run --spec cypress/e2e/workforce/filter.cy.js\" \"npx cypress run --spec 'cypress/e2e/workforce/column.cy.js,cypress/e2e/workforce/search.cy.js,cypress/e2e/workforce/fileUpload&Download.cy.js'\"",
     "cypress:report": "npx allure generate allure-results --clean -o allure-report && npx allure open allure-report"
   },
   "author": "",
