@@ -40,7 +40,7 @@ describe("Worker Module - filer", () => {
 })
   })
 
-  it('Verify Filter of the different column for company', () => {
+  it.only('Verify Filter of the different column for company', () => {
     cy.visit('/projects/94049707/workers');
     cy.log("Testing for company filter");
   

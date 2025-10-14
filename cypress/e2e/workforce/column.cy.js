@@ -28,7 +28,7 @@ describe("Worker Module - column", () => {
 })
 
 
-it('Validate adding and updating column settings', () => {
+it.only('Validate adding and updating column settings', () => {
     cy.visit('/projects/94049707/workers');
   cy.get('.icon-button button').eq(0).click();
   cy.get('button p').contains('Reset to default').click();

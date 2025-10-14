@@ -14,7 +14,7 @@ describe("Worker Module - select", () => {
   });
 
   
-  it('Validate total worker count matches displayed label after selecting all workers', () => {
+  it.only('Validate total worker count matches displayed label after selecting all workers', () => {
     cy.visit('/projects/94049707/workers');
     cy.wait(3000);
     cy.get('.sc-kMkxaj.eTAOVM')

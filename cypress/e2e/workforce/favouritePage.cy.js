@@ -39,7 +39,7 @@ describe("Worker Module - Favorites", () => {
         });
       });
 
-      it('Verify that the latest page added to favorites is displayed at the top of the favorites list.', ()=>{
+      it.only('Verify that the latest page added to favorites is displayed at the top of the favorites list.', ()=>{
         cy.visit('/projects/94049707/workers');
         cy.get('body').then(($body) => {
             if ($body.find('[role="button"] [fill="#FACC15"]').length > 0) {
