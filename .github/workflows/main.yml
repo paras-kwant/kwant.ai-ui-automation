@@ -71,12 +71,24 @@ jobs:
           echo "Debug: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED, TIME=$TOTAL_TIME"
 
       - name: 🌍 Deploy Allure Report to Surge
+        id: surge_deploy
         if: always()
         continue-on-error: true
         run: |
           npx allure generate allure-results --clean -o allure-report
           npm install --global surge
+          
+          # Generate timestamped URL
+          TIMESTAMP_ID=$(date +%s%3N)
+          PREVIEW_URL="https://${TIMESTAMP_ID}-kwant-ui-automation.surge.sh"
+          
+          # Deploy to both production and timestamped URL
           surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+          surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN
+          
+          # Save the preview URL for Slack notification
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $PREVIEW_URL"
 
       - name: 💬 Send Slack Notification
         if: always()
@@ -88,9 +100,11 @@ jobs:
           SUCCESS_RATE="${{ steps.cypress.outputs.success_rate }}"
           TOTAL_TIME="${{ steps.cypress.outputs.total_time }}"
           TIMESTAMP="${{ steps.cypress.outputs.timestamp }}"
+          PREVIEW_URL="${{ steps.surge_deploy.outputs.preview_url }}"
 
           # Debug: Show what we received
           echo "Debug Slack: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED"
+          echo "Preview URL: $PREVIEW_URL"
 
           # Set defaults if values are empty
           TOTAL="${TOTAL:-0}"
@@ -100,6 +114,7 @@ jobs:
           SUCCESS_RATE="${SUCCESS_RATE:-0.00}"
           TOTAL_TIME="${TOTAL_TIME:-0m 0s}"
           TIMESTAMP="${TIMESTAMP:-N/A}"
+          PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation.surge.sh}"
 
           # Determine status and color
           if [[ "$TOTAL" -eq 0 ]]; then
@@ -126,6 +141,7 @@ jobs:
             --arg success_rate "$SUCCESS_RATE%" \
             --arg total_time "$TOTAL_TIME" \
             --arg timestamp "$TIMESTAMP" \
+            --arg preview_url "$PREVIEW_URL" \
             '{
               attachments: [
                 {
@@ -144,7 +160,7 @@ jobs:
                     {
                       type: "button",
                       text: "View Detailed Report",
-                      url: "https://kwant-ui-automation.surge.sh/"
+                      url: $preview_url
                     }
                   ]
                 }
