@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const xlsx = require("xlsx");
 const allureWriter = require("@shelex/cypress-allure-plugin/writer");
-const { google } = require("googleapis");
+const Imap = require('imap-simple');
 
 module.exports = defineConfig({
   e2e: {
@@ -81,34 +81,111 @@ module.exports = defineConfig({
           return null;
         },
 
-        // ✅ Gmail check task
-        async checkGmail({ recipient, subject, maxWaitTime = 60000 }) {
-          const oauth2Client = new google.auth.OAuth2(
-            process.env.GMAIL_CLIENT_ID,
-            process.env.GMAIL_CLIENT_SECRET,
-            process.env.GMAIL_REDIRECT_URI
-          );
+        // ✅ Get most recent email from Gmail
+        async getMostRecentEmail() {
+          const imapConfig = {
+            imap: {
+              user: process.env.GMAIL_USER,
+              password: process.env.GMAIL_APP_PASSWORD,
+              host: 'imap.gmail.com',
+              port: 993,
+              tls: true,
+              tlsOptions: { rejectUnauthorized: false }
+            }
+          };
 
-          oauth2Client.setCredentials({
-            refresh_token: process.env.GMAIL_REFRESH_TOKEN
-          });
-
-          const gmail = google.gmail({ version: "v1", auth: oauth2Client });
-          const startTime = Date.now();
-          const interval = 3000;
-
-          while (Date.now() - startTime < maxWaitTime) {
-            const res = await gmail.users.messages.list({
-              userId: "me",
-              q: `to:${recipient} subject:${subject} newer_than:5m`,
-              maxResults: 10,
-            });
-
-            if (res.data.messages?.length > 0) return true;
-            await new Promise(r => setTimeout(r, interval));
+          try {
+            const connection = await Imap.connect(imapConfig);
+            await connection.openBox('INBOX');
+            
+            const searchCriteria = [
+              ['SINCE', new Date(Date.now() - 30 * 60 * 1000)]
+            ];
+            
+            const fetchOptions = {
+              bodies: ['HEADER', 'TEXT', ''],
+              markSeen: false
+            };
+            
+            const messages = await connection.search(searchCriteria, fetchOptions);
+            connection.end();
+            
+            if (messages && messages.length > 0) {
+              const message = messages[messages.length - 1];
+              const parts = message.parts;
+              
+              let body = '';
+              let headers = {};
+              
+              parts.forEach(part => {
+                if (part.which === 'TEXT' || part.which === '') {
+                  body += part.body;
+                }
+                if (part.which === 'HEADER') {
+                  headers = part.body;
+                }
+              });
+              
+              return {
+                subject: headers.subject ? headers.subject[0] : '',
+                from: headers.from ? headers.from[0] : '',
+                body: body,
+                date: headers.date ? headers.date[0] : ''
+              };
+            }
+            
+            return null;
+          } catch (error) {
+            console.error('❌ Error getting most recent email:', error.message);
+            return null;
           }
+        },
 
-          return false;
+        // ✅ List all recent emails (for debugging)
+        async listRecentEmails() {
+          const imapConfig = {
+            imap: {
+              user: process.env.GMAIL_USER,
+              password: process.env.GMAIL_APP_PASSWORD,
+              host: 'imap.gmail.com',
+              port: 993,
+              tls: true,
+              tlsOptions: { rejectUnauthorized: false }
+            }
+          };
+
+          try {
+            console.log('🔍 Fetching all recent emails...');
+            const connection = await Imap.connect(imapConfig);
+            await connection.openBox('INBOX');
+            
+            const searchCriteria = [
+              ['SINCE', new Date(Date.now() - 30 * 60 * 1000)]
+            ];
+            
+            const fetchOptions = {
+              bodies: ['HEADER'],
+              markSeen: false
+            };
+            
+            const messages = await connection.search(searchCriteria, fetchOptions);
+            connection.end();
+            
+            const emailList = messages.map(msg => {
+              const headers = msg.parts.find(p => p.which === 'HEADER').body;
+              return {
+                subject: headers.subject ? headers.subject[0] : 'No Subject',
+                from: headers.from ? headers.from[0] : 'Unknown',
+                date: headers.date ? headers.date[0] : 'Unknown'
+              };
+            });
+            
+            console.log(`✅ Found ${emailList.length} recent emails`);
+            return emailList;
+          } catch (error) {
+            console.error('❌ Error listing emails:', error.message);
+            return [];
+          }
         }
       });
 

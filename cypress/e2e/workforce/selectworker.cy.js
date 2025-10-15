@@ -20,7 +20,7 @@ describe("Worker Module - select", () => {
     cy.get('.sc-kMkxaj.eTAOVM')
       .invoke('text')
       .then((text) => {
-        const totalworker = text.trim().match(/\d+$/)[0];
+        const totalworker = text.trim().match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/)[2];
         cy.log(`Total number of workers: ${totalworker}`);
         cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
         cy.get('.label.default__label')
