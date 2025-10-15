@@ -2,7 +2,7 @@
 "S.No.","First Name","Last Name","Company Name","Title","Cost Code","Instance Id","MAC","Instance Type","Crew","Union","Phone ","Email","Race ","Sex","MWBE","RFID/ NFC","$/MH","Employee Id","Last Seen Location","Last Seen Time","Battery level","Project Code"
 "1","Gabe","Phillips","Devon Industrial Group, LLC","Iron Worker",,,,,"Craft","Union",,"",,"",,,"0.0","","Zone 3","06/30/2025 10:56 AM","null",
 "2","Erin","Coulson","Soil and Materials Engineers Inc","Test & Balance",,,,,,"Non-Union",,"",,"","",,"0.0","","","","null",""
-"3","David","Herbst","Hayes Drilling","Operating Engineer",,,,,"Craft","Union",,"",,"","",,"0.0","","Zone 3","06/18/2025 09:02 PM","null",
+"3","David","Herbst","Hayes Drilling","Fitter","QA",,,,"Crew 345","Union",,"",,"","",,"0.0","","Zone 3","06/18/2025 09:02 PM","null",
 "4","Favian","Cruz","Devon Industrial Group, LLC","Operating Surveyor",,,,,,"",,"",,"","",,"0.0","","","","null",""
 "5","QAAA","QA","A-Master",,,,,,,,,,,,,,"",,"","","null",
 "6","Test","New","A&C Electrical Services, Inc.","Software Quality Assurance Engineer","king code",,,,"Management",,,,,,,,"",,"","","null",
@@ -24,7 +24,7 @@
 "22","text","new","Test Company","",,,,,,"",,"",,"","",,"0.0","","","","null",""
 "23","test","room","Testing Company","Operating Engineer","king code",,,,"Management",,,,,,,,"",,"","","null",
 "24","paras","paras","A&C Electrical Services, Inc.","Laborer",,,,,,,,,,,,,"",,"","","null",
-"25","dasd","sdasd","A&C  Electrical Services, Inc.","Laborer",,,,,,,,,,,,,"",,"","","null",
+"25","dasd","sdasd","A&C  Electrical Services, Inc.","Fitter","QA",,,,"Crew 345",,,,,,,,"",,"","","null",
 "26","srwer","werewr","A&C Electrical Services, Inc.",,,,,,,,,,,,,,"",,"","","null",
 "27","jjj","jkj","A&C  Electrical Services, Inc.",,,,,,,,,,,,,,"",,"","","null",
 "28","Priya","Sen","Kwant","QA",,,,,,"",,"",,"","",,"0.0","","","","null",""
@@ -53,62 +53,58 @@
 "51","John87144491","Doe","Micron","engineer","Management","FFCDE44A1034","AC233FFAE6B6",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000008822532","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
 "52","John87144491","Doe","Micron","engineer","Management","FFCDE44A1236","AC233FFAE780",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000002706436","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
 "53","John87144491","Doe","Micron","engineer","Management","FFCDE44A1246","AC233FFAE78A",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000006853892","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
-"54","Automation","Test","Kwant",,"QA",,,,"Crew 345","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"55","Automation","Test","Kwant","ABG Inc","king code",,,,"Craft","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"56","John78858077","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
-"57","John78858077","Doe","Micron","engineer","Management","FFCDE44A1265","AC233FFAE79D",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000002636804","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
-"58","John78858077","Doe","Micron","engineer","Management","00000000000000000000ABCDE34E1271","ABCDE34E1271","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"59","John78858077","Doe","Micron","engineer","Management","00000000000000000000000000022222","22222","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"60","John54344251","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
-"61","John54344251","Doe","Micron","engineer","Management","00000000000000000000000000012234","12234","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"62","John54344251","Doe","Micron","engineer","Management","00000000000000000000000000122344","122344","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"63","John54344251","Doe","Micron","engineer","Management","ABCDE44A2399","AC233FF0F92A",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000007498540","30.0","123456","","","89","Blue Oval Battery Park of Michigan"
-"64","John98613259","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
-"65","John98613259","Doe","Micron","engineer","Management","00000000000000000000000000034567","34567","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"66","John98613259","Doe","Micron","engineer","Management","00000000000000000000000000134567","134567","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"67","John98613259","Doe","Micron","engineer","Management","ABCDE44A464C","C300003FA7D0",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009667925","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
-"68","John62600423","Doe","Micron","engineer","Management","ABCDE44A47FA","C300003FA89A",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009656079","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
-"69","John13655414","Doe","Micron","engineer","Management","ABCDE44A488D","C300003FA8B1",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009664415","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
-"70","John80745673","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
-"71","John80745673","Doe","Micron","engineer","Management","ABCDE44A48A1","C300003FA8B5",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009665082","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
-"72","John28684695","Doe","Micron","engineer","Management",,,,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"73","John28684695","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
-"74","John68439803","Doe","Micron","engineer","Management","ABCDE44A48A2","C300003FA8B6",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009659241","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
-"75","John68439803","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
-"76","John90879774","Doe","Micron","engineer","Management",,,,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
-"77","Jane1844291","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"78","John38578799","Doe","Micron","engineer","Management","ABCDE44A48AC","C300003FA8C0",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009661966","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
-"79","Jane56528251","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"80","Automation","Test","Kwant","Fitter","king code",,,,"Crew11","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"81","Jane93535063","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"82","Automation","Test","Kwant","Fitter","king code",,,,"Crew11","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"83","Jane92874342","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"84","Automation","Test","Kwant","Engineer",,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"85","Jane61292798","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"86","Automation","Test","Kwant","ABG Inc",,,,,"Crew1","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"87","Jane48943644","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"88","Automation","Test","Kwant",,,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"89","Jane81707751","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"90","Automation","Test","Kwant","Engineer","king code",,,,"Crew New","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"91","John73719421","Doe","Micron","engineer","Management","FFCDE44A6078","AC233FFAFA6A",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000002727876356","30.0","123456","","","88","Blue Oval Battery Park of Michigan"
-"92","John18542391","Doe","Micron","engineer","Management","ABCDE44AA440","C3000009F231",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000016329220","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
-"93","Jane99935751","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"94","Automation","Test","Kwant",,"None",,,,"Crew New","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"95","Jane4613438","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"96","Automation","Test","Kwant","ABG Inc","king code",,,,"Craft","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"97","Jane5546404","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"98","Automation","Test","Kwant","Engineer",,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"99","Jane45626773","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"100","Automation","Test","Kwant","Engineer",,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"101","John86108776","Doe","Micron","engineer","Management","ABCDE44AA471","C3000009F250",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000000534276","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
-"102","Jane42746814","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"103","Automation","Test","Kwant","Engineer",,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"104","Jane71229407","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"105","Automation","Test","Kwant","Engineer",,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"106","John73511277","Doe","Micron","engineer","Management","ABCDE44AA651","C3000009F304",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000000105476","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
-"107","Jane67429362","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"108","Jane56657934","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"109","Automation","Test","Kwant",,"QA",,,,"Crew 345","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
-"110","John71412749","Doe","Micron","engineer","Management","ABCDE44AA686","C3000009F327",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000000167428","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
-"111","Jane49332238","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
-"112","Automation","Test","Kwant","Engineer",,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
+"54","John78858077","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
+"55","John78858077","Doe","Micron","engineer","Management","FFCDE44A1265","AC233FFAE79D",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000002636804","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
+"56","John78858077","Doe","Micron","engineer","Management","00000000000000000000ABCDE34E1271","ABCDE34E1271","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"57","John78858077","Doe","Micron","engineer","Management","00000000000000000000000000022222","22222","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"58","John54344251","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
+"59","John54344251","Doe","Micron","engineer","Management","00000000000000000000000000012234","12234","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"60","John54344251","Doe","Micron","engineer","Management","00000000000000000000000000122344","122344","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"61","John54344251","Doe","Micron","engineer","Management","ABCDE44A2399","AC233FF0F92A",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000007498540","30.0","123456","","","89","Blue Oval Battery Park of Michigan"
+"62","John98613259","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
+"63","John98613259","Doe","Micron","engineer","Management","00000000000000000000000000034567","34567","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"64","John98613259","Doe","Micron","engineer","Management","00000000000000000000000000134567","134567","ABEEWAY","Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"65","John98613259","Doe","Micron","engineer","Management","ABCDE44A464C","C300003FA7D0",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009667925","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
+"66","John62600423","Doe","Micron","engineer","Management","ABCDE44A47FA","C300003FA89A",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009656079","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
+"67","John13655414","Doe","Micron","engineer","Management","ABCDE44A488D","C300003FA8B1",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009664415","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
+"68","John80745673","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
+"69","John80745673","Doe","Micron","engineer","Management","ABCDE44A48A1","C300003FA8B5",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009665082","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
+"70","John28684695","Doe","Micron","engineer","Management",,,,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"71","John28684695","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
+"72","John68439803","Doe","Micron","engineer","Management","ABCDE44A48A2","C300003FA8B6",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009659241","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
+"73","John68439803","Doe","Micron",,,,,,,,,,,,,,"",,"","","null",
+"74","John90879774","Doe","Micron","engineer","Management",,,,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE",,"30.0","123456","","","null","Blue Oval Battery Park of Michigan"
+"75","Jane1844291","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"76","John38578799","Doe","Micron","engineer","Management","ABCDE44A48AC","C300003FA8C0",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000009661966","30.0","123456","","","94","Blue Oval Battery Park of Michigan"
+"77","Jane56528251","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"78","Jane93535063","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"79","Jane92874342","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"80","Jane61292798","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"81","Jane48943644","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"82","Jane81707751","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"83","John73719421","Doe","Micron","engineer","Management","FFCDE44A6078","AC233FFAFA6A",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000002727876356","30.0","123456","","","88","Blue Oval Battery Park of Michigan"
+"84","John18542391","Doe","Micron","engineer","Management","ABCDE44AA440","C3000009F231",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000016329220","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
+"85","Jane99935751","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"86","Jane4613438","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"87","Jane5546404","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"88","Jane45626773","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"89","John86108776","Doe","Micron","engineer","Management","ABCDE44AA471","C3000009F250",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000000534276","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
+"90","Jane42746814","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"91","Jane71229407","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"92","John73511277","Doe","Micron","engineer","Management","ABCDE44AA651","C3000009F304",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000000105476","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
+"93","Jane67429362","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"94","Jane56657934","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"95","Jane49332238","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"96","Jane41154262","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"97","Jane21040288","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"98","Jane87523216","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"99","John53672677","Doe","Micron","engineer","Management","ABCDE44AA686","C3000009F327",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000000167428","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
+"100","Jane72265262","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"101","John68623278","Doe","Micron","engineer","Management","ABCDE44AA756","C3000009F36D",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000016756228","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
+"102","Jane44276796","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"103","Jane8698990","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"104","Automation","Test","Kwant","Journeyman",,,,,"Crew1","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
+"105","Automation","Test","Kwant","Journeyman",,,,,"Crew1","",,"automation@gmail.com",,"","",,"0.0","","","","null",""
+"106","John93198498","Doe","Micron","engineer","Management","ABCDE44AA757","C3000009F36E",,"Management","Union","988-8747777","paras+45@kwant.ai","Asian","Male","MWBE","0000000016240388","30.0","123456","","","93","Blue Oval Battery Park of Michigan"
+"107","Jane9593769","Smith","Micron",,,,,,,,,,,,,,"",,"","","null",
+"108","Automation","Test","Kwant","Engineer",,,,,,"",,"automation@gmail.com",,"","",,"0.0","","","","null",""
