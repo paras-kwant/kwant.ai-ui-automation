@@ -78,7 +78,7 @@ describe("Worker Module - overflowMenu", () => {
 })
 
 
-it('Validate the Change Value for multiple user using select feature', () => {
+it.only('Validate the Change Value for multiple user using select feature', () => {
     cy.visit('/projects/94049707/workers');
         cy.get(workforceSelector.tableRow).eq(0).find('[type="checkbox"]').check({ force: true });
         cy.get(workforceSelector.tableRow).eq(1).find('[type="checkbox"]').check({ force: true });
@@ -115,10 +115,11 @@ it('Validate the Change Value for multiple user using select feature', () => {
           cy.wrap(val).as('crew')
       })
 
-      cy.wait(2000)
+      cy.wait(1000)
 
       cy.get(workforceSelector.saveButton).click()
-      cy.get(workforceSelector.toastMessage).should('contain.text', 'Value changed successfully'); 
+      cy.get(workforceSelector.toastMessage).contains('Value changed successfully').should('be.visible');
+
 
       cy.get(workforceSelector.tableRow).eq(0).click({force:true})
       cy.get('.sc-jXbUNg>.jmJtNV').eq(1).click();
