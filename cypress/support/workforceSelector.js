@@ -12,6 +12,17 @@ export const workforceSelector = {
     tableRow:'.sc-cRmqLi',
     tableColumn :'.sc-gwZKzw',
     clearFilterButton: '.label.default__label:contains("Clear All")',
-    overflowMenu:'.icon-button .sc-cfxfcM.ibPbMT'
+    overflowMenu:'.icon-button .sc-cfxfcM.ibPbMT',
+    toastMessage:'.sc-kOPcWz',
+    toolTip:'.tooltip-content',
+    pageOne:() => cy.contains('button', '1'),
+    pageTwo: () => cy.contains('button', '2'),
+    previousButton:()=> cy.get('.workers-footer button svg').eq(0).closest('button'),
+    nextButton: () => cy.get('.workers-footer button svg').eq(1).closest('button'),
+    sendAlert:()=>cy.get('.hdcwLk > button'),
+    toastMessage:()=>cy.get('.sc-kOPcWz')
+  
+
+
   };
    

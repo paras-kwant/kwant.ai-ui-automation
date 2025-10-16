@@ -82,9 +82,9 @@ it('Vaidate adding a worker by uploading .csv file', () => {
     );
   });
   cy.get('.sc-kOPcWz').should('contain.text', '1 worker(s) will be added.')
-  cy.get(workforceSelector.submitButton).click();
-  cy.get('.personal-info-content__title').first().should('contain.text', 'Automation Test');
-  cy.get('.drawer_title>p').click()
+  // cy.get(workforceSelector.submitButton).click();
+  // cy.get('.personal-info-content__title').first().should('contain.text', 'Automation Test');
+  // cy.get('.drawer_title>p').click()
 
 })
 

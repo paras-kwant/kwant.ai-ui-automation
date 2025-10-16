@@ -83,4 +83,46 @@ describe("Worker Onboarding Email Validation", () => {
   })
 })
 
+
+it('Send Alert to the worker who doesnt have number', ()=>{
+  cy.visit('/projects/94049707/workers');
+    cy.wait(5000);
+  
+    cy.readFile('cypress/fixtures/noEmailWorker.json').then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.wait(2000)
+
+      cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
+      cy.get(workforceSelector.overflowMenu).click();
+      cy.contains('.dropdown-option', 'Send Alert').click();
+      cy.get('[label="Message Type"] [placeholder="Select"]').click()
+      cy.contains('General Communication').click()
+      cy.get('textarea').type(Math.random().toString(36).substring(2, 12))
+      workforceSelector.sendAlert().click()
+      workforceSelector.toastMessage().should('contain.text', 'None of the selected worker(s) have phone number added or no SMS consent provided.')
+})
+})
+
+it('Send Alert to the worker functionality', ()=>{
+  cy.visit('/projects/94049707/workers');
+    cy.wait(5000);
+  
+    cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.wait(2000)
+
+      cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
+      cy.get(workforceSelector.overflowMenu).click();
+      cy.contains('.dropdown-option', 'Send Alert').click();
+      cy.get('[label="Message Type"] [placeholder="Select"]').click()
+      cy.contains('General Communication').click()
+      cy.get('textarea').type(Math.random().toString(36).substring(2, 12))
+      workforceSelector.sendAlert().click()
+      workforceSelector.toastMessage().should('contain.text', 'Alert sent to 1 worker(s).')
+})
+})
 });

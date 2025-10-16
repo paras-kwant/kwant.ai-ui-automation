@@ -61,4 +61,15 @@ Cypress.Commands.add(
 );
 
 
+Cypress.Commands.add('getTotalWorkers', () => {
+  return cy.get('.sc-kMkxaj.eTAOVM')
+    .invoke('text')
+    .then((text) => {
+      const match = text.match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/);
+      return match ? Number(match[3]) : 0;
+    });
+});
+
+
+
 
