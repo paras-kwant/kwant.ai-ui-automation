@@ -21,6 +21,50 @@ describe("Worker Onboarding Email Validation", () => {
       .should("be.visible");
   });
 
+  it('Send onboarding invite and verify email delivery and content', () => {
+    cy.visit('/projects/94049707/workers');
+    cy.wait(5000);
+    
+    cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+    
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.wait(5000);
+      cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
+      cy.wait(5000);
+    
+      cy.get(workforceSelector.overflowMenu).click();
+      cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
+      cy.log('📧 Checking email...');
+      cy.wait(15000);
+    
+      // Get most recent email
+      cy.task('getMostRecentEmail').then((email) => {
+        if (!email) throw new Error('❌ NO EMAIL RECEIVED');
+    
+        // Clean email body - remove line breaks and encoding artifacts
+        const body = email.body.toLowerCase()
+          .replace(/=\r\n/g, '')  // Remove quoted-printable line breaks
+          .replace(/\r\n/g, ' ')  // Remove regular line breaks
+          .replace(/\s+/g, ' ');  // Normalize spaces
+        
+        const subject = email.subject.toLowerCase();
+    
+        cy.log(`📧 Email: ${email.subject}`);
+        cy.log(email.body.substring(0, 300));
+    
+        // Assertions - compare lowercase values
+        expect(body || subject).to.include('onboarding');
+        expect(body).to.include('regression test');
+        expect(body).to.include('badge');
+        expect(body).to.include(firstName.toLowerCase());  // ← FIX: Convert to lowercase
+        expect(body).to.satisfy(b => b.includes('invite') || b.includes('invitation'));  
+        cy.log('✅ All validations passed!');
+      });
+    });
+  });
+
   it("Send onboarding invite - Worker with no email", () => {
     cy.visit("/projects/94049707/workers");
     let workerName;
@@ -280,4 +324,6 @@ describe("Worker Onboarding Email Validation", () => {
         });
     });
   });
+
+  
 });
