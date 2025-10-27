@@ -12,6 +12,8 @@ jobs:
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
 
@@ -169,4 +171,4 @@ jobs:
 
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URL"
+            "$SLACK_WEBHOOK_URLs"
