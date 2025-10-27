@@ -10,17 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      # Login credentials
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
-      
-      # IMAP email fetching credentials (ADD THESE TO GITHUB SECRETS)
-      EMAIL_USER: ${{ secrets.EMAIL_USER }}
-      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
-      EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
-      
-      # Other services
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
 
@@ -36,36 +29,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: 🔍 Verify Email Configuration
-        run: |
-          echo "🔐 Checking email configuration..."
-          if [ -z "$EMAIL_USER" ]; then
-            echo "❌ EMAIL_USER is not set!"
-          else
-            echo "✅ EMAIL_USER is set"
-          fi
-          
-          if [ -z "$EMAIL_PASSWORD" ]; then
-            echo "❌ EMAIL_PASSWORD is not set!"
-          else
-            echo "✅ EMAIL_PASSWORD is set"
-          fi
-          
-          if [ -z "$EMAIL_HOST" ]; then
-            echo "⚠️ EMAIL_HOST not set, will use default (imap.gmail.com)"
-          else
-            echo "✅ EMAIL_HOST is set to: $EMAIL_HOST"
-          fi
-
       - name: Run Cypress tests
         id: cypress
         continue-on-error: true
         run: |
           # Run Cypress tests (continue even if tests fail)
-          npx cypress run \
-            --env email=$EMAIL,password=$PASSWORD \
-            --reporter mochawesome \
-            --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true || true
+          npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter mochawesome --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true || true
           
           # Merge all mochawesome JSON reports into one
           npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
