@@ -1,7 +1,8 @@
 /// <reference types="cypress" />
 const path = require("path");
+
 const fs = require("fs");
-import { workforceSelector } from '../../support/workforceSelector';  
+import { workforceSelector } from '../../support/workforceSelector';
 
 describe("Worker Module - Add Worker Tests", () => {
   beforeEach(() => {
