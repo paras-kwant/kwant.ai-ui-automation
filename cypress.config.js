@@ -8,6 +8,7 @@ const Imap = require('imap-simple');
 
 module.exports = defineConfig({
   e2e: {
+    experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
     defaultCommandTimeout: 30000,

@@ -80,8 +80,8 @@ describe("Worker Module - overflowMenu", () => {
       .should("be.visible");
 
     cy.get(".sc-cRmqLi").eq(0).click({ force: true });
+    cy.wait(2000)
     cy.get(".sc-jXbUNg>.jmJtNV").eq(1).click();
-
     cy.get("@crew").then((crew) => {
       cy.log("Retrieved Cost Code:", crew);
       cy.get(".hover-hoc-container__input__display-value")
@@ -155,7 +155,7 @@ describe("Worker Module - overflowMenu", () => {
     });
 
     cy.get(".personal-info-content__title").eq(1).click({ force: true });
-    cy.wait(1000);
+    cy.wait(2000);
     cy.get(".sc-jXbUNg>.jmJtNV").eq(1).click();
 
     cy.get("@crew").then((crew) => {
