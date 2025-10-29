@@ -65,6 +65,80 @@ describe("Worker Onboarding Email Validation", () => {
     });
   });
 
+  it('Send onboarding invite, verify email delivery, and accept the invitation link', () => {
+    cy.visit('/projects/94049707/workers');
+    cy.wait(5000);
+    
+    cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+    
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.wait(5000);
+      cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
+      cy.wait(5000);
+    
+      cy.get(workforceSelector.overflowMenu).click();
+      cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
+      cy.log('📧 Checking email...');
+      cy.wait(15000);
+    
+      cy.task('getMostRecentEmail').then((email) => {
+        if (!email) throw new Error('❌ NO EMAIL RECEIVED');
+    
+        const body = email.body
+          .replace(/=\r\n/g, '')
+          .replace(/\r\n/g, ' ')
+          .replace(/\s+/g, ' ');
+  
+        const lowerBody = body.toLowerCase();
+        const subject = email.subject.toLowerCase();
+    
+        cy.log(`📧 Email: ${email.subject}`);
+        cy.log(email.body.substring(0, 300));
+  
+        expect(lowerBody || subject).to.include('onboarding');
+        expect(lowerBody).to.include(firstName.toLowerCase());
+        expect(lowerBody).to.satisfy(b => b.includes('invite') || b.includes('invitation'));
+        cy.log('✅ Email content validated!');
+  
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const links = body.match(urlRegex);
+  
+        if (!links || links.length === 0) {
+          throw new Error('❌ No link found in email body');
+        }
+  
+        let onboardingLink = links.find(link =>
+          link.includes('onboarding') || link.includes('accept')
+        );
+        
+        if (!onboardingLink) {
+          throw new Error('❌ No onboarding invitation link found');
+        }
+        
+        // ✅ Clean the link properly
+        onboardingLink = onboardingLink
+          .replace(/=3D/g, '=')        
+          .replace(/["'>]/g, '')       
+          .replace(/\s/g, '')          
+          .trim();
+        
+  
+        cy.log(`🔗 Invitation link: ${onboardingLink}`);
+
+        cy.visit(onboardingLink);
+        cy.get('button').contains('Accept Work Invite').should('be.visible').click()
+        cy.get('.onboarding-title').contains('What is your contact number?').should('be.visible')
+
+        cy.log('🎉 Worker successfully accepted the onboarding invitation!');
+      });
+    });
+  });
+  
+
+
+
   it("Send onboarding invite - Worker with no email", () => {
     cy.visit("/projects/94049707/workers");
     let workerName;
