@@ -68,36 +68,44 @@ describe("Worker Module - filer", () => {
     })
   })
   it('Verify Filter of the different column for Job (Title)', () => {
-  cy.visit('/projects/94049707/workers');
-  cy.log("Testing for company filter");
-
-  cy.get('.table-header-filter-btn').eq(2).click();
-
-  cy.get('.sc-fzQBhs.fyTPqL').then(($parents) => {
-    const randomIndex = Cypress._.random(0, $parents.length - 1);
-    const $randomParent = $parents.eq(randomIndex);
-    const name = $randomParent.find('.sc-eldPxv.bVwlNE').text().trim();
-    cy.log(`Randomly selected company name: ${name}`);
-
-    cy.wrap($randomParent).find('input[type="checkbox"]').check({ force: true });
-
-    cy.get('p').contains('Filters:').click();
-    cy.wait(3000)
-
-    cy.get('body').then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 0) {
+    cy.visit('/projects/94049707/workers');
+  
+    cy.get('.table-header-filter-btn').eq(2).click();
+  
+    cy.get('.sc-fzQBhs.fyTPqL').then(($parents) => {
+      const randomIndex = Cypress._.random(0, $parents.length - 1);
+      const $randomParent = $parents.eq(randomIndex);
+      const name = $randomParent.find('.sc-eldPxv.bVwlNE').text().trim();
+      
+      cy.log(`Randomly selected job title: ${name}`);
+  
+      cy.wrap($randomParent).find('input[type="checkbox"]').check({ force: true });
+  
+      cy.get('p').contains('Filters:').click();
+      cy.wait(3000);
+  
+      if (name.toLowerCase() === 'none') {
         cy.get('.table_td:nth-child(7) .cell-content')
-          .contains(name)
+          .contains('-')
           .should('be.visible');
-      } else {
-          cy.get('.empty-body').should(
+      } 
+      else {
+        cy.get('body').then(($body) => {
+          if ($body.find(workforceSelector.tableRow).length > 0) {
+            cy.get('.table_td:nth-child(7) .cell-content')
+              .contains(name)
+              .should('be.visible');
+          } else {
+            cy.get('.empty-body').should(
               'have.text',
               'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
             );
+          }
+        });
       }
     });
-  })
-  })
+  });
+  
 
 
   it('Verify Filter of the different column for site status', () => {
