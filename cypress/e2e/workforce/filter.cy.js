@@ -16,7 +16,7 @@ describe("Worker Module - filer", () => {
   });
 
   
-  it('Verify Filter of the diffrent column for name', () => {
+  it('Verify Filter of the different column for name', () => {
     cy.visit('/projects/94049707/workers');
     cy.intercept('POST', '/api/filterProjectWorker*').as('workersApi');
     cy.reload();
@@ -26,19 +26,30 @@ describe("Worker Module - filer", () => {
       const firstNames = workers.map(worker => worker.firstName).filter(Boolean);
       cy.log(`First names: ${firstNames.join(', ')}`);
   
-    const randomNames = Cypress._.sampleSize(firstNames, 2);
-    cy.get('.table-header-filter-btn').eq(0).click();
-    cy.get('input.sc-fHjqPf.fCepZC').type(randomNames[0]);
-    cy.get('p').contains('Filters:').click()
-    cy.wait(2000)
-    cy.get('.sc-cRmqLi .personal-info-content__title').invoke('text').then((name) => {
-      cy.log(name)
-    })
-    /
-    cy.get('.sc-cRmqLi .personal-info-content__title').should('contain', randomNames[0])
-    cy.get(workforceSelector.clearFilterButton).click()
-})
-  })
+      const randomNames = Cypress._.sampleSize(firstNames, 2);
+  
+      // Open filter for the first column
+      cy.get('.table-header-filter-btn').eq(0).click();
+  
+      // Type the first random name into the filter input
+      cy.get('input.sc-fHjqPf.fCepZC').type(randomNames[0]);
+  
+      // Click 'Filters:' label to trigger the filter
+      cy.get('p').contains('Filters:').click();
+      cy.wait(2000);
+  
+      cy.get('.sc-cRmqLi .personal-info-content__title').each(($el) => {
+        cy.wrap($el).should('contain.text', randomNames[0]);
+      });
+  
+      cy.get('button p').contains('Filters').click();
+  
+      cy.get('[placeholder="Enter Name"]').should('have.value', randomNames[0]);
+      cy.get('body').click()
+      cy.get(workforceSelector.clearFilterButton).click()
+    });
+  });
+  
 
   it('Verify Filter of the different column for company', () => {
     cy.visit('/projects/94049707/workers');

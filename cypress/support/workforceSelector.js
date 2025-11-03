@@ -23,6 +23,11 @@ export const workforceSelector = {
     toastMessage:()=>cy.get('.sc-kOPcWz'),
     DocumentsPage:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(4),
     AddCertificationButton:()=>cy.get('button p').contains('Add Certification'),
-    AddLicenceButton:()=>cy.get('button p').contains('Add Licence')
+    AddLicenceButton:()=>cy.get('button p').contains('Add Licence'),
+
+
+    jobDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(3),
+
+
   };
    
