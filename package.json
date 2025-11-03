@@ -21,6 +21,7 @@
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^2.0.5",
     "cypress-parallel": "^0.15.0",
+    "cypress-real-events": "^1.15.0",
     "dotenv": "^17.2.3",
     "dotenv-cli": "^10.0.0",
     "imap-simple": "^5.1.0",
