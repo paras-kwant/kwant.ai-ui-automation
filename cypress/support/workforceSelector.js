@@ -21,12 +21,19 @@ export const workforceSelector = {
     nextButton: () => cy.get('.workers-footer button svg').eq(1).closest('button'),
     sendAlert:()=>cy.get('.hdcwLk > button'),
     toastMessage:()=>cy.get('.sc-kOPcWz'),
+
     DocumentsPage:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(4),
     AddCertificationButton:()=>cy.get('button p').contains('Add Certification'),
     AddLicenceButton:()=>cy.get('button p').contains('Add Licence'),
 
 
     jobDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(3),
+
+
+
+
+   personalDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(2),
+
 
 
   };

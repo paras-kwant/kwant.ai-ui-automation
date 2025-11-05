@@ -449,7 +449,7 @@ describe("Worker Module - Documents Page", () => {
           expect(body).to.include('license has expired');
           expect(body).to.include('needs to be renewed');
           expect(body).to.include('contact your project manager');
-          expect(body).to.include('aaaaron finch');
+          expect(body).to.include('aaaron finch');
           
           cy.log('✅ All validations passed!');
         });
