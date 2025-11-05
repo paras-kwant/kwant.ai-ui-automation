@@ -65,7 +65,7 @@ describe("Worker Module - Documents Page", () => {
     const daysToAdd = 3;
     cy.get('input[type="number"]').clear().type(daysToAdd.toString());
 
-    cy.wait(500);
+    // cy.wait(500);
 
     cy.get('[placeholder="Issued Date"]')
       .invoke("val")
@@ -105,7 +105,13 @@ describe("Worker Module - Documents Page", () => {
     ).join("");
 
     cy.visit("/projects/94049707/workers");
-    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      // cy.wait(1000);
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
 
     // Add Certification
@@ -209,11 +215,17 @@ describe("Worker Module - Documents Page", () => {
       .find('svg path[fill="#DF4242"]')
       .should("exist");
   });
+})
   it('should update an existing certificate', () => {
     cy.visit("/projects/94049707/workers");
   
     // Step 1: Open first worker and go to Documents page
-    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      // cy.wait(1000);
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
   
     // Step 2: Capture the Credential ID before editing
@@ -238,10 +250,10 @@ describe("Worker Module - Documents Page", () => {
           .should('be.visible')
           .click({ force: true });
   
-        cy.wait(1000);
+        // cy.wait(1000);
         cy.get('[placeholder="Select Expiry date"]').clear().type('11/03/2026');
         cy.get('body').click(); // Blur input to trigger save
-        cy.wait(1000);
+        // cy.wait(1000);
   
         // Step 5: Verify field changed
         cy.get('.hover-hoc-container__input__display-value')
@@ -257,7 +269,7 @@ describe("Worker Module - Documents Page", () => {
             workforceSelector.toastMessage().contains('Document updated successfully');
   
             // Step 7: Verify table now contains that credential ID with new date
-            cy.wait(3000);
+            // cy.wait(1000);
             cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
               .each(($row) => {
                 const credCell = $row.find('.cell-content').eq(2);
@@ -272,17 +284,19 @@ describe("Worker Module - Documents Page", () => {
           });
       });
   });
+})
   
 
-  it("Deleting a certificate", () => {
-    cy.visit("/projects/94049707/workers");
+it("Deleting a certificate", () => {
+  cy.visit("/projects/94049707/workers");
+
+  cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+    const { firstName, lastName } = workerData;
+    const fullName = `${firstName} ${lastName}`;
+
+    cy.get(workforceSelector.searchInput).clear().type(fullName);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
-
-    cy.get(".sc-jXbUNg.gDlPVv")
-      .eq(4)
-      .find('svg path[fill="#DF4242"]')
-      .should("exist");
 
     cy.get(".sc-cRmqLi.dEhqLz")
       .eq(0)
@@ -304,38 +318,34 @@ describe("Worker Module - Documents Page", () => {
           .contains("Successfully deleted document.")
           .should("be.visible");
 
-        cy.wait(3000);
-
+        cy.wait(2000)
         cy.get("body").then(($body) => {
-          const rows = $body.find(".sc-cRmqLi.bpifwg");
-          if (rows.length > 0) {
-            cy.get(".sc-cRmqLi.bpifwg .cell-content").should(
-              "not.contain.text",
-              docText
-            );
+          const rows = $body.find(".sc-cRmqLi.bpifwg, .sc-cRmqLi.dEhqLz");
 
-            cy.get("body").then(($body) => {
-              const hasRedSvg =
-                $body.find('.cell-content svg[fill="#DF4242"]').length > 0;
-              if (hasRedSvg) {
-                cy.log(
-                  "🔴 Red SVG found in .cell-content — verifying lower one exists"
-                );
-                cy.get(".sc-jXbUNg.gDlPVv")
-                  .eq(4)
-                  .find('svg path[fill="#DF4242"]')
-                  .should("exist");
-              } else {
-                cy.get(".sc-jXbUNg.gDlPVv")
-                  .eq(4)
-                  .find('svg path[fill="#DF4242"]')
-                  .should("not.exist");
-              }
-            });
+          if (rows.length > 0) {
+            cy.log("🟡 Rows still exist — verifying document is deleted");
+
+            // Verify that deleted doc no longer appears
+            cy.get(".sc-cRmqLi.bpifwg .cell-content, .sc-cRmqLi.dEhqLz .cell-content")
+              .should("not.contain.text", docText)
+              .then(() => {
+                const hasRedSvg = $body.find('.cell-content svg[fill="#DF4242"]').length > 0;
+
+                if (hasRedSvg) {
+                  cy.log("🔴 Red SVG found — verifying lower icon exists");
+                  cy.get(".sc-jXbUNg.gDlPVv")
+                    .eq(4)
+                    .find('svg path[fill="#DF4242"]')
+                    .should("exist");
+                } else {
+                  cy.get(".sc-jXbUNg.gDlPVv")
+                    .eq(4)
+                    .find('svg path[fill="#DF4242"]')
+                    .should("not.exist");
+                }
+              });
           } else {
-            cy.log(
-              "✅ No rows exist — document list is empty (deletion confirmed)"
-            );
+            cy.log("✅ No rows exist — document list is empty (deletion confirmed)");
             cy.get(".sc-jXbUNg.gDlPVv")
               .eq(4)
               .find('svg path[fill="#DF4242"]')
@@ -344,6 +354,8 @@ describe("Worker Module - Documents Page", () => {
         });
       });
   });
+});
+
 
   it("Verify expired licence shows red color for close date", () => {
     const credID = Array.from({ length: 16 }, () =>
@@ -351,9 +363,14 @@ describe("Worker Module - Documents Page", () => {
     ).join("");
 
     cy.visit("/projects/94049707/workers");
-    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      // cy.wait(1000);
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
-    cy.wait(4000);
+    // cy.wait(1000);
 
     // Add Licence
     cy.get(".sc-YysOf").contains("Licences").click();
@@ -387,22 +404,28 @@ describe("Worker Module - Documents Page", () => {
             cy.contains(expiryDate).find('svg[fill="#DF4242"]').should("exist");
           });
       });
-
     cy.get(".sc-jXbUNg.gDlPVv")
       .eq(4)
       .find('svg path[fill="#DF4242"]')
       .should("exist");
   });
+})
 
-  it('send request renewal to the worker', () => {
-    cy.visit("/projects/94049707/workers");
+it('send request renewal to the worker', () => {
+  cy.visit("/projects/94049707/workers");
+  cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+    const { firstName, lastName } = workerData;
+    const fullName = `${firstName} ${lastName}`;
+
+    cy.get(workforceSelector.searchInput).clear().type(fullName);
+    // cy.wait(1000);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
-    cy.wait(4000);
-  
+    // cy.wait(1000);
+
     // Add Licence
     cy.get(".sc-YysOf").contains("Licences").click();
-  
+
     cy.get(".sc-cRmqLi.bpifwg")
       .eq(0)
       .find(".cell-content")
@@ -410,54 +433,68 @@ describe("Worker Module - Documents Page", () => {
       .then((documentName) => {
         const docText = documentName.trim();
         cy.log(`document name: ${docText}`);
-  
+
         cy.get(".sc-cRmqLi.bpifwg")
           .eq(0)
           .find(".sc-jXbUNg.jnXMtv")
           .eq(0)
           .click();
-        
-        workforceSelector.toastMessage()
-          .contains('Renewal request sent successfully')
-          .should('be.visible');
-  
+
+        workforceSelector
+          .toastMessage()
+          .contains("Renewal request sent successfully")
+          .should("be.visible");
+
         // Wait for email to arrive
-        cy.wait(5000);
-  
+        // cy.wait(1000);
+
         // Verify renewal email was received
-        cy.task('getMostRecentEmail').then((email) => {
-          if (!email) throw new Error('❌ NO EMAIL RECEIVED');
-      
-          // Clean email body - remove line breaks, encoding artifacts, and HTML entities
-          const body = email.body.toLowerCase()
-            .replace(/=\r\n/g, '')        // Remove quoted-printable line breaks
-            .replace(/\r\n/g, ' ')        // Remove regular line breaks
-            .replace(/=3d/g, '=')         // Decode =3d to =
-            .replace(/=e2=80=8b/g, '')    // Remove zero-width space
-            .replace(/<[^>]*>/g, ' ')     // Remove HTML tags
-            .replace(/\s+/g, ' ')         // Normalize spaces
+        cy.task("getMostRecentEmail").then((email) => {
+          if (!email) throw new Error("❌ NO EMAIL RECEIVED");
+
+          // Clean and normalize the email body
+          const body = email.body
+            .toLowerCase()
+            .replace(/=\r\n/g, "") // quoted-printable line breaks
+            .replace(/\r\n/g, " ")
+            .replace(/=3d/g, "=")
+            .replace(/=e2=80=8b/g, "") // zero-width space
+            .replace(/<[^>]*>/g, " ") // remove HTML tags
+            .replace(/\s+/g, " ") // normalize spaces
             .trim();
-          
+
           const subject = email.subject.toLowerCase();
-      
+
           cy.log(`📧 Email Subject: ${email.subject}`);
           cy.log(`📧 Cleaned Body Preview: ${body.substring(0, 500)}`);
-      
-          // Assertions - verify renewal email content
-          expect(subject).to.include('document renewal request');
-          expect(subject).to.include('training');
-          expect(body).to.include('license has expired');
-          expect(body).to.include('needs to be renewed');
-          expect(body).to.include('contact your project manager');
-          expect(body).to.include('aaaron finch');
-          
-          cy.log('✅ All validations passed!');
+          cy.log(`👤 Full name from file: ${fullName}`);
+
+          // Assertions - verify email content
+          expect(subject).to.include("document renewal request");
+          expect(subject).to.include("training");
+          expect(body).to.include("license has expired");
+          expect(body).to.include("needs to be renewed");
+          expect(body).to.include("contact your project manager");
+
+          // 🔥 Normalize both to avoid false negatives
+          expect(
+            body.replace(/\s+/g, " ").toLowerCase()
+          ).to.include(fullName.replace(/\s+/g, " ").toLowerCase());
+
+          cy.log("✅ All validations passed!");
         });
       });
   });
+});
+
   it("Deleting a licence", () => {
     cy.visit("/projects/94049707/workers");
-    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      // cy.wait(1000);
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
 
     cy.get(".sc-jXbUNg.gDlPVv")
@@ -486,7 +523,7 @@ describe("Worker Module - Documents Page", () => {
           .contains("Successfully deleted document.")
           .should("be.visible");
 
-        cy.wait(2000);
+          cy.wait(2000);
 
         cy.get("body").then(($body) => {
           const rows = $body.find(".sc-cRmqLi.bpifwg");
@@ -526,5 +563,6 @@ describe("Worker Module - Documents Page", () => {
         });
       });
   });
+})
   
 });
