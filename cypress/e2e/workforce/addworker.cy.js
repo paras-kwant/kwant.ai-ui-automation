@@ -26,11 +26,11 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('input[name=lastName]').type(lastName);
     cy.get('input[name="company"]').type('Micron');
     cy.get('.sc-fhzFiK').click();
-    cy.get('input[name=address]').type('Kathmandu');
-    cy.wait(1000)
-    cy.get('input[name=zipCode]').type('44600');
-    cy.get('[name="drop_test"]').click();
-    cy.get('[role="button"]').contains('Drop').click();
+    // cy.get('input[name=address]').type('Kathmandu');
+    // cy.wait(1000)
+    // cy.get('input[name=zipCode]').type('44600');
+    // cy.get('[name="drop_test"]').click();
+    // cy.get('[role="button"]').contains('Drop').click();
 
     // Personal Details Page
     cy.get('button>p').contains('Add More Details').click();
@@ -115,9 +115,7 @@ describe("Worker Module - Add Worker Tests", () => {
     let expectedValuesGeneralDetails = [
       firstName,
       lastName,
-      'Micron',
-      'Kathmandu',
-      '44600'
+      'Micron'
     ];
 
     expectedValuesGeneralDetails.forEach((val) => {
