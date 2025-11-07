@@ -20,7 +20,7 @@ export const workforceSelector = {
     previousButton:()=> cy.get('.workers-footer button svg').eq(0).closest('button'),
     nextButton: () => cy.get('.workers-footer button svg').eq(1).closest('button'),
     sendAlert:()=>cy.get('.hdcwLk > button'),
-    toastMessage:()=>cy.get('.sc-kOPcWz'),
+    toastMessage:()=>cy.get('.sc-kOPcWz'), 
 
     DocumentsPage:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(4),
     AddCertificationButton:()=>cy.get('button p').contains('Add Certification'),
