@@ -13,39 +13,38 @@ describe("Worker Module - General Details Page", () => {
   });
 
   it("Verify the UI of the General Details drawer", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(2).click({ force: true });
-
-    cy.get("p").contains("General Details").should("be.visible");
-
-
+  
+    cy.contains("p", "General Details").should("be.visible");
+  
     const expectedTexts = [
       "First Name",
       "Last Name",
-      "Company",
-      "Address",
-      "Zip Code",
+      "Company", 
     ];
-
-    // Validate all expected labels exist
-    cy.get(".hover-hoc-container__label").each(($el, index) => {
-      if (index < expectedTexts.length) {
-        cy.wrap($el)
-          .invoke("text")
-          .then((text) => {
-            expect(text.trim()).to.contain(expectedTexts[index]);
-            cy.log(`✅ Label ${index}: ${text}`);
-          });
-      }
-    });
-
+  
+    cy.get(".hover-hoc-container__label")
+      .then(($labels) => {
+        const actualTexts = [...$labels].map((el) => el.innerText.trim());
+        cy.log("Actual labels:", actualTexts);
+        expectedTexts.forEach((expected) => {
+          expect(actualTexts, `Label "${expected}" should exist`).to.include(expected);
+        });
+      });
+  
+    // Hover check
     cy.get(".hover-hoc-container__input__display-value")
+      .first()
       .realHover()
       .find("svg")
       .should("be.visible");
-    cy.get("button p").contains("Cancel").should("be.visible");
+  
+    // Button checks
+    cy.contains("button p", "Cancel").should("be.visible");
     cy.get(workforceSelector.updateButton).should("be.visible");
   });
+  
 
   it("should allow editing and saving of all editable general Details fields", () => {
     cy.visit("/projects/94049707/workers");

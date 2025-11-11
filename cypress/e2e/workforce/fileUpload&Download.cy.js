@@ -9,13 +9,13 @@ describe("Worker Module - file upload and download", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains('Regression test').click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
   });
 
  
 it('Validating Uploading profile picture functionality', () => {
-  cy.visit('/projects/94049707/workers');
+  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.personal-info-content__title').eq(0).click();
   cy.wait(3000)
   
@@ -28,7 +28,7 @@ it('Validating Uploading profile picture functionality', () => {
         const initialSrc = $img.attr('src');
         console.log('Initial Image Src:', initialSrc);
 
-        cy.get(workforceSelector.profileImageUploadButton)
+        workforceSelector.profileImageUploadButton()
           .scrollIntoView()
           .should('be.visible')
           .click();
@@ -66,7 +66,7 @@ it('Validating Uploading profile picture functionality', () => {
 
 
 it('Vaidate adding a worker by uploading .csv file', () => {
-  cy.visit('/projects/94049707/workers');
+  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
   cy.get('.dropdown-option').contains('Upload').click();
 
@@ -92,7 +92,7 @@ it('Validate downloading the template file', () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
   const fileName = 'Ontarget-employee-upload-template.csv';
 
-  cy.visit('/projects/94049707/workers');
+  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
   cy.get('.dropdown-option').contains('Upload').click();
   cy.get('.drawer_title>p').click();
@@ -138,79 +138,92 @@ it('Validate downloading the template file', () => {
 
   
 
-  it("Validate worker download matches UI", () => {
-    const FILE_NAME = 'Ontarget-Employee-Report.csv';
-    const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
-    const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
+it("Validate worker download matches UI", () => {
+  const FILE_NAME = 'Ontarget-Employee-Report.csv';
+  const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
+  const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
 
-    cy.visit('/projects/94049707/workers');
-    cy.wait(10000);
-  
-    cy.get('.personal-info-content__title').then(($els) => {
-      const uiNames = [...$els].map(el => el.innerText.trim());
-      uiNames.forEach((name, i) => cy.log(`UI Worker ${i + 1}: ${name}`));
+  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+  cy.wait(10000);
 
-      cy.wait(20000)
-      cy.task("deleteDownloadedFiles", {
-        downloadsFolder: DOWNLOADS_FOLDER,
-        pattern: "Ontarget-Employee-Report",
-        extension: ".csv"
-      });
-  
-      cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
-      cy.get('.dropdown-option').contains('Download').click();
-  
-      cy.readFile(FILE_PATH, { timeout: 30000 }).then(() => {
-        cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
-          const csvNames = extractWorkerNamesFromCSV(rows);
-          
-          logComparisonResults(uiNames, csvNames);
-          validateNamesMatch(uiNames, csvNames);
-        });
+  cy.get('.personal-info-content__title').then(($els) => {
+    const uiNames = [...$els].map(el => el.innerText.trim());
+    
+    // Only log summary, not individual names
+    cy.log(`Found ${uiNames.length} workers in UI`);
+
+    cy.task("deleteDownloadedFiles", {
+      downloadsFolder: DOWNLOADS_FOLDER,
+      pattern: "Ontarget-Employee-Report",
+      extension: ".csv"
+    });
+
+    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get('.dropdown-option').contains('Download').click();
+
+    cy.readFile(FILE_PATH, { timeout: 30000 }).then(() => {
+      cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
+        const csvNames = extractWorkerNamesFromCSV(rows);
+        
+        logComparisonResults(uiNames, csvNames);
+        validateNamesMatch(uiNames, csvNames);
       });
     });
   });
-  
-  // Helper functions
-  function extractWorkerNamesFromCSV(rows) {
-    const header = rows[1];
-    const firstNameIndex = header.indexOf("First Name");
-    const lastNameIndex = header.indexOf("Last Name");
-  
-    if (firstNameIndex === -1 || lastNameIndex === -1) {
-      throw new Error("Required columns not found in CSV");
-    }
-  
-    return rows.slice(2)
-      .map(row => {
-        const firstName = row[firstNameIndex]?.toString().trim() || "";
-        const lastName = row[lastNameIndex]?.toString().trim() || "";
-        return [firstName, lastName].filter(Boolean).join(" ");
-      })
-      .filter(name => name !== "");
-  }
-  
-  function logComparisonResults(uiNames, csvNames) {
-    csvNames.forEach((name, i) => cy.log(`CSV Worker ${i + 1}: ${name}`));
-    cy.log(`UI Names: ${uiNames.length}, CSV Names: ${csvNames.length}`);
+});
 
-    
+// Helper functions
+function extractWorkerNamesFromCSV(rows) {
+  const header = rows[1];
+  const firstNameIndex = header.indexOf("First Name");
+  const lastNameIndex = header.indexOf("Last Name");
+
+  if (firstNameIndex === -1 || lastNameIndex === -1) {
+    throw new Error("Required columns not found in CSV");
+  }
+
+  return rows.slice(2)
+    .map(row => {
+      const firstName = row[firstNameIndex]?.toString().trim() || "";
+      const lastName = row[lastNameIndex]?.toString().trim() || "";
+      return [firstName, lastName].filter(Boolean).join(" ");
+    })
+    .filter(name => name !== "");
+}
+
+function logComparisonResults(uiNames, csvNames) {
+  // Only log summary statistics
+  cy.log(`CSV Workers: ${csvNames.length}`);
+  cy.log(`UI Workers: ${uiNames.length}`);
   
-    uiNames.forEach(uiName => {
-      const found = csvNames.includes(uiName) ? "✓" : "✗";
-      cy.log(`${found} ${uiName}`);
-    });
+  const missingInCsv = uiNames.filter(name => !csvNames.includes(name));
+  const extraInCsv = csvNames.filter(name => !uiNames.includes(name));
+  
+  if (missingInCsv.length > 0) {
+    cy.log(`❌ Missing in CSV: ${missingInCsv.length} workers`);
+    // Only log first 10 missing names
+    cy.log(`First missing: ${missingInCsv.slice(0, 10).join(', ')}${missingInCsv.length > 10 ? '...' : ''}`);
+  } else {
+    cy.log(`✅ All UI workers found in CSV`);
   }
   
-  function validateNamesMatch(uiNames, csvNames) {
-    const missingNames = uiNames.filter(name => !csvNames.includes(name));
-    
-    if (missingNames.length > 0) {
-      expect(missingNames.length).to.equal(0, 
-        `UI names not found in CSV: ${missingNames.join(', ')}`
-      );
-    }
+  if (extraInCsv.length > 0) {
+    cy.log(`ℹ️ Extra in CSV: ${extraInCsv.length} workers`);
   }
+}
+
+function validateNamesMatch(uiNames, csvNames) {
+  const missingNames = uiNames.filter(name => !csvNames.includes(name));
+  
+  if (missingNames.length > 0) {
+    // Log to console for debugging (not Cypress log)
+    console.log('Missing workers:', missingNames);
+    
+    expect(missingNames.length).to.equal(0, 
+      `${missingNames.length} UI names not found in CSV. Check console for full list.`
+    );
+  }
+}
 
   
 

@@ -9,7 +9,7 @@ describe("Worker Module - Favorites", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains('Regression test').click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
   });
 
@@ -19,7 +19,7 @@ describe("Worker Module - Favorites", () => {
         cy.get('body').then(($body) => {
           if ($body.find('[title="Workforce Workers"]').length > 0) {
             cy.get('[title="Workforce Workers"]').should('be.visible').click();
-            cy.url().should('include', '/projects/94049707/workers');
+            cy.url().should('include', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
             cy.get('[role="button"] [fill="#FACC15"]').should('be.visible').click()
             cy.wait(2000) 
         
@@ -27,29 +27,29 @@ describe("Worker Module - Favorites", () => {
             cy.get('[role="button"] [fill="#FACC15"]').should('not.exist');
             cy.get('[title="Workforce Workers"]').should('not.exist');
           } else {
-            cy.visit('/projects/94049707/workers');
+            cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
             cy.get('[role="button"]').click();
             cy.wait(2000)
             cy.get('.sc-kOPcWz', { timeout: 10000 })
             .should('contain.text', 'Added to favorite');
             cy.get('[title="Workforce Workers"]').should('be.visible').click();
-            cy.url().should('include', '/projects/94049707/workers');
+            cy.url().should('include', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
             cy.get('[role="button"] [fill="#FACC15"]').should('be.visible');
           }
         });
       });
 
       it('Verify that the latest page added to favorites is displayed at the top of the favorites list.', ()=>{
-        cy.visit('/projects/94049707/workers');
+        cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
         cy.get('body').then(($body) => {
             if ($body.find('[role="button"] [fill="#FACC15"]').length > 0) {
               cy.get('[role="button"] [fill="#FACC15"]').click()
               cy.wait(2000)
               cy.get('[role="button"]').click()
-              cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', '/projects/94049707/workers');
+              cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
             } else {
                 cy.get('[role="button"]').click()
-                cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', '/projects/94049707/workers');
+                cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
             }
         })
     })        

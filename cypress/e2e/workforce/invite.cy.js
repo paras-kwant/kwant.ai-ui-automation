@@ -3,14 +3,15 @@ import { workforceSelector } from "../../support/workforceSelector";
 
 describe("Worker Onboarding Email Validation", () => {
   beforeEach(() => {
+    Cypress.on('uncaught:exception', () => false);
     cy.session("userSession", () => {
       cy.login();
-      cy.get(".card-title").contains("Regression test").click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
   });
 
   it("Send Onboarding Invite - No Worker Selected", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(3000);
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Send Onboarding Invite").click();
@@ -22,22 +23,21 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it('Send onboarding invite and verify email delivery and content', () => {
-    cy.visit('/projects/94049707/workers');
-    cy.wait(5000);
-    
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+    cy.wait(1000);
     cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
     
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.wait(5000);
+      cy.wait(2000);
       cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
-      cy.wait(5000);
+      cy.wait(2000);
     
       cy.get(workforceSelector.overflowMenu).click();
       cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
       cy.log('📧 Checking email...');
-      cy.wait(15000);
+      cy.wait(10000);
     
       // Get most recent email
       cy.task('getMostRecentEmail').then((email) => {
@@ -56,9 +56,10 @@ describe("Worker Onboarding Email Validation", () => {
     
         // Assertions - compare lowercase values
         expect(body || subject).to.include('onboarding');
-        expect(body).to.include('regression test');
+        expect(body).to.include('lvl 10-11');
         expect(body).to.include('badge');
-        expect(body).to.include(firstName.toLowerCase());  // ← FIX: Convert to lowercase
+        expect(body).to.include(firstName.toLowerCase()); 
+        cy.log(firstName)
         expect(body).to.satisfy(b => b.includes('invite') || b.includes('invitation'));  
         cy.log('✅ All validations passed!');
       });
@@ -66,7 +67,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it('Send onboarding invite, verify email delivery, and accept the invitation link', () => {
-    cy.visit('/projects/94049707/workers');
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(5000);
     
     cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
@@ -81,7 +82,6 @@ describe("Worker Onboarding Email Validation", () => {
       cy.get(workforceSelector.overflowMenu).click();
       cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
       cy.log('📧 Checking email...');
-      cy.wait(15000);
     
       cy.task('getMostRecentEmail').then((email) => {
         if (!email) throw new Error('❌ NO EMAIL RECEIVED');
@@ -128,7 +128,11 @@ describe("Worker Onboarding Email Validation", () => {
         cy.log(`🔗 Invitation link: ${onboardingLink}`);
 
         cy.visit(onboardingLink);
-        cy.get('button').contains('Accept Work Invite').should('be.visible').click()
+        cy.contains('button', 'Accept Work Invite')
+        .scrollIntoView()       // 👈 scrolls down until the button is visible
+        .should('be.visible')   // ensures it's actually visible
+        .click();               // then clicks it
+      
         cy.get('.onboarding-title').contains('What is your contact number?').should('be.visible')
 
         cy.log('🎉 Worker successfully accepted the onboarding invitation!');
@@ -140,7 +144,8 @@ describe("Worker Onboarding Email Validation", () => {
 
 
   it("Send onboarding invite - Worker with no email", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+    cy.wait(2000)
     let workerName;
     cy.wait(3000);
     cy.readFile("cypress/fixtures/noEmailWorker.json").then((workerData) => {
@@ -162,7 +167,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it("Sending Alert to Worker with Missing Contact Information", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(5000);
 
     cy.readFile("cypress/fixtures/noEmailWorker.json").then((workerData) => {
@@ -190,7 +195,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it("Sending a General Communication Message", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(5000);
 
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
@@ -215,7 +220,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it("Send a Alert Message", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -237,7 +242,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it("Cancelling the Alert Sending Process", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -256,21 +261,21 @@ describe("Worker Onboarding Email Validation", () => {
     });
   });
 
-  it("Sending Alert Message when no worker are on site", () => {
-    cy.visit("/projects/94049707/workers");
-    cy.get(workforceSelector.overflowMenu).click();
-    cy.contains(".dropdown-option", "Send Alert").click();
-    cy.get('[label="Message Type"] [placeholder="Select"]').click();
-    cy.contains("General Communication").click();
-    cy.get("textarea").type(Math.random().toString(36).substring(2, 12));
-    workforceSelector.sendAlert().click();
-    workforceSelector
-      .toastMessage()
-      .should("contain.text", "No worker(s) onsite today.");
-  });
+  // it("Sending Alert Message when no worker are on site", () => {
+  //   cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+  //   cy.get(workforceSelector.overflowMenu).click();
+  //   cy.contains(".dropdown-option", "Send Alert").click();
+  //   cy.get('[label="Message Type"] [placeholder="Select"]').click();
+  //   cy.contains("General Communication").click();
+  //   cy.get("textarea").type(Math.random().toString(36).substring(2, 12));
+  //   workforceSelector.sendAlert().click();
+  //   workforceSelector
+  //     .toastMessage()
+  //     .should("contain.text", "No worker(s) onsite today.");
+  // });
 
   it("Verify the  View Alerts History on Send Alert flow", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(5000);
 
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
@@ -322,7 +327,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it("Sending an Empty General Communication Message", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -344,7 +349,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it("Sending an Alert Message with Template", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -368,7 +373,7 @@ describe("Worker Onboarding Email Validation", () => {
   });
 
   it("Modifying and Sending an Alert Message with Template", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;

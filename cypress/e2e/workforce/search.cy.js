@@ -9,13 +9,13 @@ describe("Worker Module - Search", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains('Regression test').click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
   });
 
   
   it('Validating the search functionality - run twice', () => {
-    cy.visit('/projects/94049707/workers');
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.intercept('POST', '/api/filterProjectWorker*').as('workersApi');
     cy.reload();
   
@@ -45,8 +45,9 @@ describe("Worker Module - Search", () => {
   
   
   it('Search triggers API only when at least 3 letters are entered', () => {
-    cy.visit('/projects/94049707/workers');
-    cy.wait(3000)
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+
+    cy.wait(4000)
     cy.get(workforceSelector.tableRow)
     .then(($els) => {
       const initialList = [...$els].map(el => el.innerText.trim());
@@ -54,7 +55,6 @@ describe("Worker Module - Search", () => {
       console.log('Initial List:', initialList); 
 
       cy.get(workforceSelector.searchInput).clear().type('a');
-
       cy.get(workforceSelector.tableRow).then(($newEls) => {
         const newList = [...$newEls].map(el => el.innerText.trim());
         cy.log('New List:', JSON.stringify(newList));
@@ -71,6 +71,7 @@ describe("Worker Module - Search", () => {
       console.log('Initial List:', initialList); 
 
       cy.get(workforceSelector.searchInput).clear().type('aa');
+
 
       cy.get(workforceSelector.tableRow).then(($newEls) => {
         const newList = [...$newEls].map(el => el.innerText.trim());
@@ -112,7 +113,7 @@ describe("Worker Module - Search", () => {
 
 
   it('Validating the search functionality for the search with no results', () => {
-    cy.visit('/projects/94049707/workers');
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.searchInput).clear().type('NonExistentName12345');
     cy.get('.empty-body').should('have.text', 'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters ')
     });

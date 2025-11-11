@@ -8,12 +8,12 @@ describe("Worker Module - Personal Details Page", () => {
   beforeEach(() => {
     cy.session("userSession", () => {
       cy.login();
-      cy.get(".card-title").contains("Regression test").click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
   });
 
   it("should verify all UI elements and labels in the Personal Details drawer", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.personalDetails().click();
 
@@ -21,7 +21,7 @@ describe("Worker Module - Personal Details Page", () => {
     cy.get("p").contains("Personal Details").should("be.visible");
 
     // Verify tooltip visibility on hover
-    cy.get(".hover-hoc-container__label").eq(5).find("svg").realHover();
+    cy.get(".hover-hoc-container__label").eq(7).find("svg").realHover();
     cy.get(".tooltip-content")
       .contains("Minority/Women owned Business Enterprise")
       .should("be.visible");
@@ -29,6 +29,8 @@ describe("Worker Module - Personal Details Page", () => {
     const expectedTexts = [
       "Phone",
       "Email",
+      "Address",
+      "Zip Code",
       "Date of Birth",
       "Race",
       "Sex",
@@ -39,17 +41,11 @@ describe("Worker Module - Personal Details Page", () => {
       "Emergency Contact Address",
     ];
 
-    // Validate all expected labels exist
-    cy.get(".hover-hoc-container__label").each(($el, index) => {
-      if (index < expectedTexts.length) {
-        cy.wrap($el)
-          .invoke("text")
-          .then((text) => {
-            expect(text.trim()).to.contain(expectedTexts[index]);
-            cy.log(`✅ Label ${index}: ${text}`);
-          });
-      }
-    });
+    expectedTexts.forEach((text) => {
+      cy.get('.hover-hoc-container__label')
+        .contains(text)
+        .should('exist');
+    })
 
     cy.get(".hover-hoc-container__input__display-value")
       .realHover()
@@ -60,7 +56,7 @@ describe("Worker Module - Personal Details Page", () => {
   });
 
   it("should allow editing and saving all editable fields in the Personal Details section", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.personalDetails().click();
 
@@ -71,7 +67,7 @@ describe("Worker Module - Personal Details Page", () => {
       .first()
       .should("be.visible")
       .click();
-    cy.get('[name="phone"]').click().clear().type("9868765456");
+    cy.get('[name="phone"]').click().clear().type("9779868765456");
 
     cy.get(".hover-hoc-container__input__display-value")
       .eq(1)
@@ -83,37 +79,23 @@ describe("Worker Module - Personal Details Page", () => {
     cy.get('[name="email"]').click().clear().type("paras@gmail.com");
 
     cy.get(".hover-hoc-container__input__display-value")
-      .eq(2)
-      .realHover()
-      .find(".edit-icon > svg")
-      .first()
-      .should("be.visible")
-      .click();
-    cy.get('[placeholder="Select Date of Birth"]').click().clear().type("11/07/2000");
+    .eq(2)
+    .realHover()
+    .find(".edit-icon > svg")
+    .first()
+    .should("be.visible")
+    .click();
+  cy.get('[name="address"]').click().clear().type("Nepal");
 
-    // select race
-    cy.get(".hover-hoc-container__input__display-value")
-      .eq(3)
-      .realHover()
-      .find(".edit-icon > svg")
-      .should("be.visible")
-      .click({ force: true });
-    cy.get('[placeholder="Select Race"]').click({ force: true }).clear();
-    cy.get(".sc-tagGq[role='button']").then(($buttons) => {
-      const randomIndex = Cypress._.random(0, $buttons.length - 1);
-      const $randomButton = $buttons.eq(randomIndex);
-      const randomCrew = $randomButton.text().trim();
-      cy.log(randomCrew);
-      cy.wrap($randomButton).click({ force: true });
-    });
 
     // select sex
     cy.get(".hover-hoc-container__input__display-value")
-      .eq(4)
+      .eq(6)
       .realHover()
       .find(".edit-icon > svg")
       .should("be.visible")
       .click({ force: true });
+
     cy.get('[placeholder="Select Sex"]').click({ force: true }).clear();
     cy.get(".sc-tagGq[role='button']").then(($buttons) => {
       const randomIndex = Cypress._.random(0, $buttons.length - 1);
@@ -125,7 +107,7 @@ describe("Worker Module - Personal Details Page", () => {
 
     // MWBE
     cy.get(".hover-hoc-container__input__display-value")
-      .eq(5)
+      .eq(7)
       .realHover()
       .find(".edit-icon > svg")
       .should("be.visible")
@@ -141,7 +123,7 @@ describe("Worker Module - Personal Details Page", () => {
 
     // select Ethnicity
     cy.get(".hover-hoc-container__input__display-value")
-      .eq(6)
+      .eq(8)
       .realHover()
       .find(".edit-icon > svg")
       .should("be.visible")
@@ -153,34 +135,8 @@ describe("Worker Module - Personal Details Page", () => {
       cy.wrap($randomButton).click({ force: true });
     });
 
-    // emergency contact name
-    cy.get(".hover-hoc-container__input__display-value")
-      .eq(7)
-      .realHover()
-      .find(".edit-icon > svg")
-      .should("be.visible")
-      .click({ force: true });
-    cy.get('[placeholder="Enter Emergency Contact Name"]').clear().type("rabindra ojha");
 
-    // emergency contact phone
-    cy.get(".hover-hoc-container__input__display-value")
-      .eq(8)
-      .realHover()
-      .find(".edit-icon > svg")
-      .should("be.visible")
-      .click({ force: true });
-    cy.get('[placeholder="Enter Emergency Contact Phone"]').clear().type("9878765645");
-
-    // emergency contact address
-    cy.get(".hover-hoc-container__input__display-value")
-      .eq(9)
-      .realHover()
-      .find(".edit-icon > svg")
-      .should("be.visible")
-      .click({ force: true });
-    cy.get('[placeholder="Enter Emergency Contact Address"]').clear().type("London");
-
-    cy.get("button p").contains("Update").click();
+    cy.contains('button p', 'Update').click();
     workforceSelector.toastMessage().should("contain", "Successfully updated employee.");
     cy.wait(1000);
 

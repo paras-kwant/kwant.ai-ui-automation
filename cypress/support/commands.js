@@ -71,5 +71,21 @@ Cypress.Commands.add('getTotalWorkers', () => {
 });
 
 
+Cypress.Commands.add('selectRandomOption', (inputSelector, optionSelector, name = 'option') => {
+  cy.get(inputSelector).click(); 
+  cy.get(optionSelector).should('be.visible').then(($options) => {
+    if ($options.length === 0) {
+      cy.log(`No ${name} found for selector: ${optionSelector}`);
+      return;
+    }
+    const randomIndex = Cypress._.random(0, $options.length - 1);
+    const $randomOption = $options.eq(randomIndex);
+    const optionText = $randomOption.text().trim();
+    cy.log(`Selecting random ${name}: ${optionText}`);
+    cy.wrap($randomOption).click({ force: true });
+  });
+});
+
+
 
 

@@ -9,13 +9,13 @@ describe("Worker Module - column", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains('Regression test').click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
   });
 
   
   it('Verify Colum settings reset functionality', () => {
-    cy.visit('/projects/94049707/workers');
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.icon-button button').eq(0).click();
   cy.get('button p').contains('Reset to default').click();
   cy.get('button.sc-krNlru').click();
@@ -29,23 +29,23 @@ describe("Worker Module - column", () => {
 
 
 it('Validate adding and updating column settings', () => {
-    cy.visit('/projects/94049707/workers');
+  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.icon-button button').eq(0).click();
   cy.get('button p').contains('Reset to default').click();
   cy.wait(5000)
-  cy.get('[data-rbd-draggable-id="automation_test_filter"] [type="checkbox"]').click()
+  cy.get('[data-rbd-draggable-id="email"] [type="checkbox"]').click()
   cy.get('button p').contains('Save').click();
   cy.get('.sc-kOPcWz').should('have.text', 'Column settings updated successfully! ');
   cy.get(workforceSelector.tableColumn).should('have.length', 12);
 
   cy.get(workforceSelector.tableColumn).invoke('text').then((text) => {
     expect(text.trim()).to.eq(
-      'S.NoNameCompany NameJob TitleSite StatusPhoneDeviceLast Seen Locationautomation test filter'
+      'S.NoNameCompany NameJob TitleSite StatusPhoneDeviceLast Seen LocationEmail'
     );
   });
 })
 it('Validate drag and drop colum feature)', () => {
-  cy.visit('/projects/94049707/workers');
+  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
 
   cy.get('.icon-button button').eq(0).click();
   cy.wait(1000);
@@ -103,7 +103,7 @@ it('Validate drag and drop colum feature)', () => {
 });
 
 it('should validate add column settings UI displays disabled Clear and Add buttons initially', () => {
-  cy.visit('/projects/94049707/workers');
+  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.icon-button button').eq(0).click();
   cy.wait(1000);
   cy.get('button p').contains('Add New Column').click();
