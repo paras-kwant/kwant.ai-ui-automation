@@ -11,10 +11,10 @@ module.exports = defineConfig({
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
-    defaultCommandTimeout: 30000,
-    requestTimeout: 30000,
-    responseTimeout: 30000,
-    pageLoadTimeout: 30000,
+    defaultCommandTimeout: 15000,
+    requestTimeout: 15000,
+    responseTimeout: 15000,
+    pageLoadTimeout: 15000,
     retries: { runMode: 2, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
     testIsolation: false,
@@ -35,6 +35,8 @@ module.exports = defineConfig({
       // Environment variables
       config.env.EMAIL = process.env.EMAIL;
       config.env.PASSWORD = process.env.PASSWORD;
+      config.env.PROJECT_NAME = "LVL 10-11";
+      config.env.PROJECT_ID = 500526306;
 
       // File management & Gmail tasks
       on("task", {

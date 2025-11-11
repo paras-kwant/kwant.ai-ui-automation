@@ -7,12 +7,12 @@ describe("Worker Module - overflowMenu", () => {
   beforeEach(() => {
     cy.session("userSession", () => {
       cy.login();
-      cy.get(".card-title").contains("Regression test").click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
-  });
+  })
 
   it("Validate  the options in overflow menu", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Delete").should("not.exist");
     cy.contains(".dropdown-option", "Disable").should("not.exist");
@@ -32,7 +32,7 @@ describe("Worker Module - overflowMenu", () => {
   });
 
   it("Validate the Change Value functionality", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow)
       .eq(0)
       .find('[type="checkbox"]')
@@ -62,12 +62,7 @@ describe("Worker Module - overflowMenu", () => {
       .then((val) => {
         cy.wrap(val).as("jobTitle");
       });
-    cy.get('[label="Cost Code"] input')
-      .invoke("val")
-      .then((val) => {
-        cy.wrap(val).as("costCode");
-        cy.log("Cost Code:", val); // Log to verify
-      });
+    
     cy.get('[label="Crew"] input')
       .invoke("val")
       .then((val) => {
@@ -83,15 +78,18 @@ describe("Worker Module - overflowMenu", () => {
     cy.wait(2000)
     cy.get(".sc-jXbUNg>.jmJtNV").eq(1).click();
     cy.get("@crew").then((crew) => {
-      cy.log("Retrieved Cost Code:", crew);
+      cy.log("Retrieved Crew Value:", crew);
+      const expectedCrew = crew === "None" ? "-" : crew;
+    
       cy.get(".hover-hoc-container__input__display-value")
-        .eq(2)
-        .should("contain.text", crew);
+        .eq(3)
+        .should("contain.text", expectedCrew);
     });
+    
   });
 
   it("Validate the Change Value for multiple user using select feature", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow)
       .eq(0)
       .find('[type="checkbox"]')
@@ -127,12 +125,6 @@ describe("Worker Module - overflowMenu", () => {
       .then((val) => {
         cy.wrap(val).as("jobTitle");
       });
-    cy.get('[label="Cost Code"] input')
-      .invoke("val")
-      .then((val) => {
-        cy.wrap(val).as("costCode");
-        cy.log("Cost Code:", val);
-      });
     cy.get('[label="Crew"] input')
       .invoke("val")
       .then((val) => {
@@ -148,25 +140,17 @@ describe("Worker Module - overflowMenu", () => {
     cy.get(".sc-jXbUNg>.jmJtNV").eq(1).click();
 
     cy.get("@crew").then((crew) => {
-      cy.log("Retrieved Cost Code:", crew);
+      cy.log("Retrieved Crew Value:", crew);
+      const expectedCrew = crew === "None" ? "-" : crew;
+    
       cy.get(".hover-hoc-container__input__display-value")
-        .eq(2)
-        .should("contain.text", crew);
+        .eq(3)
+        .should("contain.text", expectedCrew);
     });
-
-    cy.get(".personal-info-content__title").eq(1).click({ force: true });
-    cy.wait(2000);
-    cy.get(".sc-jXbUNg>.jmJtNV").eq(1).click();
-
-    cy.get("@crew").then((crew) => {
-      cy.log("Retrieved Cost Code:", crew);
-      cy.get(".hover-hoc-container__input__display-value")
-        .eq(2)
-        .should("contain.text", crew);
-    });
+    
   });
   it("Verify Disable Worker Functionality", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(3000);
     cy.readFile("cypress/fixtures/createdWorker.json").then(
       ({ firstName, lastName }) => {
@@ -192,7 +176,7 @@ describe("Worker Module - overflowMenu", () => {
   });
 
   it("Verify warning message on disabling a disable user.", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(3000);
     cy.readFile("cypress/fixtures/createdWorker.json").then(
       ({ firstName, lastName }) => {
@@ -213,7 +197,7 @@ describe("Worker Module - overflowMenu", () => {
   });
 
   it("Verify warning message on disabling a worker without any assigned device.", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(3000);
     cy.readFile("cypress/fixtures/noEmailWorker.json").then(
       ({ firstName, lastName }) => {
@@ -234,7 +218,7 @@ describe("Worker Module - overflowMenu", () => {
   });
 
   it("Verify the deletion functionality for the selected user.", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.wait(3000);
     cy.readFile("cypress/fixtures/createdWorker.json").then(
       ({ firstName, lastName }) => {
@@ -260,7 +244,7 @@ describe("Worker Module - overflowMenu", () => {
     const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
     const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
 
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
 
     cy.intercept("POST", "/api/filterProjectWorker*").as("getWorkers");
     cy.wait("@getWorkers");

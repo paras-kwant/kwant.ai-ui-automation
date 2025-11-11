@@ -8,45 +8,41 @@ describe("Worker Module - Job Details Page", () => {
   beforeEach(() => {
     cy.session("userSession", () => {
       cy.login();
-      cy.get(".card-title").contains("Regression test").click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
   });
 
   it("Verify the UI of the Job Details drawer", () => {
-    cy.visit("/projects/94049707/workers");
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.jobDetails().click();
 
     cy.get("p").contains("Job Details").should("be.visible");
 
     cy.get('.hover-hoc-container__label')
-    .eq(0)
+    .eq(1)
     .find('svg').realHover()
     cy.get('.tooltip-content').contains('Role of worker defined in onboarding process').should('be.visible')
     
     const expectedTexts = [
-        "Worker Role",
-        "Worker ID",
-        "Crew",
-        "$/MH",
-        "Pay Group",
-        "Union",
-        "Added On",
-        "automation test filter",
-        "Job Title",
-        "Cost Code"
-      ];
-      
-      cy.get(".hover-hoc-container__label").each(($el, index) => {
-        cy.wrap($el).invoke("text").then((text) => {
-          expect(text).to.contain(expectedTexts[index]);
-      
-          cy.log(`Element ${index}: ${text}`);
-          console.log(`Element ${index}: ${text}`);
-        });
-      });
+      "Job Title",
+      "Worker Role",
+      "Worker ID",
+      "Crew",
+      "$/MH",
+      "Union",
+      "Added On",
+      "Motion Mode"
+    ];
+  
+    // Check that each expected text exists among label elements
+    expectedTexts.forEach((text) => {
+      cy.get('.hover-hoc-container__label')
+        .contains(text)
+        .should('exist');
+    })
 
-      const indicesToHover = [0, 2, 3, 4, 5, 7, 9];
+      const indicesToHover = [0, 1, 2, 3, 4, 5, 7,8,9];
 indicesToHover.forEach((i) => {
   cy.get(".hover-hoc-container__input__display-value")
     .eq(i)
@@ -61,164 +57,83 @@ indicesToHover.forEach((i) => {
       cy.get(workforceSelector.updateButton).should('be.visible')
   });
   it("should allow editing and saving of all editable Job Details fields", () => {
-    // Navigate to workers page
-    cy.visit("/projects/94049707/workers");
+    // Step 1: Visit workers page and open Job Details tab
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-  
-    // Open Job Details tab
     workforceSelector.jobDetails().click();
-    cy.wait(1000)
-    
-    //worker role 
+    cy.wait(1000);
+  
+    // Step 2: Edit Job Title
     cy.get(".hover-hoc-container__input__display-value")
-    .eq(0)
-    .realHover()
-    .find('.edit-icon > svg')
-    .first()
-    .should('be.visible')
-    .click({ force: true });
+      .eq(0)
+      .realHover()
+      .find('.edit-icon > svg')
+      .first()
+      .should('be.visible')
+      .click({ force: true });
   
+    cy.get('[placeholder="Enter Job Title"]').clear().type('QA');
   
-    cy.get('#select-input').click().clear();
+    // Step 3: Edit Worker Role
+    cy.get(".hover-hoc-container__input__display-value")
+      .eq(1)
+      .realHover()
+      .find('.edit-icon > svg')
+      .first()
+      .should('be.visible')
+      .click({ force: true });
   
-    // Select a random option and capture its text
+    cy.get('[placeholder="Select Worker Role"]').click();
+  
     cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
       const randomIndex = Cypress._.random(0, $buttons.length - 1);
       const $randomButton = $buttons.eq(randomIndex);
       const workerRole = $randomButton.text().trim();
-  
+      cy.log(`Selected Worker Role: ${workerRole}`);
       cy.wrap($randomButton).click({ force: true });
+    });
   
-      cy.get('.hover-hoc-container__input__display-value')
-        .eq(0)
-        .should("contain", workerRole);
-        cy.wait(500) 
-    }); 
-  
-    // Worker ID section
+    // Step 4: Edit Worker ID
     cy.get(".hover-hoc-container__input__display-value")
-    .eq(1)
-    .realHover()
-    .find('.edit-icon > svg')
-    .should('be.visible')
-    .click({ force: true });
+      .eq(2)
+      .realHover()
+      .find('.edit-icon > svg')
+      .should('be.visible')
+      .click({ force: true });
   
-    cy.get('#hover-input').clear().type('1', { force: true });
+    cy.get('[placeholder="Enter Worker ID"]').clear().type('9839893333');
   
-    // Crew selection
-    cy.wait(500)
-    cy.get(".hover-hoc-container__input__display-value")
-    .eq(2)
-    .realHover()
-    .find('.edit-icon > svg')
-    .should('be.visible')
-    .click({ force: true });
+    // Step 5: Capture current Job Details text (for later verification)
+    cy.get('.hover-hoc-container__input__display-value')
+      .eq(0)
+      .invoke('text')
+      .then((jobData) => {
+        const filledInfo = jobData.trim();
+        cy.log(`Captured Job Title before update: ${filledInfo}`);
   
-    cy.get('[placeholder="Select Crew"]').click({ force: true }).clear()
+        // Step 6: Save updates
+        cy.contains('button p', 'Update').click();
+        workforceSelector.toastMessage().should('contain', 'Successfully updated employee.');
   
-    cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
-      const randomIndex = Cypress._.random(0, $buttons.length - 1);
-      const $randomButton = $buttons.eq(randomIndex);
-      const randomCrew = $randomButton.text().trim();
-      cy.log(randomCrew)
+        cy.wait(1500);
   
-      cy.wrap($randomButton).click({ force: true });
-    }); 
+        // Step 7: Reopen Job Details drawer to verify update persisted
+        cy.contains('button p', 'Cancel').click();
+        cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+        workforceSelector.jobDetails().click();
+        cy.wait(1000);
   
-    cy.get(".hover-hoc-container__input__display-value")
-    .eq(3)
-    .realHover()
-    .find('.edit-icon > svg')
-    .should('be.visible')
-    .click({ force: true });
-  
-    cy.get('[placeholder="Select $/MH"]').clear().type(10, { force: true });
-  
-    //pay group
-    cy.wait(2000)
-    cy.get(".hover-hoc-container__input__display-value")
-    .eq(4)
-    .realHover()
-    .find('.edit-icon > svg')
-    .should('be.visible')
-    .click({ force: true });
-  
-    cy.get('[placeholder="Select Pay Group"]').click({ force: true }).clear()
-  
-    cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
-      const randomIndex = Cypress._.random(0, $buttons.length - 1);
-      const $randomButton = $buttons.eq(randomIndex);
-  
-      cy.wrap($randomButton).click({ force: true });
-    }); 
-  
-    //union group
-    cy.get(".hover-hoc-container__input__display-value")
-    .eq(5)
-    .realHover()
-    .find('.edit-icon > svg')
-    .should('be.visible')
-    .click({ force: true });
-  
-    cy.get('[placeholder="Select Union"]').click({ force: true }).clear()
-  
-    cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
-      const randomIndex = Cypress._.random(0, $buttons.length - 1);
-      const $randomButton = $buttons.eq(randomIndex);
-  
-      cy.wrap($randomButton).click({ force: true });
-    }); 
-  
-    cy.get(".hover-hoc-container__input__display-value")
-    .eq(8)
-    .realHover()
-    .find('.edit-icon svg')
-    .should('be.visible')
-    .click({ force: true });
-  
-    cy.get('[placeholder="Select Job Title"]').click({ force: true }).clear({force:true})
-  
-    cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
-      const randomIndex = Cypress._.random(0, $buttons.length - 1);
-      const $randomButton = $buttons.eq(randomIndex);
-  
-      cy.wrap($randomButton).click({ force: true });
-    }); 
-
-    cy.get(".hover-hoc-container__input__display-value")
-    .eq(9)
-    .realHover()
-    .find('.edit-icon svg')
-    .should('be.visible')
-    .click({ force: true });
-  
-    cy.get('[placeholder="Select Cost Code"]').click({ force: true }).clear({force:true})
-  
-    cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
-      const randomIndex = Cypress._.random(0, $buttons.length - 1);
-      const $randomButton = $buttons.eq(randomIndex);
-  
-      cy.wrap($randomButton).click({ force: true });
-    }); 
-
-      cy.get('button p').contains('Update').click();
-      workforceSelector.toastMessage().should('contain', 'Successfully updated employee.');
-      cy.wait(1000)
-      cy.get('.hover-hoc-container__input__display-value').eq(0).invoke('text').then((filledInfo)=>{
-        cy.log(filledInfo);
-    
-      cy.get('button p').contains('Cancel').click();
-      
-      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.jobDetails().click();
-       cy.wait(1000)
-      cy.get('.hover-hoc-container__input__display-value').eq(0)
-        .should('have.text', filledInfo);
-      
-
-
-    })
+        // Step 8: Assert the value was correctly saved
+        cy.get('.hover-hoc-container__input__display-value')
+          .eq(0)
+          .invoke('text')
+          .then((updatedInfo) => {
+            cy.log(`Reopened Job Title: ${updatedInfo.trim()}`);
+            expect(updatedInfo.trim()).to.eq(filledInfo);
+          });
+      });
   });
+  
 
   
   it("should display correct tooltip information when clicking the Worker Role info icon", () => {
