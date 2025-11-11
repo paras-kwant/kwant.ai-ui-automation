@@ -52,6 +52,7 @@ export const workforceSelector = {
 
 
     jobDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(3),
+    AccessControl:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(5),
 
 
 
