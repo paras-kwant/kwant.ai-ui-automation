@@ -21,32 +21,48 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # ⭐ 1. Use Node + NPM CACHE (100% MUST HAVE)
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+          cache: 'npm'
 
+      # ⭐ 2. Cypress Binary Cache (SAVES HUGE TIME)
+      - name: Cypress Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      # ⭐ 3. Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
+      # ⭐ 4. Disable Cypress Video/Screenshots (SPEED BOOST)
+      - name: Add CI Cypress config
+        run: |
+          echo "module.exports = { video: false, screenshotOnRunFailure: false };" > cypress.ci.js
+
+      # ⭐ 5. Run Cypress Tests (Chrome = faster + stable)
       - name: Run Cypress tests
         id: cypress
         continue-on-error: true
         run: |
-          # Run Cypress tests (continue even if tests fail)
-          npx cypress run --env email=$EMAIL,password=$PASSWORD --reporter mochawesome --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true || true
-          
-          # Merge all mochawesome JSON reports into one
+          npx cypress run --config-file cypress.ci.js \
+            --browser chrome \
+            --env email=$EMAIL,password=$PASSWORD \
+            --reporter mochawesome \
+            --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true || true
+
           npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
           
-          # Extract stats from merged report
           TOTAL=$(jq '.stats.tests' cypress/results/merged-report.json)
           PASSED=$(jq '.stats.passes' cypress/results/merged-report.json)
           FAILED=$(jq '.stats.failures' cypress/results/merged-report.json)
           SKIPPED=$(jq '.stats.pending' cypress/results/merged-report.json)
           TOTAL_TIME_MS=$(jq '.stats.duration' cypress/results/merged-report.json)
-          
-          # Calculate success rate (handle division by zero)
+
           if [ "$TOTAL" -gt 0 ]; then
             SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
           else
@@ -54,13 +70,11 @@ jobs:
           fi
           
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-          
-          # Convert milliseconds to minutes and seconds
+
           MINUTES=$((TOTAL_TIME_MS / 60000))
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
 
-          # Set outputs BEFORE any exit
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
@@ -68,9 +82,6 @@ jobs:
           echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
-          
-          # Debug output
-          echo "Debug: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED, TIME=$TOTAL_TIME"
 
       - name: 🌍 Deploy Allure Report to Surge
         id: surge_deploy
@@ -80,17 +91,13 @@ jobs:
           npx allure generate allure-results --clean -o allure-report
           npm install --global surge
           
-          # Generate timestamped URL
           TIMESTAMP_ID=$(date +%s%3N)
           PREVIEW_URL="https://${TIMESTAMP_ID}-kwant-ui-automation.surge.sh"
           
-          # Deploy to both production and timestamped URL
           surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
           surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN
           
-          # Save the preview URL for Slack notification
           echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
-          echo "Deployed to: $PREVIEW_URL"
 
       - name: 💬 Send Slack Notification
         if: always()
@@ -104,11 +111,6 @@ jobs:
           TIMESTAMP="${{ steps.cypress.outputs.timestamp }}"
           PREVIEW_URL="${{ steps.surge_deploy.outputs.preview_url }}"
 
-          # Debug: Show what we received
-          echo "Debug Slack: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED"
-          echo "Preview URL: $PREVIEW_URL"
-
-          # Set defaults if values are empty
           TOTAL="${TOTAL:-0}"
           PASSED="${PASSED:-0}"
           FAILED="${FAILED:-0}"
@@ -118,16 +120,12 @@ jobs:
           TIMESTAMP="${TIMESTAMP:-N/A}"
           PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation.surge.sh}"
 
-          # Determine status and color
           if [[ "$TOTAL" -eq 0 ]]; then
             STATUS="⚠️ UI tests did not run properly"
             COLOR="warning"
           elif [[ "$FAILED" -eq 0 ]]; then
-            STATUS="✅  UI tests completed successfully"
+            STATUS="✅ UI tests completed successfully"
             COLOR="good"
-          elif [[ "$FAILED" -eq 1 ]]; then
-            STATUS="🚨 $FAILED test failed out of $TOTAL tests in UI"
-            COLOR="danger"
           else
             STATUS="🚨 $FAILED tests failed out of $TOTAL tests in UI"
             COLOR="danger"
@@ -159,11 +157,7 @@ jobs:
                     {title: "🕐 Last Checked", value: $timestamp, short: false}
                   ],
                   actions: [
-                    {
-                      type: "button",
-                      text: "View Detailed Report",
-                      url: $preview_url
-                    }
+                    { type: "button", text: "View Detailed Report", url: $preview_url }
                   ]
                 }
               ]
@@ -171,4 +165,7 @@ jobs:
 
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URL"
+
+            "$SLACK_WEBHOOK_URLs
+
+

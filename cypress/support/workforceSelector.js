@@ -49,10 +49,11 @@ export const workforceSelector = {
     DocumentsPage:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(4),
     AddCertificationButton:()=>cy.get('button p').contains('Add Certification'),
     AddLicenceButton:()=>cy.get('button p').contains('Add Licence'),
-
+    
 
     jobDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(3),
     AccessControl:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(5),
+    SafetyAudit:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(6),
 
 
 
