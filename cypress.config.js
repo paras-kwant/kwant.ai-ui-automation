@@ -1,207 +1,197 @@
-const { defineConfig } = require("cypress");
-require("dotenv").config();
-const fs = require("fs");
-const path = require("path");
-const xlsx = require("xlsx");
-const allureWriter = require("@shelex/cypress-allure-plugin/writer");
-const Imap = require('imap-simple');
+name: Run Cypress UI Tests
 
-module.exports = defineConfig({
-  e2e: {
-    experimentalPromptCommand: true,
-    baseUrl: "https://uat.kwant.ai",
-    chromeWebSecurity: false,
-    defaultCommandTimeout: 30000,
-    requestTimeout: 30000,
-    responseTimeout: 30000,
-    pageLoadTimeout: 30000,
-    retries: { runMode: 1, openMode: 0 },
-    downloadsFolder: path.join(__dirname, "cypress", "downloads"),
-    testIsolation: false,
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "05 04 * * *" # Nepali 10:05 AM
 
-    setupNodeEvents(on, config) {
-      // Clean allure-results before test run
-      on('before:run', () => {
-        const allureResultsPath = path.join(__dirname, 'allure-results');
-        if (fs.existsSync(allureResultsPath)) {
-          fs.rmSync(allureResultsPath, { recursive: true, force: true });
-          console.log('🧹 Cleaned old allure-results');
-        }
-      });
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EMAIL: ${{ secrets.EMAIL }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
 
-      // Allure plugin
-      allureWriter(on, config);
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      // Environment variables
-      config.env.EMAIL = process.env.EMAIL;
-      config.env.PASSWORD = process.env.PASSWORD;
-      config.env.PROJECT_NAME = "LVL 10-11";
-      config.env.PROJECT_ID = 500526306;
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      // File management & Gmail tasks
-      on("task", {
-        getLatestDownloadedFile({ downloadsFolder, prefix = "" }) {
-          const files = fs
-            .readdirSync(downloadsFolder)
-            .filter(
-              (f) =>
-                f.includes(prefix) &&
-                (f.endsWith(".csv") || f.endsWith(".xlsx"))
-            )
-            .map((file) => ({
-              name: file,
-              time: fs.statSync(path.join(downloadsFolder, file)).mtime.getTime(),
-            }))
-            .sort((a, b) => b.time - a.time);
+      # Cache npm dependencies and Cypress binary
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/Cypress
+            node_modules
+          key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cypress-
 
-          files.slice(1).forEach((file) =>
-            fs.unlinkSync(path.join(downloadsFolder, file.name))
-          );
+      # Use npm ci for faster, cleaner installs
+      - name: Install dependencies
+        run: npm ci
 
-          return files[0]?.name || null;
-        },
+      # Verify Cypress is installed (uses cache if available)
+      - name: Verify Cypress
+        run: npx cypress verify
 
-        parseExcel({ filePath }) {
-          const workbook = xlsx.readFile(filePath);
-          const sheet = workbook.Sheets[workbook.SheetNames[0]];
-          return xlsx.utils.sheet_to_json(sheet, { header: 1 });
-        },
+      - name: Run Cypress tests
+        id: cypress
+        continue-on-error: true
+        run: |
+          # Run Cypress tests (video already disabled in config)
+          npx cypress run \
+            --env email=$EMAIL,password=$PASSWORD \
+            --browser chrome \
+            --headless \
+            --reporter mochawesome \
+            --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true \
+            || true
+          
+          # Merge all mochawesome JSON reports into one
+          npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
+          
+          # Extract stats from merged report
+          TOTAL=$(jq '.stats.tests' cypress/results/merged-report.json)
+          PASSED=$(jq '.stats.passes' cypress/results/merged-report.json)
+          FAILED=$(jq '.stats.failures' cypress/results/merged-report.json)
+          SKIPPED=$(jq '.stats.pending' cypress/results/merged-report.json)
+          TOTAL_TIME_MS=$(jq '.stats.duration' cypress/results/merged-report.json)
+          
+          # Calculate success rate (handle division by zero)
+          if [ "$TOTAL" -gt 0 ]; then
+            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          else
+            SUCCESS_RATE="0.00"
+          fi
+          
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          # Convert milliseconds to minutes and seconds
+          MINUTES=$((TOTAL_TIME_MS / 60000))
+          SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
+          TOTAL_TIME="${MINUTES}m ${SECONDS}s"
 
-        deleteDownloadedFiles({ downloadsFolder, pattern, extension }) {
-          if (!fs.existsSync(downloadsFolder)) return 0;
+          # Set outputs BEFORE any exit
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+          echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          
+          # Debug output
+          echo "Debug: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED, TIME=$TOTAL_TIME"
 
-          const filesToDelete = fs
-            .readdirSync(downloadsFolder)
-            .filter((f) => f.includes(pattern) && f.endsWith(extension));
+      - name: 🌍 Deploy Allure Report to Surge
+        id: surge_deploy
+        if: always()
+        continue-on-error: true
+        run: |
+          npx allure generate allure-results --clean -o allure-report
+          npm install --global surge
+          
+          # Generate timestamped URL
+          TIMESTAMP_ID=$(date +%s%3N)
+          PREVIEW_URL="https://${TIMESTAMP_ID}-kwant-ui-automation.surge.sh"
+          
+          # Deploy to both production and timestamped URL
+          surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+          surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN
+          
+          # Save the preview URL for Slack notification
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $PREVIEW_URL"
 
-          filesToDelete.forEach((file) => fs.unlinkSync(path.join(downloadsFolder, file)));
+      - name: 💬 Send Slack Notification
+        if: always()
+        run: |
+          TOTAL="${{ steps.cypress.outputs.total }}"
+          PASSED="${{ steps.cypress.outputs.passed }}"
+          FAILED="${{ steps.cypress.outputs.failed }}"
+          SKIPPED="${{ steps.cypress.outputs.skipped }}"
+          SUCCESS_RATE="${{ steps.cypress.outputs.success_rate }}"
+          TOTAL_TIME="${{ steps.cypress.outputs.total_time }}"
+          TIMESTAMP="${{ steps.cypress.outputs.timestamp }}"
+          PREVIEW_URL="${{ steps.surge_deploy.outputs.preview_url }}"
 
-          return filesToDelete.length;
-        },
+          # Debug: Show what we received
+          echo "Debug Slack: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED"
+          echo "Preview URL: $PREVIEW_URL"
 
-        deleteFile({ filePath }) {
-          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-          return null;
-        },
+          # Set defaults if values are empty
+          TOTAL="${TOTAL:-0}"
+          PASSED="${PASSED:-0}"
+          FAILED="${FAILED:-0}"
+          SKIPPED="${SKIPPED:-0}"
+          SUCCESS_RATE="${SUCCESS_RATE:-0.00}"
+          TOTAL_TIME="${TOTAL_TIME:-0m 0s}"
+          TIMESTAMP="${TIMESTAMP:-N/A}"
+          PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation.surge.sh}"
 
-        // ✅ Get most recent email from Gmail
-        async getMostRecentEmail() {
-          const imapConfig = {
-            imap: {
-              user: process.env.GMAIL_USER,
-              password: process.env.GMAIL_APP_PASSWORD,
-              host: 'imap.gmail.com',
-              port: 993,
-              tls: true,
-              tlsOptions: { rejectUnauthorized: false }
-            }
-          };
+          # Determine status and color
+          if [[ "$TOTAL" -eq 0 ]]; then
+            STATUS="⚠️ UI tests did not run properly"
+            COLOR="warning"
+          elif [[ "$FAILED" -eq 0 ]]; then
+            STATUS="✅  UI tests completed successfully"
+            COLOR="good"
+          elif [[ "$FAILED" -eq 1 ]]; then
+            STATUS="🚨 $FAILED test failed out of $TOTAL tests in UI"
+            COLOR="danger"
+          else
+            STATUS="🚨 $FAILED tests failed out of $TOTAL tests in UI"
+            COLOR="danger"
+          fi
 
-          try {
-            const connection = await Imap.connect(imapConfig);
-            await connection.openBox('INBOX');
-            
-            const searchCriteria = [
-              ['SINCE', new Date(Date.now() - 30 * 60 * 1000)]
-            ];
-            
-            const fetchOptions = {
-              bodies: ['HEADER', 'TEXT', ''],
-              markSeen: false
-            };
-            
-            const messages = await connection.search(searchCriteria, fetchOptions);
-            connection.end();
-            
-            if (messages && messages.length > 0) {
-              const message = messages[messages.length - 1];
-              const parts = message.parts;
-              
-              let body = '';
-              let headers = {};
-              
-              parts.forEach(part => {
-                if (part.which === 'TEXT' || part.which === '') {
-                  body += part.body;
+          PAYLOAD=$(jq -n \
+            --arg color "$COLOR" \
+            --arg status "$STATUS" \
+            --arg total "$TOTAL" \
+            --arg passed "$PASSED" \
+            --arg failed "$FAILED" \
+            --arg skipped "$SKIPPED" \
+            --arg success_rate "$SUCCESS_RATE%" \
+            --arg total_time "$TOTAL_TIME" \
+            --arg timestamp "$TIMESTAMP" \
+            --arg preview_url "$PREVIEW_URL" \
+            '{
+              attachments: [
+                {
+                  color: $color,
+                  title: $status,
+                  fields: [
+                    {title: "Total Tests", value: $total, short: true},
+                    {title: "✅ Passed", value: $passed, short: true},
+                    {title: "❌ Failed", value: $failed, short: true},
+                    {title: "⏭️ Skipped", value: $skipped, short: true},
+                    {title: "📈 Success Rate", value: $success_rate, short: true},
+                    {title: "⏱️ Duration", value: $total_time, short: true},
+                    {title: "🕐 Last Checked", value: $timestamp, short: false}
+                  ],
+                  actions: [
+                    {
+                      type: "button",
+                      text: "View Detailed Report",
+                      url: $preview_url
+                    }
+                  ]
                 }
-                if (part.which === 'HEADER') {
-                  headers = part.body;
-                }
-              });
-              
-              return {
-                subject: headers.subject ? headers.subject[0] : '',
-                from: headers.from ? headers.from[0] : '',
-                body: body,
-                date: headers.date ? headers.date[0] : ''
-              };
-            }
-            
-            return null;
-          } catch (error) {
-            console.error('❌ Error getting most recent email:', error.message);
-            return null;
-          }
-        },
+              ]
+            }')
 
-        // ✅ List all recent emails (for debugging)
-        async listRecentEmails() {
-          const imapConfig = {
-            imap: {
-              user: process.env.GMAIL_USER,
-              password: process.env.GMAIL_APP_PASSWORD,
-              host: 'imap.gmail.com',
-              port: 993,
-              tls: true,
-              tlsOptions: { rejectUnauthorized: false }
-            }
-          };
-
-          try {
-            console.log('🔍 Fetching all recent emails...');
-            const connection = await Imap.connect(imapConfig);
-            await connection.openBox('INBOX');
-            
-            const searchCriteria = [
-              ['SINCE', new Date(Date.now() - 30 * 60 * 1000)]
-            ];
-            
-            const fetchOptions = {
-              bodies: ['HEADER'],
-              markSeen: false
-            };
-            
-            const messages = await connection.search(searchCriteria, fetchOptions);
-            connection.end();
-            
-            const emailList = messages.map(msg => {
-              const headers = msg.parts.find(p => p.which === 'HEADER').body;
-              return {
-                subject: headers.subject ? headers.subject[0] : 'No Subject',
-                from: headers.from ? headers.from[0] : 'Unknown',
-                date: headers.date ? headers.date[0] : 'Unknown'
-              };
-            });
-            
-            console.log(`✅ Found ${emailList.length} recent emails`);
-            return emailList;
-          } catch (error) {
-            console.error('❌ Error listing emails:', error.message);
-            return [];
-          }
-        }
-      });
-
-      return config;
-    },
-
-    env: {
-      allure: true,
-      allureResultsPath: "allure-results",
-      allureSkipCommands: "wrap",
-      allureAddVideoOnPass: false,
-      allureSkipAutomaticScreenshots: false,
-      allureLogCypress: false,
-    },
-  },
-});
+          curl -X POST -H 'Content-type: application/json' \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL"
