@@ -14,7 +14,7 @@ describe("Worker Module - Add Worker Tests", () => {
   });
 
   it('Validate adding a worker with all fields filled', () => {
-    const workerData = generateWorkerData(); // generate random worker data
+    const workerData = generateWorkerData(); 
 
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     workforceSelector.addWorkerButton().click();
