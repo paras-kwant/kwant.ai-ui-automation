@@ -37,7 +37,7 @@ describe("Worker Onboarding Email Validation", () => {
       cy.get(workforceSelector.overflowMenu).click();
       cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
       cy.log('📧 Checking email...');
-      cy.wait(10000);
+      cy.wait(15000);
     
       // Get most recent email
       cy.task('getMostRecentEmail').then((email) => {

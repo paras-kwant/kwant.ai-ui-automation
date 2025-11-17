@@ -336,7 +336,7 @@ describe("Worker Module - Filter", () => {
 
     cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.get('[label="Filters"] button').click();
-    cy.get('[placeholder="MM/DD/YYYY - MM/DD/YYYY"]').eq(3).type(startDate);
+    cy.get('[label="Added On"] [placeholder="MM/DD/YYYY - MM/DD/YYYY"]').type(startDate);
     cy.get(".rmdp-day.rmdp-today .sd").click();
     cy.get(".sc-aXZVg.hdcwLk button").click();
     cy.get(".jHNNhu").click();

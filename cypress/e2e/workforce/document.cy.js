@@ -256,7 +256,7 @@ it('should update an existing certificate', () => {
           .click({ force: true });
 
         cy.get('[placeholder="Select Expiry date"]')
-          .clear()
+          .clear({force:true})
           .type('11/03/2026');
         cy.get('body').click(); // blur input to trigger save
 

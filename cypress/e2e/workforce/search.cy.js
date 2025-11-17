@@ -47,69 +47,57 @@ describe("Worker Module - Search", () => {
   it('Search triggers API only when at least 3 letters are entered', () => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
 
-    cy.wait(4000)
+    cy.wait(4000);
+    
+    // Store the initial list once
     cy.get(workforceSelector.tableRow)
-    .then(($els) => {
-      const initialList = [...$els].map(el => el.innerText.trim());
-      cy.log('Initial List:', JSON.stringify(initialList));
-      console.log('Initial List:', initialList); 
+      .then(($els) => {
+        const initialList = [...$els].map(el => el.innerText.trim());
+        cy.log('Initial List:', JSON.stringify(initialList));
+        console.log('Initial List:', initialList); 
 
-      cy.get(workforceSelector.searchInput).clear().type('a');
-      cy.get(workforceSelector.tableRow).then(($newEls) => {
-        const newList = [...$newEls].map(el => el.innerText.trim());
-        cy.log('New List:', JSON.stringify(newList));
-        console.log('New List:', newList); 
-        expect(newList).to.deep.equal(initialList);
-        
+        // Test with 1 character - list should remain the same
+        cy.get(workforceSelector.searchInput).clear().type('a');
+        cy.get(workforceSelector.tableRow).then(($newEls) => {
+          const newList = [...$newEls].map(el => el.innerText.trim());
+          cy.log('List after 1 char:', JSON.stringify(newList));
+          console.log('List after 1 char:', newList); 
+          expect(newList).to.deep.equal(initialList);
+        });
+
+        // Test with 2 characters - list should remain the same
+        cy.get(workforceSelector.searchInput).clear().type('aa');
+        cy.get(workforceSelector.tableRow).then(($newEls) => {
+          const newList = [...$newEls].map(el => el.innerText.trim());
+          cy.log('List after 2 chars:', JSON.stringify(newList));
+          console.log('List after 2 chars:', newList); 
+          expect(newList).to.deep.equal(initialList);
+        });
+
+        // Test with 3 characters - API should be triggered
+        cy.get(workforceSelector.searchInput).clear().type('aha');
+        cy.wait(3000);
+
+        cy.get('body').then(($body) => {
+          if ($body.find(workforceSelector.tableRow).length > 0) {
+            cy.get(workforceSelector.tableRow).then(($newEls) => {
+              const newList = [...$newEls].map(el => el.innerText.trim());
+              cy.log('List after 3 chars:', JSON.stringify(newList));
+              console.log('List after 3 chars:', newList);
+              
+              // List content should be different (API was called and filtered results)
+              expect(newList).to.not.deep.equal(initialList);
+            });
+          } else {
+            // No results found case
+            cy.get('.empty-body').should(
+              'have.text',
+              'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
+            );
+          }
+        });
       });
-    });
-
-    cy.get(workforceSelector.tableRow)
-    .then(($els) => {
-      const initialList = [...$els].map(el => el.innerText.trim());
-      cy.log('Initial List:', JSON.stringify(initialList));
-      console.log('Initial List:', initialList); 
-
-      cy.get(workforceSelector.searchInput).clear().type('aa');
-
-
-      cy.get(workforceSelector.tableRow).then(($newEls) => {
-        const newList = [...$newEls].map(el => el.innerText.trim());
-        cy.log('New List:', JSON.stringify(newList));
-        console.log('New List:', newList); 
-        expect(newList).to.deep.equal(initialList);
-        
-      });
-    });
-
-    cy.get(workforceSelector.tableRow)
-    .then(($els) => {
-      const initialList = [...$els].map(el => el.innerText.trim());
-      cy.log('Initial List:', JSON.stringify(initialList));
-      console.log('Initial List:', initialList); 
-
-      cy.get(workforceSelector.searchInput).clear().type('aha');
-      cy.wait(3000)
-
-      cy.get('body').then(($body) => {
-        if ($body.find(workforceSelector.tableRow).length > 0) {
-          cy.get(workforceSelector.tableRow).then(($newEls) => {
-            const newList = [...$newEls].map(el => el.innerText.trim());
-            console.log('New List:', newList);
-  
-            expect(newList).to.not.deep.equal(initialList);
-          });
-        } else {
-          cy.get('.empty-body').should(
-            'have.text',
-            'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-          );
-        }
-      });
-    });
-
-  });
-  
+});
 
 
   it('Validating the search functionality for the search with no results', () => {
