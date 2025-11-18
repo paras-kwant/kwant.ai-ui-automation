@@ -138,7 +138,7 @@ it('Validate downloading the template file', () => {
 
   
 
-it("Validate worker download matches UI", () => {
+it('Validate worker download matches UI', () => {
   const FILE_NAME = 'Ontarget-Employee-Report.csv';
   const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
   const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);

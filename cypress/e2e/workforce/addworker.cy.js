@@ -177,7 +177,7 @@ describe("Worker Module - Add Worker Tests", () => {
     // cy.get('.sc-CCtys.bfwwiC').click();
   });
 
-  it("Validate adding a worker with only mandatory fields", () => {
+  it('Validate adding a worker with only mandatory fields', () => {
     const workerData = generateWorkerData();
 
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
@@ -196,7 +196,7 @@ describe("Worker Module - Add Worker Tests", () => {
     });
   });
 
-  it("Validate worker photo capture via camera works", () => {
+  it('Validate worker photo capture via camera works', () => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);    
     workforceSelector.addWorkerButton().click();
     workforceSelector.profileImageUploadButton().click();

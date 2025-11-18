@@ -4,7 +4,7 @@ const fs = require("fs");
 import { throttle } from 'rxjs';
 import { workforceSelector } from '../../support/workforceSelector';  
 
-describe("Worker Module - Search", () => {
+describe("Worker Module - Pagination", () => {
   beforeEach(() => {
     cy.session('userSession', () => {
       cy.login();
