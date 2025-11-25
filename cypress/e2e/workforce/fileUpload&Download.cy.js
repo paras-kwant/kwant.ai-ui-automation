@@ -51,7 +51,7 @@ it('Vaidate adding a worker by uploading .csv file', () => {
       { subjectType: 'drag-n-drop', force: true }
     );
   });
-  cy.get('.sc-kOPcWz').should('contain.textt', '1 worker(s) will be added.')
+  cy.get('.sc-kOPcWz').should('contain.text', '1 worker(s) will be added.')
 
 })
 
