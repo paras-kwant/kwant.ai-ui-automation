@@ -2,20 +2,42 @@
 import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
 
+Cypress.Commands.add('closeUploadDownloadDrawerIfOpen', () => {
+  cy.wait(1000)
+  cy.get('body').then(($body) => {
+    const $icon = $body.find('.sc-krNlru svg, aside button');
+
+    if ($icon.length === 0) {
+      cy.log('Drawer icon not found');
+      return;
+    }
+    if (!$icon.is(':visible')) {
+      cy.log('Drawer icon found but not visible');
+      return;
+    }
+    cy.wrap($icon).click({ force: true });
+  });
+});
+
 describe("Worker Module - Access Control Page Tests", () => {
   // Login and select project before each test
-  beforeEach(() => {
-    cy.session("userSession", () => {
+  before(() => {
+    cy.session('userSession', () => {
       cy.login();
-      cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
     });
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+  });
+
+
+  beforeEach(() => {
+    cy.closeUploadDownloadDrawerIfOpen();
   });
 
   /**
    * Test 1: Validate that all main UI elements are visible on the Access Control page
    */
   it("should display all main UI elements correctly", () => {
-    cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
 
     // Open first worker and go to Access Control
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
@@ -60,7 +82,6 @@ describe("Worker Module - Access Control Page Tests", () => {
    * Test 2: Validate editing and updating the assigned device
    */
   it("should allow assigning a random device and persist the value", () => {
-    cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
 
     // Open first worker and go to Access Control
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
@@ -111,7 +132,6 @@ describe("Worker Module - Access Control Page Tests", () => {
    * Test 3: Validate disabling a device removes it from the field
    */
   it("should disable the device and remove it from the field", () => {
-    cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
 
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.AccessControl().click();
@@ -133,7 +153,6 @@ describe("Worker Module - Access Control Page Tests", () => {
    * Test 4: Motion Mode toggle requires assigned device
    */
   it("should show error toast when enabling Motion Mode without a device", () => {
-    cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
 
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.AccessControl().click();
@@ -155,7 +174,6 @@ describe("Worker Module - Access Control Page Tests", () => {
    * Test 5: Validate Print Badge triggers required assets
    */
   it("should load all assets when Print Badge is clicked", () => {
-    cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
 
     // Open first worker and Access Control
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
@@ -174,7 +192,6 @@ describe("Worker Module - Access Control Page Tests", () => {
    * Test 6: Ensure one device can only be assigned to one worker
    */
   it("should prevent assigning the same device to multiple workers", () => {
-    cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
 
     // Step 1: First worker - assign device if empty
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });

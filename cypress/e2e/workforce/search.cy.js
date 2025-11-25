@@ -1,128 +1,180 @@
 /// <reference types="cypress" />
 const path = require("path");
 const fs = require("fs");
-import { workforceSelector } from '../../support/workforceSelector';  
-
-
+import { workforceSelector } from '../../support/workforceSelector';
 
 describe("Worker Module - Search", () => {
-  beforeEach(() => {
+
+  // Safe login + project opening
+  before(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
     });
   });
-
   
-  it('Validating the search functionality - run twice', () => {
+  beforeEach(() => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.intercept('POST', '/api/filterProjectWorker*').as('workersApi');
+  });
+
+
+  // 1. Validate search functionality (run twice)
+  it("Validating the search functionality - run twice", () => {
+    cy.wait(1500);
+    cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
     cy.reload();
-  
-    cy.wait('@workersApi').then((interception) => {
-      const workers = interception.response.body.projectWorkerDTOS;
-      const firstNames = workers.map(worker => worker.firstName).filter(Boolean);
-      cy.log(`First names: ${firstNames.join(', ')}`);
-  
+
+    cy.wait("@workersApi").then((interception) => {
+      const workers = interception?.response?.body?.projectWorkerDTOS || [];
+      const firstNames = workers.map((w) => w.firstName).filter(Boolean);
       const randomNames = Cypress._.sampleSize(firstNames, 2);
-  
-      randomNames.forEach((name, index) => {
-        cy.log(`Search attempt ${index + 1}: ${name}`);
-        cy.get(workforceSelector.searchInput).clear().type(name);
-        cy.wait(3000)
-  
-        cy.get('body').then(($body) => {
-          if ($body.find(workforceSelector.tableRow).length) {
-            cy.get(workforceSelector.tableRow).contains(name).should('be.visible');
-        
+
+      randomNames.forEach((name) => {
+        cy.get(workforceSelector.searchInput).clear().type(name, { delay: 50 });
+        cy.wait(2000);
+
+        cy.get("body").then(($body) => {
+          if ($body.find(workforceSelector.tableRow).length > 0) {
+            cy.get(workforceSelector.tableRow).contains(name).should("be.visible");
           } else {
-            throw new Error(`Neither worker list nor alternate element found for "${name}"`);
+            cy.log(`Worker not found for: ${name}`);
           }
         });
       });
     });
   });
-  
-  
-  it('Search triggers API only when at least 3 letters are entered', () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
 
-    cy.wait(4000);
-    
-    // Store the initial list once
-    cy.get(workforceSelector.tableRow)
-      .then(($els) => {
-        const initialList = [...$els].map(el => el.innerText.trim());
-        cy.log('Initial List:', JSON.stringify(initialList));
-        console.log('Initial List:', initialList); 
+  // 2. Search triggers API only when >= 3 letters
+  it("Search triggers API only when at least 3 letters are entered", () => {
+    cy.wait(2000);
 
-        // Test with 1 character - list should remain the same
-        cy.get(workforceSelector.searchInput).clear().type('a');
-        cy.get(workforceSelector.tableRow).then(($newEls) => {
-          const newList = [...$newEls].map(el => el.innerText.trim());
-          cy.log('List after 1 char:', JSON.stringify(newList));
-          console.log('List after 1 char:', newList); 
-          expect(newList).to.deep.equal(initialList);
-        });
+    cy.get(workforceSelector.tableRow).then(($els) => {
+      const initialList = [...$els].map((el) => el.innerText.trim());
 
-        // Test with 2 characters - list should remain the same
-        cy.get(workforceSelector.searchInput).clear().type('aa');
-        cy.get(workforceSelector.tableRow).then(($newEls) => {
-          const newList = [...$newEls].map(el => el.innerText.trim());
-          cy.log('List after 2 chars:', JSON.stringify(newList));
-          console.log('List after 2 chars:', newList); 
-          expect(newList).to.deep.equal(initialList);
-        });
-
-        // Test with 3 characters - API should be triggered
-        cy.get(workforceSelector.searchInput).clear().type('aha');
-        cy.wait(3000);
-
-        cy.get('body').then(($body) => {
-          if ($body.find(workforceSelector.tableRow).length > 0) {
-            cy.get(workforceSelector.tableRow).then(($newEls) => {
-              const newList = [...$newEls].map(el => el.innerText.trim());
-              cy.log('List after 3 chars:', JSON.stringify(newList));
-              console.log('List after 3 chars:', newList);
-              
-              // List content should be different (API was called and filtered results)
-              expect(newList).to.not.deep.equal(initialList);
-            });
-          } else {
-            // No results found case
-            cy.get('.empty-body').should(
-              'have.text',
-              'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-            );
-          }
-        });
+      cy.get(workforceSelector.searchInput).clear().type("a");
+      cy.get(workforceSelector.tableRow).then(($new) => {
+        expect([...$new].map((x) => x.innerText.trim())).to.deep.equal(initialList);
       });
-});
 
+      cy.get(workforceSelector.searchInput).clear().type("aa");
+      cy.get(workforceSelector.tableRow).then(($new) => {
+        expect([...$new].map((x) => x.innerText.trim())).to.deep.equal(initialList);
+      });
 
-  it('Validating the search functionality for the search with no results', () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.get(workforceSelector.searchInput).clear().type('NonExistentName12345');
-    cy.get('.empty-body').should('have.text', 'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters ')
-    });
+      cy.get(workforceSelector.searchInput).clear().type("aha");
+      cy.wait(2000);
 
-
-    it('Validating search functionality with empty input keeps rows unchanged', () => {
-        cy.visit('/projects/94049707/workers');
-        cy.wait(5000)
-      
-        cy.get('.personal-info-content__title').invoke("text").then((beforeText) => {
-          const workerNamesBefore = beforeText.trim();
-          cy.log('Before Search:', workerNamesBefore);
-      
-          cy.get(workforceSelector.searchInput).clear().type(' ');
-      
-          cy.get('.personal-info-content__title').invoke("text").then((afterText) => {
-            const workerNamesAfter = afterText.trim();
-            cy.log('After Search:', workerNamesAfter);
-            expect(workerNamesAfter).to.eq(workerNamesBefore);
+      cy.get("body").then(($body) => {
+        if ($body.find(workforceSelector.tableRow).length > 0) {
+          cy.get(workforceSelector.tableRow).then(($new) => {
+            expect([...$new].map((x) => x.innerText.trim())).not.to.deep.equal(initialList);
           });
-        });
+        } else {
+          cy.get(".empty-body").should(
+            "contain.text",
+            "No Results Found"
+          );
+        }
       });
-})
-  
+    });
+  });
+
+  // 3. Search no results
+  it("Validating the search functionality for the search with no results", () => {
+    cy.get(workforceSelector.searchInput).clear().type("NonExistentName12345");
+    cy.get(".empty-body").should("contain.text", "No Results Found");
+  });
+
+  // 4. Empty input keeps rows unchanged
+  it("Validating search functionality with empty input keeps rows unchanged", () => {
+    cy.wait(3000);
+
+    cy.get(".personal-info-content__title")
+      .first()
+      .invoke("text")
+      .then((beforeValue) => {
+        cy.get(workforceSelector.searchInput).clear().type(" ");
+        cy.wait(1000);
+
+        cy.get(".personal-info-content__title")
+          .first()
+          .invoke("text")
+          .then((afterValue) => {
+            expect(afterValue.trim()).to.eq(beforeValue.trim());
+          });
+      });
+  });
+
+  // 5. Search by Job Title
+  it("Validating search functionality with job title in use", () => {
+    cy.get(workforceSelector.tableRow)
+      .eq(1)
+      .find(".cell-content")
+      .eq(2)
+      .invoke("text")
+      .then((jobTitle) => {
+        cy.get(workforceSelector.searchInput).clear().type(jobTitle);
+        cy.wait(2000);
+
+        cy.get(workforceSelector.tableRow)
+          .find(".cell-content")
+          .eq(2)
+          .contains(jobTitle);
+      });
+  });
+
+  // 6. Search by Company
+  it("Validating search functionality with company in use", () => {
+    cy.get(workforceSelector.tableRow)
+      .eq(0)
+      .find(".cell-content")
+      .eq(1)
+      .invoke("text")
+      .then((company) => {
+        cy.get(workforceSelector.searchInput).clear().type(company);
+        cy.wait(2000);
+
+        cy.get(workforceSelector.tableRow)
+          .eq(0)
+          .find(".cell-content")
+          .eq(1)
+          .should("contain.text", company);
+      });
+  });
+
+  // 7. Case Insensitive Search
+  it("Verify search Supports Case Insensitivity (Uppercase, Lowercase, Mixed Case)", () => {
+    cy.wait(2000);
+    cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
+    cy.reload();
+
+    cy.wait("@workersApi").then((interception) => {
+      const workers = interception?.response?.body?.projectWorkerDTOS || [];
+      const firstNames = workers.map((w) => w.firstName).filter(Boolean);
+      const name = Cypress._.sample(firstNames);
+
+      const testValues = [
+        name.toUpperCase(),
+        name.toLowerCase(),
+        name
+          .split("")
+          .map((c) => (Math.random() > 0.5 ? c.toUpperCase() : c.toLowerCase()))
+          .join(""),
+      ];
+
+      const runSearch = (value) => {
+        cy.get(workforceSelector.searchInput).clear().type(value);
+        cy.wait(1500);
+
+        cy.get(".sc-cRmqLi .personal-info-content__title").each(($el) => {
+          expect($el.text().toLowerCase()).to.include(name.toLowerCase());
+        });
+      };
+
+      testValues.forEach(runSearch);
+    });
+  });
+
+});

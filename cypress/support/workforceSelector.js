@@ -4,7 +4,7 @@ export const workforceSelector = {
     lastNameInput: () => cy.get('input[name="lastName"]'),
     companyNameInput: () => cy.get('input[name="company"]'),
     addMoreDetail:()=> cy.contains('button', 'Add More Details'),
-    submitWorkerButton:()=> cy.contains('.hdcwLk > button > p', 'Add Worker'),
+    submitWorkerButton:()=> cy.contains('.hdcwLk > button', 'Add Worker'),
     profileImageUploadButton: () => cy.get('.upload-button__camera-icon'),
     addressInput:()=> cy.get('input[name=address]'),
     zipcodeInput:()=>cy.get('input[name=zipCode]'),
@@ -54,13 +54,12 @@ export const workforceSelector = {
     jobDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(3),
     AccessControl:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(5),
     SafetyAudit:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(6),
-
-
-
-
    personalDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(2),
 
 
 
+   //filter
+
+   nameFilter: () => cy.contains('.sc-fremEr.jImTfM', 'Name').find('.table-header-filter-btn')  , 
   };
    

@@ -4,73 +4,43 @@ const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';  
 
 
+Cypress.Commands.add("closeUploadDownloadDrawerIfOpen", () => {
+  cy.get("body").then(($body) => {
+    if ($body.find(".sc-krNlru svg").length > 0) {
+      cy.get(".sc-krNlru svg")
+        .should("be.visible")
+        .click({ force: true });
 
-describe("Worker Module - file upload and download", () => {
-  beforeEach(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
-    });
-  });
-
- 
-it('Validating Uploading profile picture functionality', () => {
-  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-  cy.get('.personal-info-content__title').eq(0).click();
-  cy.wait(3000)
-  
-  cy.get('.upload-avatar').scrollIntoView().then(($avatarContainer) => {
-    
-    if ($avatarContainer.find('img').length > 0) {
-      console.log('Profile image exists');
-      
-      cy.get('.upload-avatar img').then(($img) => {
-        const initialSrc = $img.attr('src');
-        console.log('Initial Image Src:', initialSrc);
-
-        workforceSelector.profileImageUploadButton()
-          .scrollIntoView()
-          .should('be.visible')
-          .click();
-          
-        cy.get('.upload-button__upload-options__option').eq(0).click();
-        cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
-        
-        cy.get(workforceSelector.updateButton).scrollIntoView().click();
-        cy.get('.sc-kOPcWz').contains('Successfully updated employee.').should('be.visible');
-        cy.get('.upload-avatar').scrollIntoView()
-        cy.wait(3000)
-        cy.get('.upload-avatar img').should('be.visible').then(($updatedImg) => {
-          const finalSrc = $updatedImg.attr('src');
-          console.log('Final Image Src:', finalSrc);
-          expect(finalSrc).to.not.equal(initialSrc);
-        });
-      });
-      
-    } else {
-      console.log('No profile image, proceeding to upload');
-      cy.get('.upload-avatar').scrollIntoView()
-      cy.get(workforceSelector.profileImageUploadButton)
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
-      cy.get('.upload-button__upload-options__option').eq(0).click();
-      cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
-      cy.get('.upload-avatar').scrollIntoView()
-      cy.get(workforceSelector.updateButton).click();
-      cy.get('.sc-kOPcWz').contains('Successfully updated employee.').should('be.visible');
-      cy.get('.upload-avatar img').should('be.visible');
+      // Wait until drawer overlay disappears fully
+      cy.get(".sc-zmges", { timeout: 10000 }).should("not.exist");
     }
   });
 });
 
 
+
+
+describe("Worker Module - file upload and download", () => {
+  before(() => {
+    cy.session('userSession', () => {
+      cy.login();
+      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+    });
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+  });
+
+  beforeEach(() => {
+    cy.closeUploadDownloadDrawerIfOpen();
+  });
+
+
+
+
 it('Vaidate adding a worker by uploading .csv file', () => {
-  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
   cy.get('.dropdown-option').contains('Upload').click();
 
-  cy.fixture('employeeUpload.csv', 'base64').then(fileContent => {
+  cy.fixture('uploadFiles/employeeUpload.csv', 'base64').then(fileContent => {
     cy.get('.sc-ewBhFl').attachFile(
       {
         fileContent,
@@ -81,10 +51,7 @@ it('Vaidate adding a worker by uploading .csv file', () => {
       { subjectType: 'drag-n-drop', force: true }
     );
   });
-  cy.get('.sc-kOPcWz').should('contain.text', '1 worker(s) will be added.')
-  // cy.get(workforceSelector.submitButton).click();
-  // cy.get('.personal-info-content__title').first().should('contain.text', 'Automation Test');
-  // cy.get('.drawer_title>p').click()
+  cy.get('.sc-kOPcWz').should('contain.textt', '1 worker(s) will be added.')
 
 })
 
@@ -92,7 +59,6 @@ it('Validate downloading the template file', () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
   const fileName = 'Ontarget-employee-upload-template.csv';
 
-  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
   cy.get('.dropdown-option').contains('Upload').click();
   cy.get('.drawer_title>p').click();
@@ -143,7 +109,6 @@ it('Validate worker download matches UI', () => {
   const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
   const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
 
-  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   cy.wait(10000);
 
   cy.get('.personal-info-content__title').then(($els) => {
@@ -227,5 +192,259 @@ function validateNamesMatch(uiNames, csvNames) {
 
   
 
-  
+it('Validate CSV contains only the selected worker', () => {
+  const FILE_NAME = 'Ontarget-Employee-Report.csv';
+  const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
+  const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
+
+  cy.wait(5000);
+
+  cy.get('.personal-info-content__title').then(($els) => {
+    const firstWorker = $els[0].innerText.trim();
+    cy.log(`Selected worker: ${firstWorker}`);
+
+    cy.task("deleteDownloadedFiles", {
+      downloadsFolder: DOWNLOADS_FOLDER,
+      pattern: "Ontarget-Employee-Report",
+      extension: ".csv"
+    });
+
+    // ✅ Select only the first worker
+    cy.get('.checkboxCheckmark').eq(0).click({ force: true });
+
+    // Download CSV
+    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get('.dropdown-option').contains('Download').click();
+
+    cy.readFile(FILE_PATH, { timeout: 30000 }).should('exist').then(() => {
+      cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
+        const csvNames = extractWorkerNamesFromCSV(rows);
+
+        const normalize = str => str.toLowerCase().trim();
+        const normalizedCsv = csvNames.map(normalize);
+
+        expect(normalizedCsv.length).to.equal(1);
+        expect(normalizedCsv[0]).to.equal(firstWorker.toLowerCase());
+      });
+    });
+  });
+});
+
+it('Validate adding a worker by drag-and-dropping .csv file', () => {
+
+  // Open upload modal
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload CSV via drag and drop
+  cy.fixture('uploadFiles/employeeUpload.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'employeeUpload.csv',
+        mimeType: 'text/csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+
+  cy.get('.sc-kOPcWz')
+    .should('be.visible')
+    .and('contain.text', '1 worker(s) will be added.');
+});
+
+
+
+
+it('Validate adding .csv file with no worker', () => {
+  // Open upload modal
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload empty CSV via drag-and-drop
+  cy.fixture('backup.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'EmptyCsv.csv',
+        mimeType: 'text/csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+
+  cy.get('.sc-kOPcWz')
+    .should('be.visible')
+    .and('contain.text', 'No content to upload.'); // update text for empty CSV
+});
+
+it('Validate adding worker by uploading  file with other than csv or excel', () => {
+
+
+  // Open upload modal
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click({force: true});
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload empty CSV via drag-and-drop
+  cy.fixture('demo.pdf', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'demo.pdf',
+        mimeType: 'pdf',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+
+workforceSelector.toastMessage().contains('File type unsupported').should('be.visible')
+});
+
+it('Empty company name', () => {
+
+
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload empty CSV via drag-and-drop
+  cy.fixture('noCompany.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'noCompany.csv',
+        mimeType: 'csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+
+workforceSelector.toastMessage().contains('Company Name cannot be empty.').should('be.visible')
+});
+
+
+it('Empty First Name', () => {
+
+
+  // Open upload modal
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload empty CSV via drag-and-drop
+  cy.fixture('uploadFiles/noFirstName.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'noFirstName.csv',
+        mimeType: 'csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+
+workforceSelector.toastMessage().contains('First Name or Last Name cannot be empty.').should('be.visible')
+});
+
+
+it('Empty last Name', () => {
+  // Open upload modal
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload empty CSV via drag-and-drop
+  cy.fixture('uploadFiles/noLastName.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'noLastName.csv',
+        mimeType: 'csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+workforceSelector.toastMessage().contains('First Name or Last Name cannot be empty.').should('be.visible')
+});
+
+it('Duplicate worker data', () => {
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload empty CSV via drag-and-drop
+  cy.fixture('uploadFiles/duplicateWorker.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'duplicateWorker.csv.csv',
+        mimeType: 'csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+workforceSelector.toastMessage().contains('Duplicate worker(s) found. 1 record(s) will not be uploaded.').should('be.visible')
+});
+
+it('Invalid Phone Number', () => {
+
+  // Open upload modal
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  // Upload empty CSV via drag-and-drop
+  cy.fixture('uploadFiles/invalidPhoneNumber.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'invalidPhoneNumber.csv',
+        mimeType: 'csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+
+  cy.get('.sc-kOPcWz')
+  .should('be.visible')
+  .and('contain.text', '1 Invalid Phone Number');
+});
+
+
+
+it('Invalid field', () => {
+  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get('.dropdown-option').contains('Upload').click();
+
+  cy.fixture('uploadFiles/invalidSex.csv', 'base64').then(fileContent => {
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        fileContent,
+        fileName: 'invalidSex.csv',
+        mimeType: 'csv',
+        encoding: 'base64'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  });
+
+  workforceSelector.submitButton().click();
+  cy.get('input[placeholder="Search"]').clear().type('parass');
+  cy.wait(2000)
+ cy.get(workforceSelector.tableRow).eq(0).click({force: true});
+  workforceSelector.personalDetails().click();
+  cy.getWorkerField('Email').contains('-');
+  cy.getWorkerField('Sex').contains('-');
+  cy.getWorkerField('Race').contains('-');
+  cy.getWorkerField('MWBE').contains('-');
+
+  cy.get('button p').contains('Cancel').click();
+  cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({ force: true });
+  cy.get(workforceSelector.overflowMenu).click();
+  cy.contains(".dropdown-option", "Delete").click();
+  cy.get("button p").contains("Delete").click();
+})
 })

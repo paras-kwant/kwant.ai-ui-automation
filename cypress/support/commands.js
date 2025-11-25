@@ -41,24 +41,36 @@ Cypress.Commands.add('login', () => {
   });
 
 
-
-Cypress.Commands.add(
-  'verifyTableorEmptyState',
-  ({ tableRowSelector, cellSelector, expectedText }) => {
-    cy.get('body').then(($body) => {
-      cy.wait(2000); // Wait for 2 seconds to allow content to load
-      if ($body.find(tableRowSelector).length > 0) {
-        cy.get(cellSelector)
-          .contains(expectedText)
-          .should('be.visible');
-      } else {
-        cy.get('.empty-body').should(
+  Cypress.Commands.add(
+    'verifyTableorEmptyState',
+    ({ tableRowSelector, cellSelector, expectedText }) => {
+      cy.get('body').then(($body) => {
+        cy.wait(2000); // allow UI to render
+  
+        const hasRows = $body.find(tableRowSelector).length > 0;
+  
+        if (hasRows) {
+          cy.get(cellSelector).each(($cell) => {
+            cy.wrap($cell)
+              .invoke("text")
+              .then((txt) => {
+                expect(txt.trim()).to.include(
+                  expectedText,
+                  `Cell text "${txt.trim()}" should include "${expectedText}"`
+                );
+              });
+          });
+  
+        } else {
+          cy.get('.empty-body').should(
             'have.text',
             'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-          );}
-    });
-  }
-);
+          );
+        }
+      });
+    }
+  );
+  
 
 
 Cypress.Commands.add('getTotalWorkers', () => {
@@ -85,6 +97,14 @@ Cypress.Commands.add('selectRandomOption', (inputSelector, optionSelector, name 
     cy.wrap($randomOption).click({ force: true });
   });
 });
+
+
+Cypress.Commands.add('getWorkerField', (label) => {
+  return cy.contains('.hover-hoc-container__label', label)
+    .closest('.hover-hoc-container')
+    .find('.hover-hoc-container__input__display-value');
+});
+
 
 
 
