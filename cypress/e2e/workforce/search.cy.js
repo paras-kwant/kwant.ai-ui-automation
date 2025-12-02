@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 const path = require("path");
 const fs = require("fs");
+import WorkerHelper from '../../support/helper/workerHelper';
 import { workforceSelector } from '../../support/workforceSelector';
 
 describe("Worker Module - Search", () => {
@@ -13,14 +14,15 @@ describe("Worker Module - Search", () => {
         .contains(Cypress.env('PROJECT_NAME'))
         .click();
     });
+    WorkerHelper.visitWorkersPage();
   });
-  
+
   beforeEach(() => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-  });
+    cy.cleanUI();
+  })
 
 
-  // 1. Validate search functionality (run twice)
+
   it("Validating the search functionality - run twice", () => {
     cy.wait(1500);
     cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");

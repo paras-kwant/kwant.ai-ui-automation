@@ -6,17 +6,29 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 
 describe("Worker Module - select", () => {
-  beforeEach(() => {
+  before(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
+    });
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+    cy.wait(3000)
+
+  });
+  beforeEach(() => {
+    cy.get("body").then(($body) => {
+      if ($body.find(".secondary  svg").length > 0) {
+        cy.get(".secondary  svg")
+          .should("be.visible")
+          .click({ force: true });
+      }
     });
   });
 
   
   it('Validate total worker count matches displayed label after selecting all workers', () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.wait(3000);
     cy.get('.sc-kMkxaj.eTAOVM')
       .invoke('text')
       .then((text) => {
@@ -29,12 +41,22 @@ describe("Worker Module - select", () => {
   });
 
   it('Validate one worker count matches displayed label after selecting all workers', () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.wait(3000);
     cy.get('[type="checkbox"]').eq(1).check({force:true})
     cy.get('.label.default__label')
     .should('contain', "1");
-
   });
+
+
+  it('Validate clicking x removes all selected workers', () => {
+    cy.get('[type="checkbox"]').eq(1).check({force:true})
+    cy.get('.label.default__label')
+    .should('contain', "1");
+    cy.get('.secondary  svg').click({force:true});
+    cy.get('.label.default__label').should('not.exist')
+
+
+
+
+  })
 })
   

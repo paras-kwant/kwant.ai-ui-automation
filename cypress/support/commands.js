@@ -1,5 +1,6 @@
 
 import { workforceSelector } from './workforceSelector';  
+import workerHelper from './helper/workerHelper';
 
 
 Cypress.Commands.add('login', () => {
@@ -104,6 +105,11 @@ Cypress.Commands.add('getWorkerField', (label) => {
     .closest('.hover-hoc-container')
     .find('.hover-hoc-container__input__display-value');
 });
+
+
+Cypress.Commands.add("cleanUI", () => {
+  workerHelper.closeSidebarIfOpen();
+})
 
 
 

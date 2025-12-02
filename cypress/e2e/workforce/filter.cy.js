@@ -4,6 +4,8 @@ const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
 import "../../support/commands";
 import { log } from "console";
+import workerHelper from '../../support/helper/workerHelper.js';
+
 
 
 
@@ -15,15 +17,16 @@ describe("Worker Module - Filter", () => {
         .contains(Cypress.env('PROJECT_NAME'))
         .click();
     });
+    workerHelper.visitWorkersPage();
   });
   
   beforeEach(() => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+        cy.cleanUI()
+
   });
 
 
   it("Verify the table header filter - name", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
     cy.reload();
 
@@ -55,7 +58,6 @@ describe("Worker Module - Filter", () => {
   });
 
   it('Verify the table header filter exists for applicable table headers', () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.wait(1000);
   
     cy.get('.sc-bXWnss').each(($el, index) => {
@@ -72,7 +74,6 @@ describe("Worker Module - Filter", () => {
   });
 
   it("Verify Clear filter functionality", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
 
     let workerNamesBefore, selectedName, selectedCompany, selectedJobTitle, selectedStatus;
 
@@ -159,7 +160,6 @@ describe("Worker Module - Filter", () => {
 
 
   it("Verify Multiple Company Selection for Filtering", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.log("Testing multiple company filter selection");
 
     // Get company names from first 4 rows
@@ -190,7 +190,7 @@ describe("Worker Module - Filter", () => {
         cy.log(`Unique companies: ${uniqueCompanies.join(", ")}`);
 
         // Open company filter
-        cy.get(".table-header-filter-btn").eq(1).click();
+        cy.get(".table-header-filter-btn").eq(1).click({force: true});
         cy.wait(1000);
 
         // Select ALL unique companies found
@@ -253,7 +253,6 @@ describe("Worker Module - Filter", () => {
 
 
   it("Verify Dropdown Selection for Filtering - company", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.log("Testing for company filter");
 
     cy.get(".table-header-filter-btn").eq(1).click();
@@ -281,7 +280,6 @@ describe("Worker Module - Filter", () => {
   });
 
   it("Verify combined filters (Name + Company + Job Title + Site Status)", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.log("Testing combined filters");
 
     let selectedName, selectedCompany, selectedJobTitle, selectedStatus;
@@ -390,7 +388,6 @@ describe("Worker Module - Filter", () => {
   });
 
   it('Verify Toast Message for Empty Filter Results',()=>{
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.log("Testing for toast message on empty filter results");
 
     cy.get(".table-header-filter-btn").eq(0).click();
@@ -408,7 +405,6 @@ describe("Worker Module - Filter", () => {
 
 
   it("Verify Name Filter Supports Case Insensitivity (Uppercase, Lowercase, Mixed Case)", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
     cy.reload();
   
@@ -452,7 +448,6 @@ describe("Worker Module - Filter", () => {
     });
   });
   it("Validate removing filter one after another", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.get('[label="Filters"] button').click();
     cy.get('[name="name"]').type("test");
     cy.get('[name="phone"]').type("98789765654");
@@ -477,8 +472,6 @@ describe("Worker Module - Filter", () => {
   });
 
   it("Verify Filter of the different column for Job (Title)", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
-
     cy.get(".table-header-filter-btn").eq(2).click();
     cy.get('input[placeholder="Search"]').eq(1).type("tech");
     cy.get("p").contains("Filters:").click();
@@ -502,7 +495,6 @@ describe("Worker Module - Filter", () => {
   });
 
   it("Verify Filter of the different column for site status", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.log("Testing for site status filter");
 
     cy.get(".table-header-filter-btn").eq(3).click();
@@ -541,7 +533,6 @@ describe("Worker Module - Filter", () => {
   });
 
   it("Verify Interaction with Search Bar Filter", () => {
-    // cy.visit(`/projects/${Cypress.env("PROJECT_ID")}/workers`);
     cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
     cy.reload();
   

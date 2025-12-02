@@ -1,41 +1,25 @@
 /// <reference types="cypress" />
 const path = require("path");
 const fs = require("fs");
-import { workforceSelector } from '../../support/workforceSelector';  
-
-Cypress.Commands.add('closeColumnDrawerIfOpen', () => {
-  cy.wait(500)
-  cy.get('body').then(($body) => {
-    const $icon = $body.find('.sc-krNlru svg');
-
-    if ($icon.length === 0) {
-      cy.log('Drawer icon not found');
-      return;
-    }
-    if (!$icon.is(':visible')) {
-      cy.log('Drawer icon found but not visible');
-      return;
-    }
-    cy.wrap($icon).click({ force: true });
-  });
-});
-
+import { workforceSelector } from '../../support/workforceSelector';
+import workerHelper from '../../support/helper/workerHelper.js';
 
 
 
 
 describe("Worker Module - Column", () => {
-
   before(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
     });
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-  });
+    workerHelper.visitWorkersPage();
 
+  });
   beforeEach(() => {
-    cy.closeColumnDrawerIfOpen();
+    cy.cleanUI()
   });
 
 
@@ -55,7 +39,7 @@ describe("Worker Module - Column", () => {
     });
   });
 
-  it('Validate drag and drop column feature', () => {
+  it('[smoke] Validate drag and drop column feature', () => {
     cy.get('.icon-button button').eq(0).click();
     cy.wait(1000);
 
@@ -196,6 +180,4 @@ describe("Worker Module - Column", () => {
     cy.get('input[placeholder="Add Field Name"]').should('have.value', '');
   })
 
-
-
-});
+})

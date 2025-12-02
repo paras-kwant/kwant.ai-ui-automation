@@ -1,10 +1,12 @@
 export const workforceSelector = {
     addWorkerButton: () => cy.contains('button', 'Add Worker'),
+
     firstNameInput: () => cy.get('input[name="firstName"]'),
     lastNameInput: () => cy.get('input[name="lastName"]'),
     companyNameInput: () => cy.get('input[name="company"]'),
     addMoreDetail:()=> cy.contains('button', 'Add More Details'),
-    submitWorkerButton:()=> cy.contains('.hdcwLk > button', 'Add Worker'),
+    submitWorkerButton:()=> cy.contains('footer [label="Add Worker"] button', 'Add Worker'),
+
     profileImageUploadButton: () => cy.get('.upload-button__camera-icon'),
     addressInput:()=> cy.get('input[name=address]'),
     zipcodeInput:()=>cy.get('input[name=zipCode]'),
