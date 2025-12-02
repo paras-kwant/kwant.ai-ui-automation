@@ -188,4 +188,8 @@ describe("Worker Module - Add Worker Tests", () => {
       lastName: workerData.lastName
     });
   });
+<<<<<<< HEAD
 })
+=======
+});
+>>>>>>> fdd612f714153c884a6a8a77e14c4a563183257c
