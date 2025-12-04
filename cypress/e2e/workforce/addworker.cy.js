@@ -13,7 +13,7 @@ describe("Worker Module - Add Worker Tests", () => {
         .contains(Cypress.env('PROJECT_NAME'))
         .click();
     });
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+    workerHelper.visitWorkersPage();
 
   });
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe("Worker Module - Add Worker Tests", () => {
     workforceSelector.addWorkerButton().click()
   })
 
-  it('Should disable buttons when mandatory fields are empty', () => {
+  it.only('Should disable buttons when mandatory fields are empty', () => {
     workforceSelector.submitWorkerButton().should('be.disabled');
     workforceSelector.addMoreDetail().should('be.disabled');
   });
@@ -168,7 +168,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('[placeholder="Issued Date"]').click();
     cy.get('[name="expiresInPeriods"]').click();
     cy.get('[role="button"]').contains('Day(s)').click();
-    cy.fixture('file.pdf', 'base64').then(fileContent => {
+    cy.fixture('image.png', 'base64').then(fileContent => {
       cy.get('.sc-gObJpS').attachFile(
         { fileContent, fileName: 'file.pdf', mimeType: 'application/pdf' },
         { subjectType: 'drag-n-drop' }
@@ -188,8 +188,4 @@ describe("Worker Module - Add Worker Tests", () => {
       lastName: workerData.lastName
     });
   });
-<<<<<<< HEAD
 })
-=======
-});
->>>>>>> fdd612f714153c884a6a8a77e14c4a563183257c

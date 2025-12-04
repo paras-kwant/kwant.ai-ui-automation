@@ -36,6 +36,7 @@ export const workforceSelector = {
     // submitButton:'button >p:contains("Submit")',
     saveButton:'button >p:contains("Save")',
     tableRow:'.sc-cRmqLi',
+    
     tableColumn :'.sc-gwZKzw',
     clearFilterButton: '.label.default__label:contains("Clear All")',
     overflowMenu:'.icon-button .sc-cfxfcM.ibPbMT',
@@ -43,8 +44,11 @@ export const workforceSelector = {
     toolTip:'.tooltip-content',
     pageOne:() => cy.contains('button', '1'),
     pageTwo: () => cy.contains('button', '2'),
+    pageThree: () => cy.contains('button', '3'),
+    pageFour: () => cy.contains('button', '4'),
     previousButton:()=> cy.get('.workers-footer button svg').eq(0).closest('button'),
     nextButton: () => cy.get('.workers-footer button svg').eq(1).closest('button'),
+    lastPageButton:()=> cy.get('button.sc-ktJbId.dbOXEy:nth-child(6)'),
     sendAlert:()=>cy.get('.hdcwLk > button'),
     toastMessage:()=>cy.get('.sc-kOPcWz'), 
 
@@ -57,6 +61,10 @@ export const workforceSelector = {
     AccessControl:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(5),
     SafetyAudit:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(6),
    personalDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(2),
+
+
+   selectAllCheckbox: () => cy.get('.header-checkbox-container [type="checkbox"]').eq(0),
+
 
 
 
