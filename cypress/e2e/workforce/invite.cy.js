@@ -12,56 +12,46 @@ describe("Worker Onboarding Email Validation", () => {
 
   it("Send Onboarding Invite - No Worker Selected", () => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.wait(3000);
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Send Onboarding Invite").click();
-    cy.get(".sc-kOPcWz")
-      .contains(
-        "To use this and more actions, please select workers by pressing checkboxes."
-      )
-      .should("be.visible");
+    workforceSelector.toastMessage().contains("To use this and more actions, please select workers by pressing checkboxes.").should('be.visible')
+
   });
 
   it('Send onboarding invite and verify email delivery and content', () => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.wait(1000);
     cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
     
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.wait(2000);
-      cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
-      cy.wait(2000);
+      cy.get(workforceSelector.tableRow).first().should('be.visible');
+      workforceSelector.selectAllCheckbox().check({ force: true });
     
       cy.get(workforceSelector.overflowMenu).click();
       cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
       cy.log('📧 Checking email...');
       cy.wait(15000);
     
-      // Get most recent email
       cy.task('getMostRecentEmail').then((email) => {
         if (!email) throw new Error('❌ NO EMAIL RECEIVED');
     
-        // Clean email body - remove line breaks and encoding artifacts
         const body = email.body.toLowerCase()
-          .replace(/=\r\n/g, '')  // Remove quoted-printable line breaks
-          .replace(/\r\n/g, ' ')  // Remove regular line breaks
-          .replace(/\s+/g, ' ');  // Normalize spaces
+          .replace(/=\r\n/g, '')  
+          .replace(/\r\n/g, ' ')  
+          .replace(/\s+/g, ' ');
         
         const subject = email.subject.toLowerCase();
     
         cy.log(`📧 Email: ${email.subject}`);
         cy.log(email.body.substring(0, 300));
     
-        // Assertions - compare lowercase values
         expect(body || subject).to.include('onboarding');
         expect(body).to.include('lvl 10-11');
         expect(body).to.include('badge');
         expect(body).to.include(firstName.toLowerCase()); 
         cy.log(firstName)
         expect(body).to.satisfy(b => b.includes('invite') || b.includes('invitation'));  
-        cy.log('✅ All validations passed!');
       });
     });
   });
@@ -261,7 +251,7 @@ describe("Worker Onboarding Email Validation", () => {
     });
   });
 
-  // it("Sending Alert Message when no worker are on site", () => {
+  // it.only("Sending Alert Message when no worker are on site", () => {
   //   cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
   //   cy.get(workforceSelector.overflowMenu).click();
   //   cy.contains(".dropdown-option", "Send Alert").click();
@@ -371,6 +361,56 @@ describe("Worker Onboarding Email Validation", () => {
         .should("contain.text", "Alert sent to 1 worker(s).");
     });
   });
+
+
+  it("Sending an Alert Message with Special Characters",()=>{
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.wait(2000);
+      cy.get('.header-checkbox-container [type="checkbox"]')
+        .eq(0)
+        .check({ force: true });
+      cy.get(workforceSelector.overflowMenu).click();
+      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.get('[label="Message Type"] [placeholder="Select"]').click();
+      cy.get('[role="button"]').contains("Alert").click();
+      const specialCharMessage = "!@#$%^&*()_+{}|:\"<>?-=[]\\;',./`~";
+      cy.get("textarea").type(specialCharMessage);
+      workforceSelector.sendAlert().click();
+      workforceSelector
+        .toastMessage()
+        .should("contain.text", "Alert sent to 1 worker(s).");
+    });
+  })
+
+  it("Verify the workers data are downloaded as per the search applied",()=>{
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.wait(2000);
+      cy.get(workforceSelector.downloadWorkersButton).click();
+      cy.wait(3000);
+
+      cy.task("getLatestDownloadedFile", {
+        downloadsFolder: "cypress/downloads",
+        prefix: "Workers-Data",
+      }).then((filename) => {
+        cy.readFile(`cypress/downloads/${filename}`, "utf8").then(
+          (csvContent) => {
+            expect(csvContent).to.include(firstName);
+            expect(csvContent).to.include(lastName);
+          }
+        );
+
+        cy.task("deleteFile", { filePath: `cypress/downloads/${filename}` });
+      });
+    });
+  })
 
   it("Modifying and Sending an Alert Message with Template", () => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);

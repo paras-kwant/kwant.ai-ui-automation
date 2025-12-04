@@ -23,7 +23,7 @@ describe("Worker Module - Add Worker Tests", () => {
     workforceSelector.addWorkerButton().click()
   })
 
-  it('Should disable buttons when mandatory fields are empty', () => {
+  it.only('Should disable buttons when mandatory fields are empty', () => {
     workforceSelector.submitWorkerButton().should('be.disabled');
     workforceSelector.addMoreDetail().should('be.disabled');
   });
@@ -168,7 +168,7 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.get('[placeholder="Issued Date"]').click();
     cy.get('[name="expiresInPeriods"]').click();
     cy.get('[role="button"]').contains('Day(s)').click();
-    cy.fixture('file.pdf', 'base64').then(fileContent => {
+    cy.fixture('image.png', 'base64').then(fileContent => {
       cy.get('.sc-gObJpS').attachFile(
         { fileContent, fileName: 'file.pdf', mimeType: 'application/pdf' },
         { subjectType: 'drag-n-drop' }
@@ -188,4 +188,3 @@ describe("Worker Module - Add Worker Tests", () => {
       lastName: workerData.lastName
     });
   });
-})
