@@ -23,7 +23,7 @@ describe("Worker Module - Add Worker Tests", () => {
     workforceSelector.addWorkerButton().click()
   })
 
-  it.only('Should disable buttons when mandatory fields are empty', () => {
+  it('Should disable buttons when mandatory fields are empty', () => {
     workforceSelector.submitWorkerButton().should('be.disabled');
     workforceSelector.addMoreDetail().should('be.disabled');
   });

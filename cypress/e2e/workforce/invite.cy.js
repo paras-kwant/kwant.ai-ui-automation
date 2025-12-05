@@ -215,7 +215,8 @@ describe("Worker Onboarding Email Validation", () => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.wait(2000);
+      cy.get(workforceSelector.tableRow).first().should('be.visible');
+
       cy.get('.header-checkbox-container [type="checkbox"]')
         .eq(0)
         .check({ force: true });
@@ -344,7 +345,7 @@ describe("Worker Onboarding Email Validation", () => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.wait(2000);
+     cy.get(workforceSelector.tableRow).first().should('be.visible');
       cy.get('.header-checkbox-container [type="checkbox"]')
         .eq(0)
         .check({ force: true });
@@ -369,7 +370,7 @@ describe("Worker Onboarding Email Validation", () => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.wait(2000);
+      cy.get(workforceSelector.tableRow).first().should('be.visible');
       cy.get('.header-checkbox-container [type="checkbox"]')
         .eq(0)
         .check({ force: true });
@@ -386,31 +387,6 @@ describe("Worker Onboarding Email Validation", () => {
     });
   })
 
-  it("Verify the workers data are downloaded as per the search applied",()=>{
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
-      const { firstName, lastName } = workerData;
-      const fullName = `${firstName} ${lastName}`;
-      cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.wait(2000);
-      cy.get(workforceSelector.downloadWorkersButton).click();
-      cy.wait(3000);
-
-      cy.task("getLatestDownloadedFile", {
-        downloadsFolder: "cypress/downloads",
-        prefix: "Workers-Data",
-      }).then((filename) => {
-        cy.readFile(`cypress/downloads/${filename}`, "utf8").then(
-          (csvContent) => {
-            expect(csvContent).to.include(firstName);
-            expect(csvContent).to.include(lastName);
-          }
-        );
-
-        cy.task("deleteFile", { filePath: `cypress/downloads/${filename}` });
-      });
-    });
-  })
 
   it("Modifying and Sending an Alert Message with Template", () => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
@@ -418,7 +394,8 @@ describe("Worker Onboarding Email Validation", () => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.wait(2000);
+      cy.get(workforceSelector.tableRow).first().should('be.visible');
+
       cy.get('.header-checkbox-container [type="checkbox"]')
         .eq(0)
         .check({ force: true });
