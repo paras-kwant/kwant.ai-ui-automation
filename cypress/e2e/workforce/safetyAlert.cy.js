@@ -22,9 +22,8 @@ describe("Worker Module - Safety Alert", () => {
             cy.wrap($reset).click();
           }
         });
-  
         cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]').click();
-        cy.contains("button p", "Save").click();
+        cy.contains("button p", "Save").should('be.visible').click({force: true});
 
     });
   

@@ -110,8 +110,3 @@ Cypress.Commands.add('getWorkerField', (label) => {
 Cypress.Commands.add("cleanUI", () => {
   workerHelper.closeSidebarIfOpen();
 })
-
-
-
-
-
