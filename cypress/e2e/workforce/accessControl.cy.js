@@ -24,12 +24,16 @@ describe("Worker Module - Access Control Page Tests", () => {
   before(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
     });
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+    workerHelper.visitWorkersPage();
   });
 
-
+  beforeEach(() => {
+    cy.cleanUI()
+  });
   beforeEach(() => {
     cy.closeUploadDownloadDrawerIfOpen();
   });

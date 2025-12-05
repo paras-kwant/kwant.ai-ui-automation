@@ -141,7 +141,7 @@ describe("Worker Module - Add Worker Tests", () => {
     workforceSelector.emailInput().type('paras+45@kwant.ai');
     workforceSelector.addressInput().type('Kathmandu');
     workforceSelector.zipcodeInput().type('44600');
-    workforceSelector.dobInput().clear({ force: true }).type('01/01/2001', { force: true });
+    workforceSelector.dobInput().first().clear({ force: true }).type('01/01/2001', { force: true });
     cy.selectRandomOption('[name="raceName"]', '.sc-tagGq[role="button"]', 'raceName');
     cy.selectRandomOption('[name="sex"]', '.sc-tagGq[role="button"]', 'sex');
     cy.selectRandomOption('[name="mwbe"]', '.sc-tagGq[role="button"]', 'mwbe');
