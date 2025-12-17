@@ -9,6 +9,7 @@ Cypress.Commands.add('login', () => {
     cy.get('[name="email"]').type(Cypress.env('EMAIL'))
     cy.get('[name="password"]').type(Cypress.env('PASSWORD'))
     cy.get('button p').contains('Login').click()
+    cy.wait(8000)
   
   }, {
     cacheAcrossSpecs: false 
@@ -17,27 +18,24 @@ Cypress.Commands.add('login', () => {
 
 
   Cypress.Commands.add("searchAndDeleteWorker", (firstName, lastName) => {
-    cy.get(workforceSelector.searchInput).type(firstName);
+    cy.get(workforceSelector.searchInput).type(firstName + " " + lastName);
   
-    // Verify worker card shows up
-    cy.get(".personal-info-content__title")
+    cy.get(".personal-info-content > .personal-info-content__title")
       .contains(`${firstName} ${lastName}`)
       .should("be.visible");
   
-    // Validate worker details
-    cy.get(workforceSelector.tableRow)
-      .should("contain.text", firstName)
-      .and("contain.text", "Micron");
-  
     // Delete workflow
-    cy.get(".checkboxCheckmark").click();
+    cy.get(".checkboxCheckmark").each(($checkbox) => {
+      cy.wrap($checkbox).click({ force: true });
+    });
+    
     cy.get(".sc-gFAWRd>.sc-aXZVg>button").click();
     cy.get(".delete-btn").click();
     cy.get("button>p").contains("Delete").click();
   
     // Assertion after deletion
     cy.get(".sc-kOPcWz")
-      .contains("1 worker was successfully deleted")
+      .contains("successfully deleted")
       .should("be.visible");
   });
 

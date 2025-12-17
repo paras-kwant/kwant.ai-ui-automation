@@ -83,7 +83,7 @@ indicesToHover.forEach((i) => {
       .should('be.visible')
       .click({ force: true });
   
-    cy.get('[placeholder="Select Worker Role"]').click();
+    cy.get('[placeholder="Select Worker Role"]').first().click();
   
     cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
       const randomIndex = Cypress._.random(0, $buttons.length - 1);

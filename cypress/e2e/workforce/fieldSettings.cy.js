@@ -186,14 +186,9 @@ describe("Worker Module - Field Settings", () => {
       const fullName = `${firstName} ${lastName}`;
       let newlyToggledField = "";
       let initialCheckedCount = 0;
-
-      // Open worker and Field Settings
-      cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
       cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
       cy.contains("p", "Field Settings").should("be.visible");
-
-      // Count how many items are already checked
       cy.get(".columns-drawer-content__column-option").then(($options) => {
         const checkedOptions = $options.filter((i, el) => {
           return Cypress.$(el).find('input[type="checkbox"]').is(':checked');
@@ -319,4 +314,6 @@ describe("Worker Module - Field Settings", () => {
       cy.log("✓ All fields remain unchecked after reopening - changes persisted");
     });
   });
+
+  
 });

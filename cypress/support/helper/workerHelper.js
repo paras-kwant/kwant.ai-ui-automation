@@ -1,4 +1,5 @@
 import { workforceSelector } from '../workforceSelector';
+import workerHelper from './workerHelper';
 
 const WorkerHelper = {
   visitWorkersPage: () => cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`),
@@ -22,30 +23,36 @@ const WorkerHelper = {
 
 
     closeSidebarIfOpen: () => {
-      cy.get('body').then($body => {
-        if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
-          cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
+      cy.url().then((url) => {
+        // Only run cleanup if we're on the workers page
+        if (!url.includes('/workers')) {
+          workerHelper.visitWorkersPage();
         }
-
-        if ($body.find('.sc-ktJbId.sc-gmgFlS').length > 0) {
-          cy.get('.sc-ktJbId.sc-gmgFlS').eq(0).click({ force: true });
-        } else {
-          cy.log('Pagination not found, skipping to page one selection');
-        }
+        
+        cy.get('body').then($body => {
+          if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
+            cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
+          }
     
-        if ($body.find('.tag.default.grey:contains("Clear")').length > 0) {
-          cy.contains('.tag.default.grey', 'Clear')
-            .click({ force: true });
-        }
-
-        if ($body.find('.filters-header-container svg').length > 0) {
-          cy.get('.filters-header-container svg').eq(0).click();
-        }
-
-
-        if( $body.find(workforceSelector.searchInput).length > 0){
-          cy.get(workforceSelector.searchInput).clear();
-        }
+          if ($body.find('.sc-ktJbId.sc-gmgFlS').length > 0) {
+            cy.get('.sc-ktJbId.sc-gmgFlS').eq(0).click({ force: true });
+          } else {
+            cy.log('Pagination not found, skipping to page one selection');
+          }
+      
+          if ($body.find('.tag.default.grey:contains("Clear")').length > 0) {
+            cy.contains('.tag.default.grey', 'Clear')
+              .click({ force: true });
+          }
+    
+          if ($body.find('.filters-header-container svg').length > 0) {
+            cy.get('.filters-header-container svg').eq(0).click();
+          }
+    
+          if($body.find(workforceSelector.searchInput).length > 0){
+            cy.get(workforceSelector.searchInput).clear();
+          }
+        });
       });
     },
 

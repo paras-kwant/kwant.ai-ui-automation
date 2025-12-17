@@ -152,7 +152,7 @@ it('Verify page scroll resets to top after navigating between pages', () => {
 
     cy.get('.table-wrapper').scrollTo('bottom', { duration: 1000, ensureScrollable: false });
     cy.get('.table-wrapper').should(($el) => {
-      expect($el[0].scrollTop).to.be.greaterThan(0); // fails if scroll didn’t happen
+      expect($el[0].scrollTop).to.be.greaterThan(0); 
     });
 
     workforceSelector.pageTwo().should('be.visible').click();

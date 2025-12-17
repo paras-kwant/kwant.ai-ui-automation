@@ -3,20 +3,23 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
+import workerHelper from '../../support/helper/workerHelper.js';
+
 
 
 describe("Worker Module - Documents Page", () => {
-  beforeEach(() => {
-    cy.session("userSession", () => {
+  before(() => {
+    cy.session('userSession', () => {
       cy.login();
-      cy.get(".card-title").contains("Regression test").click();
     });
+    workerHelper.visitWorkersPage();
+  })
+  beforeEach(() => {
+    cy.cleanUI()
   });
-
 
   
   it("Verify the UI of the document", () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
 
@@ -46,7 +49,6 @@ describe("Worker Module - Documents Page", () => {
   });
   
   it("Validate the ui of the document form", () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
     workforceSelector.AddCertificationButton().click();
@@ -105,8 +107,6 @@ describe("Worker Module - Documents Page", () => {
       Math.floor(Math.random() * 10)
     ).join("");
 
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -137,8 +137,12 @@ describe("Worker Module - Documents Page", () => {
               { subjectType: "drag-n-drop" }
             );
           });
+cy.get('iframe[src^="blob:https://uat.kwant.ai"]')
+.should('be.visible')
+cy.wait(1000)
 
-          cy.get("button > p").contains("Submit").click({ force: true });
+
+          cy.get("button > p").contains("Submit").click();
           cy.get(".cell-content")
             .contains(credID)
             .closest(".sc-cRmqLi") // go up to the parent that contains this credID
@@ -165,8 +169,6 @@ describe("Worker Module - Documents Page", () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
     ).join("");
-
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -198,6 +200,10 @@ describe("Worker Module - Documents Page", () => {
             { subjectType: "drag-n-drop" }
           );
         });
+        cy.get('iframe[src^="blob:https://uat.kwant.ai"]')
+.should('be.visible')
+cy.wait(1000)
+
 
         cy.get("button > p").contains("Submit").click({ force: true });
         cy.get(".cell-content")
@@ -221,11 +227,7 @@ describe("Worker Module - Documents Page", () => {
       .should("exist");
   });
 })
-
 it('should update an existing certificate', () => {
-  cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-
-  // Step 1: Open first worker and go to Documents page
   cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
     const { firstName, lastName } = workerData;
     const fullName = `${firstName} ${lastName}`;
@@ -234,20 +236,20 @@ it('should update an existing certificate', () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.DocumentsPage().click();
 
-    // Step 2: Capture the Credential ID before editing
+    // Capture the Credential ID before editing
     cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
       .eq(0)
       .find(".cell-content")
-      .eq(2) // Credential ID column
+      .eq(2)
       .invoke("text")
       .then((originalCred) => {
         const origCred = originalCred.trim();
         cy.log(`Original Credential ID: ${origCred}`);
 
-        // Step 3: Open document in edit mode
+        // Open document in edit mode
         cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg").eq(0).click();
 
-        // Step 4: Edit expiry date
+        // Edit expiry date
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)
           .realHover()
@@ -257,40 +259,59 @@ it('should update an existing certificate', () => {
 
         cy.get('[placeholder="Select Expiry date"]')
           .clear({force:true})
-          .type('11/03/2026');
-        cy.get('body').click(); // blur input to trigger save
+          .type('11/06/2026');
+        cy.get('body').click();
 
-        // Step 5: Verify field changed
+        // Verify field changed
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)
-          .should('contain.text', '11/03/2026')
+          .should('contain.text', '11/06/2026')
           .invoke('text')
           .then((newDate) => {
             const updatedDate = newDate.trim();
             cy.log(`Updated Expiry Date: ${updatedDate}`);
 
-            // Step 6: Save the document
-            cy.contains('button p', 'Update').click();
+            cy.contains('button p', 'Update').click({});
             workforceSelector.toastMessage().contains('Document updated successfully');
 
-            // Step 7: Verify table now shows the same Credential ID with updated date
-            cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
-              .filter((index, row) => {
-                return Cypress.$(row).find('.cell-content').eq(2).text().trim() === origCred;
-              })
-              .first()
-              .within(() => {
-                cy.get('.cell-content')
-                  .eq(1) // Expiry date column
-                  .should('contain.text', updatedDate);
+            // Wait for DOM to stabilize after update
+            cy.wait(1000);
+
+            // SOLUTION: Break the chain completely - requery from scratch each time
+            cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg").then($allRows => {
+              // Find the index of the matching row
+              let matchingIndex = -1;
+              $allRows.each((index, row) => {
+                const credId = Cypress.$(row).find('.cell-content').eq(2).text().trim();
+                if (credId === origCred) {
+                  matchingIndex = index;
+                  return false; // break the loop
+                }
               });
+
+              cy.log(`Found matching row at index: ${matchingIndex}`);
+
+              // Now query fresh from the DOM using the index
+              cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
+                .eq(matchingIndex)
+                .scrollIntoView()
+                .should('be.visible');
+
+              // Query again for the specific cell
+              cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
+                .eq(matchingIndex)
+                .find('.cell-content')
+                .eq(1)
+                .scrollIntoView()
+                .should('be.visible')
+                .should('contain.text', updatedDate);
+            });
           });
       });
   });
 });
 
   it("Deleting a certificate", () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
 
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
@@ -365,7 +386,6 @@ it('should update an existing certificate', () => {
       Math.floor(Math.random() * 10)
     ).join("");
 
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -415,7 +435,6 @@ it('should update an existing certificate', () => {
   });
 
   it('send request renewal to the worker', () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -491,7 +510,6 @@ it('should update an existing certificate', () => {
   });
 
   it("Deleting a licence", () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -567,5 +585,171 @@ it('should update an existing certificate', () => {
         });
     });
   });
+
+
+
+  it("adding with invalid ", () => {
+    const credID = Array.from({ length: 16 }, () =>
+      Math.floor(Math.random() * 10)
+    ).join("");
+
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      // cy.wait(1000);
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+      workforceSelector.DocumentsPage().click();
+
+      // Add Certification
+      workforceSelector.AddCertificationButton().click();
+      cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType')
+      cy.get('[name="credentialId"]').type(credID);
+
+      // Set Dates
+      cy.get('[placeholder="Issued Date"]').click();
+      cy.get(".rmdp-today").first().click();
+      cy.get('[name="expiresInPeriods"]').click();
+      cy.get(".sc-kdBSHD > :nth-child(2)").click();
+      cy.get('input[type="number"]').type("3");
+
+      // Upload document and submit
+      cy.get('[placeholder="Expiry Date"]')
+        .invoke("val")
+        .then((expiryDate) => {
+          cy.fixture("backup.csv", "base64").then((fileContent) => {
+            cy.get(".sc-gObJpS").attachFile(
+              { fileContent, fileName: "backup.csv", mimeType: "text/csv" },
+              { subjectType: "drag-n-drop" }
+            );
+          });
+
+          cy.get("button > p").contains("Submit").click({ force: true });
+          workforceSelector.toastMessage().should("contain", "File type unsupported");
+        });
+      })
+    })
+
+
+    it("Should not allow adding documnent which expire date is already done", () => {
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    
+      workforceSelector.DocumentsPage().click();
+      workforceSelector.AddCertificationButton().click();
+    
+    
+      // Open Expiry Date calendar
+      cy.get('[placeholder="Expiry Date"]').click();
+    
+      // 🔥 ASSERT: All previous dates must be disabled
+      cy.get(".rmdp-day")
+        .filter(".rmdp-disabled")
+        .should("exist");
+    
+      // Optional: Assert that disabled dates cannot be clicked
+      cy.get(".rmdp-day.rmdp-disabled").first().click({ force: true });
+      cy.get('header p').contains('Add Certification').click()
+    
+      // The input value SHOULD NOT CHANGE
+      cy.get('[placeholder="Expiry Date"]')
+        .invoke("val")
+        .should("eq", ""); 
+    
+    })
+
+
+
+    it("Should not allow adding documnent which expire date is older trahn issued date", () => {
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    
+      // Navigate to Documents page
+      workforceSelector.DocumentsPage().click();
+    
+      // Open Add Certification modal
+      workforceSelector.AddCertificationButton().click();
+    
+      // Select Issued Date (today)
+      cy.get('[placeholder="Issued Date"]').click();
+      cy.get(".rmdp-today").first().click();
+    
+      // Open Expiry Date calendar
+      cy.get('[placeholder="Expiry Date"]').click();
+    
+      // 🔥 ASSERT: All previous dates must be disabled
+      cy.get(".rmdp-day")
+        .filter(".rmdp-disabled")
+        .should("exist");
+    
+      // Optional: Assert that disabled dates cannot be clicked
+      cy.get(".rmdp-day.rmdp-disabled").first().click({ force: true });
+      cy.get('header p').contains('Add Certification').click()
+    
+      // The input value SHOULD NOT CHANGE
+      cy.get('[placeholder="Expiry Date"]')
+        .invoke("val")
+        .should("eq", ""); 
+    
+    })
+
+
+    it("Should auto-calculate expiry date when Expires In is set", () => {
+      // Open modal
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+      workforceSelector.DocumentsPage().click();
+      workforceSelector.AddCertificationButton().click();
+    
+      // Fill form
+      cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType');
+      cy.get('[name="credentialId"]').type("TEST123456");
+    
+      // Select Issued Date = today
+      cy.get('[placeholder="Issued Date"]').click();
+      cy.get(".rmdp-today").first().click();
+    
+      // Set Expires In = 90 days
+      cy.get('[name="expiresInPeriods"]').click();
+      cy.get(".sc-kdBSHD").contains("Day(s)").click();
+      cy.get('input[type="number"]').clear({force:true}).type("90");
+    
+      // Verify Expiry Date auto-calculated
+      cy.get('[placeholder="Issued Date"]').invoke("val").then((issued) => {
+        cy.get('[placeholder="Expiry Date"]').invoke("val").then((expiry) => {
+          const issuedDate = new Date(issued);
+          const expectedExpiry = new Date(issuedDate);
+          expectedExpiry.setDate(expectedExpiry.getDate() + 90);
+          
+          const expectedStr = expectedExpiry.toLocaleDateString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric"
+          });
+          
+          expect(expiry).to.equal(expectedStr);
+        });
+      });
+    })
+
+    it("Should not save document when modal is closed without submitting", () => {
+
+      const credID = Array.from({ length: 16 }, () =>
+        Math.floor(Math.random() * 10)
+      ).join("");
   
-}); 
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+      workforceSelector.DocumentsPage().click();
+    
+      // Count existing documents
+      cy.get("body").then(($body) => {
+    
+        workforceSelector.AddCertificationButton().click();
+        cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType');
+        cy.get('[name="credentialId"]').type(credID);
+        cy.get('[placeholder="Issued Date"]').click();
+        cy.get(".rmdp-today").first().click();
+    
+        cy.get("body").click(0, 0); 
+    
+        cy.get("body").should("not.contain", credID);
+      });
+    });
+  })

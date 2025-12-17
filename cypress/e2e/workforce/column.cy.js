@@ -21,6 +21,11 @@ describe("Worker Module - Column", () => {
   beforeEach(() => {
     cy.cleanUI()
   });
+  beforeEach(() => {
+    cy.get('.icon-button button').eq(0).click();
+    cy.get('button p').contains('Reset to default').click();
+    cy.get('button.sc-krNlru').click();
+  })
 
 
   it('Validate adding and updating column settings', () => {
@@ -28,7 +33,6 @@ describe("Worker Module - Column", () => {
     cy.get('button p').contains('Reset to default').click();
     cy.wait(2000);
     cy.get('[data-rbd-draggable-id="email"] [type="checkbox"]').click();
-  
     cy.get('button p').contains('Save').click();
     cy.get('.sc-kOPcWz').should('have.text', 'Column settings updated successfully! ');
     cy.get(workforceSelector.tableColumn).should('have.length', 12);
@@ -39,7 +43,7 @@ describe("Worker Module - Column", () => {
     });
   });
 
-  it('[smoke] Validate drag and drop column feature', () => {
+  it('Validate drag and drop column feature', () => {
     cy.get('.icon-button button').eq(0).click();
     cy.wait(1000);
 
@@ -139,6 +143,24 @@ describe("Worker Module - Column", () => {
     cy.get('div[label="Clear"]').click();
     cy.get('div[label="Clear"]').should('have.attr', 'disabled');
   });
+
+  it('Verify the availability of the following fields on the Column setting page.Emergency Contact Name, Emergency Contact Phone, Emergency Contact Address', ()=>{
+    cy.get('.icon-button button').eq(0).click();
+    cy.get('[data-rbd-draggable-id="emergencyContactName"] [type="checkbox"]').should('exist');
+    cy.get('[data-rbd-draggable-id="emergencyContactPhone"] [type="checkbox"]').should('exist');
+    cy.get('[data-rbd-draggable-id="emergencyContactAddress"] [type="checkbox"]').should('exist');
+  })
+
+
+  it('Verify toggling the button OFF for a column field does not display that specific field on the workers page.',()=>{
+ cy.get('.icon-button button').eq(0).click();
+ cy.get('[data-rbd-draggable-id="projectTaskTradeName"] [type="checkbox"]').click();
+ cy.get('[data-rbd-draggable-id="projectTaskTradeName"] [type="checkbox"]').should('not.be.checked');
+ cy.get('button p').contains('Save').click();
+ cy.contains('.sc-fremEr', 'Company Name').should('not.exist');
+  })
+
+
 
   it("Validate the Save button is disabled initially in Add Column settings", () => {
     cy.get('.icon-button button').eq(0).click();

@@ -6,31 +6,35 @@ import workerHelper from "../../support/helper/workerHelper";
 describe("Worker Module - Safety Alert", () => {
 
   before(() => {
-    // Create session
     cy.session("userSession", () => {
       cy.login();
       cy.get(".card-title")
         .contains(Cypress.env("PROJECT_NAME"))
         .click();
     });
-  
     workerHelper.visitWorkersPage();
-  
-        cy.get(".icon-button button").first().click();
-        cy.contains('button p', "Reset to default").then(($reset) => {
-          if ($reset.length) {
-            cy.wrap($reset).click();
-          }
-        });
-        cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]').click();
-        cy.contains("button p", "Save").should('be.visible').click({force: true});
 
     });
-  
+
+    before(()=>{
+      cy.get(workforceSelector.tableRow).eq(0).should('be.visible')
+      cy.get(".icon-button button").first().click();
+      cy.contains('button p', "Reset to default").click()
+      cy.wait(5000)
+      cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]')
+  .scrollIntoView()
+
+  cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]')
+  .click({ force: true });
+      cy.wait(2000)
+      cy.contains("button p", "Save").should('be.visible').click();
+
+    }) 
 
   beforeEach(() => {
     cy.cleanUI();
   });
+
 
   it("Verify Safety Audit Drawer UI and Default Filters Display Correctly", () => {
     const today = new Date();
@@ -351,5 +355,23 @@ describe("Worker Module - Safety Alert", () => {
     verifyAlertFilter('Unsafe', 'Near Miss');
     verifyAlertFilter('Near Miss', 'Restricted');
   });
+
+
+  it('should verify that safety alerts are displayed in descending order by date', () => {
+    workerHelper.openSafteyAuditModel();
+  
+    cy.get('.sc-cRmqLi.dEhqLz .cell-content') // replace '.cell-date' with your actual date cell selector
+      .then(($dates) => {
+        const dateArray = $dates.toArray().map(el => new Date(el.innerText.trim()));
+  
+        // Verify that array is sorted in descending order
+        for (let i = 0; i < dateArray.length - 1; i++) {
+          expect(dateArray[i].getTime()).to.be.gte(dateArray[i + 1].getTime());
+        }
+  
+        cy.log('All alerts are in descending order by date');
+      });
+  });
+  
 
 });

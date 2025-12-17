@@ -6,7 +6,6 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 describe("Worker Module - Search", () => {
 
-  // Safe login + project opening
   before(() => {
     cy.session('userSession', () => {
       cy.login();
@@ -19,9 +18,7 @@ describe("Worker Module - Search", () => {
 
   beforeEach(() => {
     cy.cleanUI();
-  })
-
-
+  });
 
   it("Validating the search functionality - run twice", () => {
     cy.wait(1500);
@@ -48,7 +45,6 @@ describe("Worker Module - Search", () => {
     });
   });
 
-  // 2. Search triggers API only when >= 3 letters
   it("Search triggers API only when at least 3 letters are entered", () => {
     cy.wait(2000);
 
@@ -83,13 +79,11 @@ describe("Worker Module - Search", () => {
     });
   });
 
-  // 3. Search no results
   it("Validating the search functionality for the search with no results", () => {
     cy.get(workforceSelector.searchInput).clear().type("NonExistentName12345");
     cy.get(".empty-body").should("contain.text", "No Results Found");
   });
 
-  // 4. Empty input keeps rows unchanged
   it("Validating search functionality with empty input keeps rows unchanged", () => {
     cy.wait(3000);
 
@@ -109,7 +103,6 @@ describe("Worker Module - Search", () => {
       });
   });
 
-  // 5. Search by Job Title
   it("Validating search functionality with job title in use", () => {
     cy.get(workforceSelector.tableRow)
       .eq(1)
@@ -127,7 +120,6 @@ describe("Worker Module - Search", () => {
       });
   });
 
-  // 6. Search by Company
   it("Validating search functionality with company in use", () => {
     cy.get(workforceSelector.tableRow)
       .eq(0)
@@ -146,7 +138,60 @@ describe("Worker Module - Search", () => {
       });
   });
 
-  // 7. Case Insensitive Search
+  it("Validating search functionality with device in use", () => {
+    cy.get(workforceSelector.tableRow)
+      .eq(0)
+      .find(".cell-content")
+      .eq(4)
+      .invoke("text")
+      .then((device) => {
+        cy.get(workforceSelector.searchInput).clear().type(device);
+        cy.wait(2000);
+
+        cy.get(workforceSelector.tableRow).each(($row) =>{
+          cy.wrap($row)
+            .find(".cell-content")
+            .eq(4)
+            .should("contain.text", device);
+        })
+      });
+  });
+
+  it("Validating search functionality based on Last Seen Location in use", () => {
+    cy.get(workforceSelector.tableRow)
+      .eq(1)
+      .find(".loc-content")
+      .eq(0)
+      .invoke("text")
+      .then((LastSeenLocation) => {
+        cy.get(workforceSelector.searchInput).clear().type(LastSeenLocation);
+  
+        cy.get(workforceSelector.tableRow).each(($row) => {
+          cy.wrap($row)
+            .find(".loc-content")
+            .eq(0)
+            .should("contain.text", LastSeenLocation);
+        });
+      });
+  });
+
+  it("turinng on all the column and testing", ()=>{
+    cy.get(workforceSelector.tableRow).eq(0).should('be.visible')
+    cy.get(".icon-button button").first().click();
+    cy.contains('button p', "Reset to default").click()
+    cy.wait(5000)
+    cy.get('[data-rbd-draggable-id="raceName"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="sex"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="crewName"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="document"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="ethnicity"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="accessStatus"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="emergencyContactName"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="emergencyContactPhone"] [type="checkbox"]').click({ force: true });
+    cy.get('[data-rbd-draggable-id="emergencyContactAddress"] [type="checkbox"]').click({ force: true });
+    cy.contains('button p', 'Save').click();
+  })
+
   it("Verify search Supports Case Insensitivity (Uppercase, Lowercase, Mixed Case)", () => {
     cy.wait(2000);
     cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");

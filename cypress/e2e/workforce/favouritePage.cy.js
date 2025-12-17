@@ -51,7 +51,22 @@ describe("Worker Module - Favorites", () => {
                 cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
             }
         })
-    })        
+    })
+    it('Validate only 2 pages can be favorites at a time', () => {
+
+      cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+        cy.get('body').then(($body) => {
+            if ($body.find('[role="button"] [fill="#FACC15"]').length > 0) {
+              cy.get('[role="button"] [fill="#FACC15"]').click()
+              cy.wait(2000)
+              cy.get('[role="button"]').click()
+              cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
+            } else {
+                cy.get('[role="button"]').click()
+                cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
+            }
+      });
+    })
     
   
 })

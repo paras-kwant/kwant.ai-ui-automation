@@ -1,6 +1,8 @@
 /// <reference types="cypress" />
 import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
+import workerHelper from '../../support/helper/workerHelper.js';
+
 
 Cypress.Commands.add('closeUploadDownloadDrawerIfOpen', () => {
   cy.wait(1000)

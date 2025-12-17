@@ -5,6 +5,7 @@ const path = require("path");
 const xlsx = require("xlsx");
 const allureWriter = require("@shelex/cypress-allure-plugin/writer");
 const Imap = require('imap-simple');
+const twilio = require('twilio');
 
 module.exports = defineConfig({
   e2e: {
@@ -190,9 +191,25 @@ module.exports = defineConfig({
             console.error('❌ Error listing emails:', error.message);
             return [];
           }
+        },
+
+        getTwilioOtp({ accountSid, authToken, to }) {
+          const client = twilio(accountSid, authToken);
+    
+          return client.messages
+            .list({ to, limit: 5 })
+            .then(messages => {
+              // Find the latest OTP message
+              const otpMessage = messages.find(msg => msg.body.includes('Your OTP'));
+              if (otpMessage) {
+                const otp = otpMessage.body.match(/\d{4,6}/)[0]; // extract 4-6 digit OTP
+                return otp;
+              }
+              return null;
+            });
         }
       });
-
+    
       return config;
     },
 
