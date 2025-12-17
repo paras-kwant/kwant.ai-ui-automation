@@ -537,7 +537,7 @@ describe("Worker Module - overflowMenu", () => {
     cy.get(workforceSelector.overflowMenu).should('be.visible');
   })
 
-  it.only('Verify the Save button is disabled unless the inputs are selected from the drop-down of Cost Code, Crew, Job Title.',()=>{
+  it('Verify the Save button is disabled unless the inputs are selected from the drop-down of Cost Code, Crew, Job Title.',()=>{
     cy.get('.personal-info-content__title').should('be.visible')
     cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({force: true});
     cy.get(workforceSelector.overflowMenu).click();
