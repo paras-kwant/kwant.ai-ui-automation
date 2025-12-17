@@ -3,17 +3,24 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
+import workerHelper from '../../support/helper/workerHelper.js';
+import "../../support/commands";
 
 describe("Worker Module - Personal Details Page", () => {
-  beforeEach(() => {
-    cy.session("userSession", () => {
+  before(() => {
+    cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
     });
+    workerHelper.visitWorkersPage();
+  });
+  beforeEach(() => {
+    cy.cleanUI();
   });
 
   it("should verify all UI elements and labels in the Personal Details drawer", () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.personalDetails().click();
 
@@ -56,7 +63,6 @@ describe("Worker Module - Personal Details Page", () => {
   });
 
   it("should allow editing and saving all editable fields in the Personal Details section", () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     workforceSelector.personalDetails().click();
 
@@ -153,8 +159,6 @@ describe("Worker Module - Personal Details Page", () => {
   });
 
   it("should display the correct tooltip information on clicking the info icon in Personal Details", () => {
-    cy.visit("/projects/94049707/workers");
-
     cy.get(workforceSelector.tableRow)
       .eq(0)
       .within(() => {

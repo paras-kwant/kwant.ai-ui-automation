@@ -539,15 +539,7 @@ describe("Worker Module - overflowMenu", () => {
 
   it('Verify the Save button is disabled unless the inputs are selected from the drop-down of Cost Code, Crew, Job Title.',()=>{
     cy.get('.personal-info-content__title').should('be.visible')
-    cy.readFile("cypress/fixtures/createdWorker.json").then(
-      ({ firstName, lastName }) => {
-        cy.get(workforceSelector.searchInput)
-          .clear()
-          .type(`${firstName} ${lastName}`);
-      }
-    );
-    cy.get('.personal-info-content__title').should('be.visible')
-    cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({ force: true });
+    cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check();
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Change Value").click();
     cy.get('[label="Save"] button').should('be.disabled');

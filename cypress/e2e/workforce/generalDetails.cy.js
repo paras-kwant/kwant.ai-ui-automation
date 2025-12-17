@@ -3,17 +3,24 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
+import workerHelper from '../../support/helper/workerHelper.js';
+import "../../support/commands";
 
 describe("Worker Module - General Details Page", () => {
-  beforeEach(() => {
-    cy.session("userSession", () => {
+  before(() => {
+    cy.session('userSession', () => {
       cy.login();
-      cy.get(".card-title").contains("Regression test").click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
     });
+    workerHelper.visitWorkersPage();
   });
-
+  beforeEach(() => {
+    cy.cleanUI();
+  });
+  
   it("Verify the UI of the General Details drawer", () => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
     cy.get(workforceSelector.tableRow).eq(2).click({ force: true });
   
     cy.contains("p", "General Details").should("be.visible");
@@ -32,8 +39,6 @@ describe("Worker Module - General Details Page", () => {
           expect(actualTexts, `Label "${expected}" should exist`).to.include(expected);
         });
       });
-  
-    // Hover check
     cy.get(".hover-hoc-container__input__display-value")
       .first()
       .realHover()
@@ -47,23 +52,23 @@ describe("Worker Module - General Details Page", () => {
   
 
   it("should allow editing and saving of all editable general Details fields", () => {
-    cy.visit("/projects/94049707/workers");
-    cy.get(workforceSelector.tableRow).eq(2).click({ force: true });
+    cy.get(workforceSelector.tableRow).eq(2).click({force: true});
+    cy.wait(2000)
     cy.get(".hover-hoc-container__input__display-value")
       .eq(0)
       .realHover()
-      .find(".edit-icon > svg")
+      .find("svg")
       .first()
       .should("be.visible")
       .click();
     cy.get('[name="firstName"]').click().clear().type("paras");
 
 
+
     cy.get(".hover-hoc-container__input__display-value")
     .eq(1)
     .realHover()
-    .find(".edit-icon > svg")
-    .first()
+    .find("svg")
     .should("be.visible")
     .click();
   cy.get('[name="lastName"]').click().clear().type("paras");
@@ -72,7 +77,7 @@ describe("Worker Module - General Details Page", () => {
   cy.get(".hover-hoc-container__input__display-value")
   .eq(2)
   .realHover()
-  .find('.edit-icon > svg')
+  .find('svg')
   .should('be.visible')
   .click({ force: true });
 
@@ -99,10 +104,8 @@ describe("Worker Module - General Details Page", () => {
   });
 
   it("should display correct tooltip information when clicking the Worker Role info icon in general page", () => {
-    cy.visit("/projects/94049707/workers");
-
     cy.get(workforceSelector.tableRow)
-      .eq(2)
+      .eq(0)
       .within(() => {
         cy.get(".personal-info-content__title")
           .invoke("text")
@@ -110,7 +113,6 @@ describe("Worker Module - General Details Page", () => {
             cy.wrap(text.trim()).as("workerName"); // save alias
           });
 
-        // Step 2: click the worker name
         cy.get(".personal-info-content__title").click({ force: true });
       });
 
