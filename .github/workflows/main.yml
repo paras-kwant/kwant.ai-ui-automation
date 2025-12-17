@@ -3,7 +3,7 @@ name: Run Cypress UI Tests
 on:
   workflow_dispatch:
   schedule:
-    #- cron: "05 04 * * *" # Nepali 10:05 AM
+    - cron: "05 04 * * *" # Nepali 10:05 AM
 
 jobs:
   cypress-run:
