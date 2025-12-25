@@ -110,7 +110,13 @@ describe("Worker Module - Add Worker Tests", () => {
     addWorkerSelector.firstNameInput().type(workerData.firstName);
     addWorkerSelector.lastNameInput().type(workerData.lastName);
     cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
+    addWorkerSelector.addMoreDetail().click();
+    cy.get('p').contains('Personal Details').scrollIntoView().should('be.visible');
+    addWorkerSelector.emailInput().type('paras+45@kwant.ai');
+    workforceSelector.AccessControl().click()
+    cy.selectRandomOption('[name="projectBeaconSerialNumber"]', '.sc-tagGq[role="button"]', 'device');
     addWorkerSelector.submitWorkerButton().click();
+
     cy.get('h4').contains('successfully added as a worker.').should('be.visible');
   });
 
@@ -125,7 +131,7 @@ describe("Worker Module - Add Worker Tests", () => {
       .should('have.attr', 'src')
       .and('not.contain', 'https://uat.kwant.ai/assets/personbg-2f058cfa');
   });
-  it('Should add worker with all fields filled', () => {
+  it.only('Should add worker with all fields filled', () => {
     const workerData = generateWorkerData();
 
     cy.get('.upload-button__camera-icon').click();

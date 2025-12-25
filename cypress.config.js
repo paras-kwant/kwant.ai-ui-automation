@@ -37,6 +37,10 @@ module.exports = defineConfig({
       // Environment variables
       config.env.EMAIL = process.env.EMAIL;
       config.env.PASSWORD = process.env.PASSWORD;
+      config.env.TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+      config.env.TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+      config.env.TWILIO_NUMBER = process.env.TWILIO_NUMBER;
+      config.env.EXPECTED_FROM = process.env.EXPECTED_FROM;
       config.env.PROJECT_NAME = "LVL 10-11";
       config.env.PROJECT_ID = 500526306;
 

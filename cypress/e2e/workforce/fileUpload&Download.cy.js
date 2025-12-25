@@ -3,6 +3,8 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper';
+import { generateWorkerData } from '../../fixtures/workerData.js';
+
 
 describe("Worker Module - File Upload and Download", () => {
   before(() => {
@@ -22,7 +24,7 @@ describe("Worker Module - File Upload and Download", () => {
 
   it('Should add a worker by uploading a valid CSV file', () => {
    workerHelper.openUploadModal()
-    workerHelper.uploadWorkerCSV('uploadFiles/employeeUpload.csv');
+    workerHelper.uploadWorkerCSV('testdata/employeeUpload.csv');
     cy.get('.sc-kOPcWz').should('contain.text', '1 worker(s) will be added.');
 
   });
@@ -120,7 +122,7 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
-    cy.fixture('uploadFiles/employeeUpload.csv', 'base64').then(fileContent => {
+    cy.fixture('testdata/employeeUpload.csv', 'base64').then(fileContent => {
       cy.get('.sc-ewBhFl').attachFile(
         {
           fileContent,
@@ -202,7 +204,7 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
-    cy.fixture('uploadFiles/noFirstName.csv', 'base64').then(fileContent => {
+    cy.fixture('testdata/noFirstName.csv', 'base64').then(fileContent => {
       cy.get('.sc-ewBhFl').attachFile(
         {
           fileContent,
@@ -221,7 +223,7 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
-    cy.fixture('uploadFiles/noLastName.csv', 'base64').then(fileContent => {
+    cy.fixture('testdata/noLastName.csv', 'base64').then(fileContent => {
       cy.get('.sc-ewBhFl').attachFile(
         {
           fileContent,
@@ -241,7 +243,7 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
-    cy.fixture('uploadFiles/duplicateWorker.csv', 'base64').then(fileContent => {
+    cy.fixture('testdata/duplicateWorker.csv', 'base64').then(fileContent => {
       cy.get('.sc-ewBhFl').attachFile(
         {
           fileContent,
@@ -262,7 +264,7 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
-    cy.fixture('uploadFiles/invalidPhoneNumber.csv', 'base64').then(fileContent => {
+    cy.fixture('testdata/invalidPhoneNumber.csv', 'base64').then(fileContent => {
       cy.get('.sc-ewBhFl').attachFile(
         {
           fileContent,
@@ -283,7 +285,7 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
-    cy.fixture('uploadFiles/invalidFields.csv', 'base64').then(fileContent => {
+    cy.fixture('testdata/invalidFields.csv', 'base64').then(fileContent => {
       cy.get('.sc-ewBhFl').attachFile(
         {
           fileContent,
@@ -313,12 +315,12 @@ describe("Worker Module - File Upload and Download", () => {
   });
 
 
-  it('Should  sow error message for invalid project code', () => {
+  it('Should  showw - while the project code is invalid', () => {
     cy.wait(2000)
     cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
-    cy.fixture('uploadFiles/projectcode.csv', 'base64').then(fileContent => {
+    cy.fixture('testdata/projectcode.csv', 'base64').then(fileContent => {
       cy.get('.sc-ewBhFl').attachFile(
         {
           fileContent,
@@ -329,17 +331,277 @@ describe("Worker Module - File Upload and Download", () => {
         { subjectType: 'drag-n-drop', force: true }
       );
     });
-
-    workforceSelector.toastMessage()
-      .contains('Duplicate worker(s) found. 1 record(s) will not be uploaded.')
-      .should('be.visible');
+    workforceSelector.submitButton().click();
+    cy.get('input[placeholder="Search"]').clear().type('James anderson112');
+    cy.wait(2000)
+    cy.get(workforceSelector.tableRow).eq(0).click({force: true});
+    workforceSelector.jobDetails().click();
+    cy.getWorkerField('Project Code').contains('-');
+  
   });
 
+
+  it('submiting device with instance id and with out mac id', () => {
+    cy.wait(2000)
+    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get('.dropdown-option').contains('Upload').click();
+
+    cy.fixture('testdata/nomacid.csv', 'base64').then(fileContent => {
+      cy.get('.sc-ewBhFl').attachFile(
+        {
+          fileContent,
+          fileName: 'nomacid.csv',
+          mimeType: 'csv',
+          encoding: 'base64'
+        },
+        { subjectType: 'drag-n-drop', force: true }
+      );
+    });
+    workforceSelector.toastMessage().contains('MAC cannot be empty.')
+  });
+
+
+  it('Uploading device without first name, last name and company', () => {
+
+    const generateInstanceId = () => {
+      const chars = '0123456789abcdefghijklmnopqrstu';
+      return Array.from({ length: 10 }, () =>
+        chars.charAt(Math.floor(Math.random() * chars.length))
+      ).join('');
+    };
+  
+    const generateMacId = () => {
+      const chars = 'WXYZ';
+      return Array.from({ length: 7 }, () =>
+        chars.charAt(Math.floor(Math.random() * chars.length))
+      ).join('');
+    };
+  
+    const instanceId = generateInstanceId();
+    const macId = generateMacId();
+  
+    // Open Upload modal
+    cy.get('.sc-gFAWRd > .sc-aXZVg > button')
+      .should('be.visible')
+      .click();
+  
+    cy.get('.dropdown-option')
+      .contains('Upload')
+      .click();
+  
+    cy.readFile('cypress/fixtures/testdata/validintancemacid.csv').then((content) => {
+      const lines = content.split('\n');
+      const headers = lines[0].split(',');
+      const data = lines[1].split(',');
+  
+      const firstNameIndex = headers.findIndex(h => h.trim() === 'First Name');
+      const lastNameIndex = headers.findIndex(h => h.trim() === 'Last Name');
+      const companyIndex = headers.findIndex(h => h.trim() === 'Company Name');
+      const instanceIdIndex = headers.findIndex(h => h.trim() === 'Instance Id');
+      const macIndex = headers.findIndex(h => h.trim() === 'MAC');
+  
+      if (firstNameIndex !== -1) data[firstNameIndex] = '';
+      if (lastNameIndex !== -1) data[lastNameIndex] = '';
+      if (companyIndex !== -1) data[companyIndex] = '';
+      if (instanceIdIndex !== -1) data[instanceIdIndex] = instanceId;
+      if (macIndex !== -1) data[macIndex] = macId;
+  
+      const updatedCsv = [lines[0], data.join(',')].join('\n');
+      cy.writeFile('cypress/fixtures/testdata/validintancemacid.csv', updatedCsv);
+    });
+  
+    // Upload CSV
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        filePath: 'testdata/validintancemacid.csv',
+        mimeType: 'text/csv'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+    cy.get('[type="info"]')
+      .contains('1 Beacon will be imported.').should('be.visible')
+      cy.get('button p').contains('Submit').click();
+  
+    cy.wait(3000);
+    cy.contains('.sc-fremEr', 'Device')
+    .scrollIntoView()
+    .find('svg')
+    .click();
+
+    cy.get('[placeholder="Search"]').eq(1).click().type(macId)
+    cy.get('.sc-eldPxv').contains(macId).should('be.visible');
+
+  });
+  
+
+  it('Uploading device with worker so that it gets assigned', () => {
+    const workerData = generateWorkerData();
+
+    const generateInstanceId = () => {
+      const chars = '0123456789abcdefghijklmnopqrstu';
+      return Array.from({ length: 10 }, () =>
+        chars.charAt(Math.floor(Math.random() * chars.length))
+      ).join('');
+    };
+  
+
+    const generateMacId = () => {
+      const chars = 'WXYZ'; 
+      return Array.from({ length: 7 }, () =>
+        chars.charAt(Math.floor(Math.random() * chars.length))
+      ).join('');
+    };
+  
+    const instanceId = generateInstanceId();
+    const macId = generateMacId();
+  
+    cy.get('.sc-gFAWRd > .sc-aXZVg > button')
+      .should('be.visible')
+      .click();
+  
+    cy.get('.dropdown-option')
+      .contains('Upload')
+      .click();
+  
+      cy.readFile('cypress/fixtures/testdata/validintancemacid.csv').then((content) => {
+        const lines = content.split('\n');
+        const headers = lines[0].split(',');
+        const data = lines[1].split(',');
+      
+        const firstNameIndex = headers.findIndex(h => h.trim() === 'First Name');
+        const lastNameIndex = headers.findIndex(h => h.trim() === 'Last Name');
+        const companyIndex = headers.findIndex(h => h.trim() === 'Company Name');
+        const instanceIdIndex = headers.findIndex(h => h.trim() === 'Instance Id');
+        const macIndex = headers.findIndex(h => h.trim() === 'MAC');
+      
+        if (firstNameIndex !== -1) data[firstNameIndex] = workerData.firstName;
+        if (lastNameIndex !== -1) data[lastNameIndex] = workerData.lastName;
+        if (companyIndex !== -1) data[companyIndex] = 'ACI';
+        if (instanceIdIndex !== -1) data[instanceIdIndex] = instanceId;
+        if (macIndex !== -1) data[macIndex] = macId;
+      
+        cy.writeFile(
+          'cypress/fixtures/testdata/validintancemacid.csv',
+          `${lines[0]}\n${data.join(',')}`
+        );
+      });
+      
+      
+
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        filePath: 'testdata/validintancemacid.csv',
+        mimeType: 'text/csv'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+
+    cy.get('[type="info"]').contains('1 Beacon will be imported.').should('be.visible');
+    cy.wait(5000)
+    cy.get('button p').contains('Submit').click();
+    cy.get(workforceSelector.tableRow).should('be.visible')
+    cy.get('input[placeholder="Search"]').clear().type(`${workerData.firstName} ${workerData.lastName}`);
+    cy.wait(2000)
+    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    workforceSelector.AccessControl().click();
+    cy.getWorkerField('Device').should('contain.text', macId);
+    workforceSelector.personalDetails().click();
+
+    cy.get('button p').contains('Cancel').click();
+  cy.get(".sc-cRmqLi").each(($row) => {
+    cy.wrap($row).find('[type="checkbox"]').check({ force: true });
+  });
+    cy.get(workforceSelector.overflowMenu).click();
+  cy.contains(".dropdown-option", "Delete").click();
+  cy.get("button p").contains("Delete").click();
+
+  });
+
+
+  it('Uploading device with already exist ids', () => {
+
+    cy.get('.sc-gFAWRd > .sc-aXZVg > button').should('be.visible').click();
+    cy.get('.dropdown-option').contains('Upload').click();
+
+  
+    cy.get('.sc-ewBhFl').attachFile(
+      { filePath: 'testdata/validintancemacid.csv', mimeType: 'text/csv' },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  
+    workforceSelector.toastMessage().contains('1 Beacon(s) already exist.').should('be.visible');
+
+  });
+
+  it('Uploading device with EMPTY instance id should fail validation', () => {
+
+    const instanceId = '';
+  
+    const generateMacId = () => {
+      const chars = 'WXYZ';
+      return Array.from({ length: 7 }, () =>
+        chars.charAt(Math.floor(Math.random() * chars.length))
+      ).join('');
+    };
+  
+    const macId = generateMacId();
+  
+    // Open Upload modal
+    cy.get('.sc-gFAWRd > .sc-aXZVg > button')
+      .should('be.visible')
+      .click();
+  
+    cy.get('.dropdown-option')
+      .contains('Upload')
+      .click();
+  
+    // Update CSV with EMPTY instance id
+    cy.readFile('cypress/fixtures/testdata/validintancemacid.csv').then((content) => {
+      const lines = content.split('\n');
+      const headers = lines[0].split(',');
+      const data = lines[1].split(',');
+  
+      const instanceIdIndex = headers.findIndex(h => h.trim() === 'Instance Id');
+      const macIndex = headers.findIndex(h => h.trim() === 'MAC');
+  
+      if (instanceIdIndex !== -1) data[instanceIdIndex] = instanceId; // EMPTY
+      if (macIndex !== -1) data[macIndex] = macId;
+  
+      const updatedCsv = [lines[0], data.join(',')].join('\n');
+      cy.writeFile('cypress/fixtures/testdata/validintancemacid.csv', updatedCsv);
+    });
+  
+   
+    cy.get('.sc-ewBhFl').attachFile(
+      {
+        filePath: 'testdata/validintancemacid.csv',
+        mimeType: 'text/csv'
+      },
+      { subjectType: 'drag-n-drop', force: true }
+    );
+  
+    cy.get('[type="info"]')
+      .contains('1 Beacon will be imported.')
+      .should('not.exist');
+  
+    cy.wait(3000);
+    cy.get('button p').contains('Submit').click({ force: true });
+  cy.get(workforceSelector.tableRow).should('be.visible')
+  cy.wait(3000);
+  cy.contains('.sc-fremEr', 'Device')
+  .scrollIntoView()
+  .find('svg')
+  .click();
+
+  cy.get('[placeholder="Search"]').eq(1).click().type(macId)
+  cy.get('.sc-eldPxv').contains(macId).should('not.exist');
+  });
+  
 it('Should upload CSV, verify worker details, and delete the entry ', () => {
   cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
   cy.get('.dropdown-option').contains('Upload').click();
 
-  cy.fixture('uploadFiles/fulldata.csv', 'base64').then(fileContent => {
+  cy.fixture('testdata/fulldata.csv', 'base64').then(fileContent => {
     cy.get('.sc-ewBhFl').attachFile(
       {
         fileContent,
@@ -357,7 +619,7 @@ it('Should upload CSV, verify worker details, and delete the entry ', () => {
   cy.get(workforceSelector.tableRow).eq(0).click({force: true});
   workforceSelector.personalDetails().click();
   cy.getWorkerField('Email').contains('jamesanderson@gmail.com');
-  cy.getWorkerField('Phone').contains('986-8757379');
+  cy.getWorkerField('Phone').contains('986-8757379');  
   cy.getWorkerField('Sex').contains('Male');
   cy.getWorkerField('Race').contains('American Indian or Alaska Native');
   cy.getWorkerField('MWBE').contains('Non MWBE');
@@ -421,4 +683,5 @@ function validateNamesMatch(uiNames, csvNames) {
       `${missingNames.length} UI names not found in CSV. Check console for full list.`
     );
   }
+  
 }

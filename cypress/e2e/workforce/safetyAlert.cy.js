@@ -331,8 +331,12 @@ describe("Worker Module - Safety Alert", () => {
    workerHelper.openSafteyAuditModel();
   
     const verifyAlertFilter = (filterLabel, alertType) => {
+      const today = new Date();
+    const formattedDate = `${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getDate().toString().padStart(2, '0')}/${today.getFullYear()}`;
+
       cy.get(`[label="${filterLabel}"]`).click();
       cy.contains('.alert-type-label', alertType).click();
+      cy.get(`.filter-alert-calender-container [label="12/20/2020 - ${formattedDate}"]`).should('be.visible');
       cy.wait(5000);
   
       cy.get('body').then(($body) => {
