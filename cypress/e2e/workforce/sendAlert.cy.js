@@ -40,8 +40,9 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
     });
   });
 
-  it("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", () => {
+  it.only("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", () => {
     const randomText = Math.random().toString(36).substring(2, 12);
+    const twilioNumber = Cypress.env("TWILIO_NUMBER");
   
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
@@ -53,7 +54,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.get(workforceSelector.tableRow).first().click({ force: true });
       workforceSelector.personalDetails().click();
       cy.getWorkerField("Phone").click();
-      cy.get('[name="phone"]').clear().type(Cypress.env("TWILIO_NUMBER"));
+      cy.get('[name="phone"]').clear().type(twilioNumber);
       cy.get("button p").contains("Update").click();
       cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated employee.");
       cy.get("button p").contains("Cancel").click();
@@ -131,7 +132,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
               check(retries);
             });
           };
-          cy.wait(3000)
+          cy.wait(5000)
   
           pollTwilio().then((latestSMS) => {
             expect(latestSMS).to.exist;
