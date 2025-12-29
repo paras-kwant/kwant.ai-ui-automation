@@ -131,7 +131,7 @@ describe("Worker Module - Add Worker Tests", () => {
       .should('have.attr', 'src')
       .and('not.contain', 'https://uat.kwant.ai/assets/personbg-2f058cfa');
   });
-  it.only('Should add worker with all fields filled', () => {
+  it('Should add worker with all fields filled', () => {
     const workerData = generateWorkerData();
 
     cy.get('.upload-button__camera-icon').click();
