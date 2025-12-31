@@ -112,7 +112,10 @@ describe("Worker Module - Add Worker Tests", () => {
     .should('have.attr', 'src')
     .and('match', /^blob:/); 
   });
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa8d4a397423b04c30800b63e9e191f2d2225a5e
   it('Should add worker with all fields filled', () => {
     const workerData = generateWorkerData();
 
