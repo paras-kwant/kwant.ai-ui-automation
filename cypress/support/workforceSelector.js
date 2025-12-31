@@ -33,7 +33,7 @@ export const workforceSelector = {
     // companyNameInput:'input[name="company"]',
     searchInput:'#search-input',
     updateButton:'button >p:contains("Update")',
-    // submitButton:'button >p:contains("Submit")',
+    
     saveButton:'button >p:contains("Save")',
     tableRow:'.sc-cRmqLi',
     

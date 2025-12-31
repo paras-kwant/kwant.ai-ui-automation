@@ -40,7 +40,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
     });
   });
 
-  it.only("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", () => {
+  it("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", () => {
     const randomText = Math.random().toString(36).substring(2, 12);
     const twilioNumber = Cypress.env("TWILIO_NUMBER");
   
@@ -54,7 +54,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.get(workforceSelector.tableRow).first().click({ force: true });
       workforceSelector.personalDetails().click();
       cy.getWorkerField("Phone").click();
-      cy.get('[name="phone"]').clear().type(twilioNumber);
+      cy.get('[name="phone"]').clear().type(Cypress.env("TWILIO_NUMBER"));
       cy.get("button p").contains("Update").click();
       cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated employee.");
       cy.get("button p").contains("Cancel").click();
@@ -63,7 +63,6 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
           cy.get(workforceSelector.overflowMenu).click();
           cy.contains(".dropdown-option", "Send Alert").click();
           
-
           cy.get('[label="Message Type"] [placeholder="Select"]').click();
           cy.contains("General Communication").click();
           cy.get("textarea").type(randomText);
@@ -82,10 +81,6 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
           cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
           cy.get(workforceSelector.overflowMenu).click();
           cy.contains(".dropdown-option", "Send Alert").click();
-
-
-  
-
 
           cy.get("footer .sc-dhKdcB")
             .invoke("text")

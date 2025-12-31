@@ -799,4 +799,52 @@ describe("Worker Module - Documents Page", () => {
       cy.get("body").should("not.contain", credID);
     });
   });
+
+  
+  it("Download uploaded document - validate downloaded file name", () => {
+
+    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    workforceSelector.DocumentsPage().click();
+    cy.get('.sc-cRmqLi.bpifwg').eq(0).click();
+  
+    cy.get('iframe[src*="s3.amazonaws.com"]')
+      .should('have.attr', 'src')
+      .then((src) => {
+        const expectedFileName = src.split('/').pop();
+        cy.log("Expected file name: " + expectedFileName);
+  
+        cy.get('.sc-aXZVg.liAmio button svg').eq(0).click();
+        cy.get('p').contains('Download').click();
+  
+        const downloadsFolder = Cypress.config('downloadsFolder');
+        const downloadedFilePath = path.join(downloadsFolder, expectedFileName);
+
+        cy.readFile(downloadedFilePath, { timeout: 15000 }).should('exist');
+        cy.log("Downloaded file exists: " + downloadedFilePath);
+      });
+  });
+
+
+  it("Editing the existing document and add a jpeg document", () => {
+
+    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    workforceSelector.DocumentsPage().click();
+    cy.get('.sc-cRmqLi.bpifwg').eq(0).click();
+    cy.get('.sc-aXZVg.liAmio button svg').eq(0).click();
+    cy.get('button p').contains('Remove').click()
+    cy.fixture("document.jpg", "base64").then((fileContent) => {
+      cy.get(".sc-gObJpS").attachFile(
+        { fileContent, fileName: "document.jpg", mimeType: "image/jpeg" },
+        { subjectType: "drag-n-drop" }
+      );
+    });
+    cy.get('img[src^="blob:https://uat.kwant.ai"]')
+    .scrollIntoView()
+    .should('be.visible')
+  
+
+
+
+  });
+
 });

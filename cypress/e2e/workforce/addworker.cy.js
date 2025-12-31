@@ -5,6 +5,7 @@ import { workforceSelector } from '../../support/workforceSelector';
 import { generateWorkerData } from '../../fixtures/workerData.js';
 import workerHelper from '../../support/helper/workerHelper.js';
 import { addWorkerSelector } from '../../selector/addWorker.js';
+import addworkerPage from '../../pages/workforce/addworkerPage.js';
 
 describe("Worker Module - Add Worker Tests", () => {
   before(() => {
@@ -21,59 +22,50 @@ describe("Worker Module - Add Worker Tests", () => {
     cy.cleanUI()
   });
   beforeEach(() => {
-    addWorkerSelector.addWorkerButton().click()
+    addworkerPage.openAddWorkerForm();
   })
-
   it('Should disable buttons when mandatory fields are empty', () => {
-    addWorkerSelector.submitWorkerButton().should('be.disabled');
-    addWorkerSelector.addMoreDetail().should('be.disabled');
+      addworkerPage.verifyMandatoryButtonsAreDisabled();
   });
 
   it('Should not allow adding worker without First Name', () => {
     const workerData = generateWorkerData();
-    addWorkerSelector.profileImageUploadButton().click();
-    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
+    addworkerPage.uploadProfileImage('profile.png');
     addWorkerSelector.lastNameInput().type(workerData.lastName);
     cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
-    addWorkerSelector.submitWorkerButton().should('be.disabled');
-    addWorkerSelector.addMoreDetail().should('be.disabled');
+    addworkerPage.verifyMandatoryButtonsAreDisabled();
   });
 
   it('Should not allow adding worker without Last Name', () => {
     const workerData = generateWorkerData();
-    addWorkerSelector.profileImageUploadButton().click();
-    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
+    addworkerPage.uploadProfileImage('profile.png');
     workforceSelector.firstNameInput().type(workerData.firstName);
     cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
-    addWorkerSelector.submitWorkerButton().should('be.disabled');
-    addWorkerSelector.addMoreDetail().should('be.disabled');
+    addworkerPage.verifyMandatoryButtonsAreDisabled();
   });
 
   it('Should not allow adding worker without Company name', () => {
     const workerData = generateWorkerData();
     workforceSelector.profileImageUploadButton().click();
     cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
-    addWorkerSelector.firstNameInput().type(workerData.firstName);
-    addWorkerSelector.lastNameInput().type(workerData.lastName);
-    addWorkerSelector.submitWorkerButton().should('be.disabled');
-    addWorkerSelector.addMoreDetail().should('be.disabled');
+    addworkerPage.fillWorkerName(workerData);
+    addworkerPage.verifyMandatoryButtonsAreDisabled();
   });
 
   it('Should validate email format', () => {
     const workerData = generateWorkerData(); 
-    addWorkerSelector.firstNameInput().type(workerData.firstName);
-    addWorkerSelector.lastNameInput().type(workerData.lastName);
+    addworkerPage.fillWorkerName(workerData);
     cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
     addWorkerSelector.addMoreDetail().click();
     addWorkerSelector.emailInput().type('paras@asdasdsa');
     addWorkerSelector.addMoreDetail().click();
-    addWorkerSelector.toastMessage().contains('Invalid email').should('be.visible');
+    addworkerPage.assertToastMessage('Invalid email')
   });
 
   it('Should restrict worker image upload to PNG, JPG, JPEG', () => {
-    cy.get('.upload-button__camera-icon').click();
-    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/demo.pdf', { force: true });
-    addWorkerSelector.toastMessage().contains('Image upload failed: Unsupported file type.').should('be.visible');
+    addworkerPage.uploadProfileImage('demo.pdf');
+    addworkerPage.assertToastMessage('Image upload failed: Unsupported file type.');
+
   });
 
   it('Should show warning when adding existing worker', () => {
@@ -82,31 +74,23 @@ describe("Worker Module - Add Worker Tests", () => {
       .invoke('text')
       .then((fullName) => {
         const [firstName, lastName] = fullName.trim().split(" ");
-        addWorkerSelector.firstNameInput().type(firstName);
-        addWorkerSelector.lastNameInput().type(lastName);
-        addWorkerSelector.toastMessage()
-          .contains('This worker name may already be in your system.')
-          .should('be.visible');
+        addworkerPage.fillWorkerName({ firstName, lastName });
+        addworkerPage.assertToastMessage('This worker name may already be in your system.')
       });
   });
 
   it('Should add worker with only mandatory fields', () => {
     const workerData = generateWorkerData();
-    addWorkerSelector.firstNameInput().type(workerData.firstName);
-    addWorkerSelector.lastNameInput().type(workerData.lastName);
-    cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
-    addWorkerSelector.submitWorkerButton().click();
-    cy.get('h4').contains('successfully added as a worker.').should('be.visible');
-    cy.writeFile('cypress/fixtures/noEmailWorker.json', {
-      firstName: workerData.firstName,
-      lastName: workerData.lastName
-    });
+    addworkerPage.fillWorkerName(workerData);
+    cy.selectRandomOption('input[name="company"]','.sc-tagGq[role="button"]','company');
+    addworkerPage.submitWorker();
+    cy.writeFile('cypress/fixtures/noEmailWorker.json', workerData);
   });
+  
 
   it('Should add worker with profile picture', () => {
     const workerData = generateWorkerData();
-    addWorkerSelector.profileImageUploadButton().click();
-    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
+    addworkerPage.uploadProfileImage('profile.png');
     addWorkerSelector.firstNameInput().type(workerData.firstName);
     addWorkerSelector.lastNameInput().type(workerData.lastName);
     cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
@@ -115,30 +99,26 @@ describe("Worker Module - Add Worker Tests", () => {
     addWorkerSelector.emailInput().type('paras+45@kwant.ai');
     workforceSelector.AccessControl().click()
     cy.selectRandomOption('[name="projectBeaconSerialNumber"]', '.sc-tagGq[role="button"]', 'device');
-    addWorkerSelector.submitWorkerButton().click();
-
-    cy.get('h4').contains('successfully added as a worker.').should('be.visible');
+    addworkerPage.submitWorker();
   });
 
   it('Should capture worker photo via camera', () => {   
     addWorkerSelector.profileImageUploadButton().click();
-    cy.wait(2000); 
     addWorkerSelector.takeAPictureButton().click();
-    cy.wait(2000);
+    cy.get('.video_viewer').should('be.visible')
     addWorkerSelector.clickPictureButton().click();
     addWorkerSelector.submitPhotoButton().click();
     cy.get('.upload-avatar img')
-      .should('have.attr', 'src')
-      .and('not.contain', 'https://uat.kwant.ai/assets/personbg-2f058cfa');
+    .should('have.attr', 'src')
+    .and('match', /^blob:/); 
   });
-  it.only('Should add worker with all fields filled', () => {
+
+  it('Should add worker with all fields filled', () => {
     const workerData = generateWorkerData();
 
-    cy.get('.upload-button__camera-icon').click();
-    cy.get('#worker_image_uploader').selectFile('cypress/fixtures/profile.png', { force: true });
+    addworkerPage.uploadProfileImage('profile.png');
 
-    addWorkerSelector.firstNameInput().type(workerData.firstName);
-    addWorkerSelector.lastNameInput().type(workerData.lastName);
+    addworkerPage.fillWorkerName(workerData);
     cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
 
     addWorkerSelector.addMoreDetail().click();
@@ -186,9 +166,8 @@ describe("Worker Module - Add Worker Tests", () => {
     addWorkerSelector.addMoreDetail().click();
     cy.selectRandomOption('[name="projectBeaconSerialNumber"]', '.sc-tagGq[role="button"]', 'device');
     cy.get('.exact-toggle-switch > [type="checkbox"]').check({ force: true });
-    cy.wait(2000);
-    addWorkerSelector.submitWorkerButton().click();
-    cy.get('h4').contains('successfully added as a worker.').should('be.visible');
+    // cy.wait(2000);
+    addworkerPage.submitWorker();
     cy.writeFile('cypress/fixtures/createdWorker.json', {
       firstName: workerData.firstName,
       lastName: workerData.lastName

@@ -3,7 +3,7 @@ import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
 import workerHelper from "../../support/helper/workerHelper";
 
-describe("Worker Module - Safety Alert", () => {
+describe("Worker Module - Safety Audit", () => {
 
   before(() => {
     cy.session("userSession", () => {
@@ -173,6 +173,24 @@ describe("Worker Module - Safety Alert", () => {
     });
   });
 
+  it("Verify that Yellow or Red color is displayed for workers with unsafe security alerts", () => {
+    workerHelper.openSafteyAuditModel();
+  
+    cy.get('body').click(0, 0);
+  
+    cy.get(workforceSelector.tableRow).each(($row) => {
+      cy.wrap($row)
+        .find('div.tooltip-container.right-center span')
+        .invoke('text')
+        .then((text) => {
+          const cleanText = text.replace(/\u00a0/g, '').trim();
+          expect(cleanText).to.match(/^(Yellow|Red)$/);
+        });
+  
+    });
+  });
+  
+
   it('should delete a safety alert and verify it is no longer visible in the same list', () => {
     workerHelper.openSafteyAuditModel();
   
@@ -198,8 +216,7 @@ describe("Worker Module - Safety Alert", () => {
   });
 
   it('should add a comment to a safety alert and verify it appears in the comment list', () => {
-   workerHelper.openSafteyAuditModel();
-
+   workerHelper.openSafteyAuditModel()
 
    cy.get('.sc-cRmqLi.dEhqLz').eq(0).find('svg').last().click();
    workerHelper.addRandomComment()
@@ -327,7 +344,7 @@ describe("Worker Module - Safety Alert", () => {
   });
   
 
-  it('Should verify all safety alert filters display the correct alert types', () => {
+  it.only('Should verify all safety alert filters display the correct alert types', () => {
    workerHelper.openSafteyAuditModel();
   
     const verifyAlertFilter = (filterLabel, alertType) => {
@@ -341,9 +358,9 @@ describe("Worker Module - Safety Alert", () => {
   
       cy.get('body').then(($body) => {
         if ($body.find('.sc-cRmqLi.dEhqLz').length > 0) {
-          cy.get('.table-wrapper').each(($table) => {
+          cy.get('.table-wrapper').eq(1).each(($table) => {
             cy.wrap($table).within(() => {
-              cy.get('.label.default__label').should('contain.text', alertType);
+              cy.get('.sc-cRmqLi.dEhqLz .label.default__label').should('contain.text', alertType);
             }).scrollTo('bottom', { duration: 1000, ensureScrollable: false });
           });
         } else {
@@ -364,11 +381,10 @@ describe("Worker Module - Safety Alert", () => {
   it('should verify that safety alerts are displayed in descending order by date', () => {
     workerHelper.openSafteyAuditModel();
   
-    cy.get('.sc-cRmqLi.dEhqLz .cell-content') // replace '.cell-date' with your actual date cell selector
+    cy.get('.sc-cRmqLi.dEhqLz .cell-content') 
       .then(($dates) => {
         const dateArray = $dates.toArray().map(el => new Date(el.innerText.trim()));
   
-        // Verify that array is sorted in descending order
         for (let i = 0; i < dateArray.length - 1; i++) {
           expect(dateArray[i].getTime()).to.be.gte(dateArray[i + 1].getTime());
         }
@@ -376,6 +392,124 @@ describe("Worker Module - Safety Alert", () => {
         cy.log('All alerts are in descending order by date');
       });
   });
+
+
+  it('Verify Comment has no character limit', () => {
+    workerHelper.openSafteyAuditModel();
+  
+    cy.get('.sc-cRmqLi.dEhqLz').eq(0).find('svg').last().click();
+  
+    const longComment = 'A'.repeat(5000); // Large input
+  
+    cy.get('textarea')
+      .should('be.visible')
+      .clear()
+      .type(longComment, { delay: 0 });
+    cy.contains('button p', 'Add Comment').click();
+
+    cy.get('.comment-item-body__content').should('be.visible');
+
+  
+    cy.get('.comment-item-body__content')
+      .first()
+      .invoke('text')
+      .then((text) => {
+        expect(text.length).to.eq(longComment.length);
+        expect(text).to.eq(longComment);
+      });
+  });
+
+  it("Verify Selected Safety Audit Alerts Count Matches Worker Alerts Summary", () => {
+
+    // Open filter
+    cy.get('.table-header-filter-btn').eq(7).click();
+  
+    // Select all except None
+    cy.get('.sc-esYiGF').each(($el) => {
+      const label = $el.find('span').text().trim();
+      if (label !== 'None') {
+        cy.wrap($el).find('input[type="checkbox"]').check({ force: true });
+      }
+    });
+  
+    // Close filter
+    cy.get('.table-header-filter-btn').eq(7).click();
+  
+    // Log worker name
+    cy.get(workforceSelector.tableRow).eq(1).within(() => {
+      cy.get('.personal-info-content__title')
+        .invoke('text')
+        .then((name) => {
+          cy.log(`Worker Name: ${name.trim()}`);
+          console.log(`Worker Name: ${name.trim()}`);
+        });
+    });
+  
+    let totalSafetyAuditCount = 0;
+  
+    // Calculate total alerts from labels
+    cy.get(workforceSelector.tableRow).eq(1).within(() => {
+      cy.get('.default__label:visible').each(($el) => {
+        const text = $el.text().trim();
+        cy.log(`Found label: ${text}`);
+  
+        const numberMatch = text.match(/\+\s*(\d+)/);
+  
+        if (numberMatch) {
+          totalSafetyAuditCount += Number(numberMatch[1]);
+        } else if (text.length > 0) {
+          totalSafetyAuditCount += 1;
+        }
+      });
+    }).then(() => {
+  
+      cy.log(`Total Safety Audit Count: ${totalSafetyAuditCount}`);
+      console.log('Total Safety Audit Count:', totalSafetyAuditCount);
+  
+      // Open worker safety audit
+      cy.get(workforceSelector.tableRow).eq(1).click({ force: true });
+      workforceSelector.SafetyAudit().click();
+  
+      cy.get('p').contains('Safety Audit').should('be.visible');
+      cy.get('.sc-cRmqLi.dEhqLz').should('be.visible');
+  
+      // Select all alerts
+      cy.get('.sc-stxIr .header-checkbox-container [type="checkbox"]')
+        .eq(0)
+        .check({ force: true });
+  
+      // Get selected alerts count & assert
+      cy.get('.selected-container .default__label')
+        .invoke('text')
+        .then((selectedText) => {
+  
+          const selectedMatch = selectedText.match(/(\d+)/);
+          const selectedCount = selectedMatch ? Number(selectedMatch[1]) : 0;
+  
+          cy.log(`Selected Alerts Count: ${selectedCount}`);
+          console.log('Selected Alerts Count:', selectedCount);
+  
+          expect(selectedCount).to.equal(totalSafetyAuditCount);
+        });
+    });
+  });
+  
+  
+      // cy.get(workforceSelector.tableRow).eq(1).click({ force: true });
+      // workforceSelector.SafetyAudit().click();
+      // cy.get('.sc-cRmqLi.dEhqLz [type="checkbox"]').then(($checkboxes) => {
+      //   const totalAlerts = $checkboxes.length;
+      //   const alertsToSelect = Math.min(3, totalAlerts);
+      //
+      //   for (let i = 0; i < alertsToSelect; i++) {
+      //     cy.wrap($checkboxes[i]).check({ force: true });
+      //   }
+      //
+      //   cy.get('.label.default__label')
+      //     .should('contain', alertsToSelect.toString());
+      // });
+
+  
   
 
 });
