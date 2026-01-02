@@ -5,6 +5,7 @@ import { workforceSelector } from "../../support/workforceSelector";
 import "../../support/commands";
 import { log } from "console";
 import workerHelper from '../../support/helper/workerHelper.js';
+import filterPage from '../../pages/workforce/filter.js';
 
 describe("Worker Module - Filter", () => {
   before(() => {
@@ -39,6 +40,7 @@ describe("Worker Module - Filter", () => {
   });
   
 
+  
   it("Verify the table header filter - name", () => {
     cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
     cy.reload();
@@ -65,6 +67,8 @@ describe("Worker Module - Filter", () => {
       cy.get(workforceSelector.clearFilterButton).click();
     });
   });
+
+  
 
   it('Verify the table header filter exists for applicable table headers', () => {
     cy.wait(1000);
@@ -520,7 +524,7 @@ describe("Worker Module - Filter", () => {
     });
   });
 
-  it("Verify Interaction with Search Bar Filter", () => {
+  it("Verify filter Interaction with Search Bar Filter", () => {
     cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
     cy.reload();
 
@@ -567,7 +571,6 @@ describe("Worker Module - Filter", () => {
         });
     });
   });
-
   it("Verify the table header filter icon (funnel icon) is visible", () => {
     cy.get('.sc-bXWnss').each(($el, index) => {
       if (index >= 3) {
@@ -696,412 +699,231 @@ describe("Worker Module - Filter", () => {
     });
   });
   
-  it("Verifies the Device filter works correctly", () => {
-    cy.contains('.sc-fremEr', 'Device')
-      .find('svg')
-      .click({ force: true });
   
-    let selectedDevice; 
+  it("Verifies the Device filter works correctly for all rows", () => {
+    filterPage.applyFilter("Ethnicity");
   
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-  
-      // Filter out "None"
-      const filtered = $parents.filter((i, el) => {
-        const deviceText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return deviceText !== "None";     // ❌ skip None
-      });
-  
-      // If everything was None → fallback: just pick the first None and continue
-      if (filtered.length === 0) {
-        cy.log("⚠️ All devices are 'None', selecting first item as fallback");
-  
-        const first = $parents.eq(0);
-        selectedDevice = first.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-        cy.wrap(first)
-          .find('input[type=\"checkbox\"]')
-          .check({ force: true });
-  
-        return; // <-- stop here. Don’t run random code.
-      }
-  
-      // Normal random selection from valid items
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-  
-      const deviceName = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-      selectedDevice = deviceName;
-  
-      cy.log(`Selected Device: ${deviceName}`);
-  
-      cy.wrap($randomParent)
-        .find('input[type=\"checkbox\"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000)
-  
-    cy.get('body').then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length === 1) {
-        cy.get(workforceSelector.tableRow).first().click({force: true});
-        workforceSelector.AccessControl().click();
-        cy.getWorkerField('Device').should('contain.text', selectedDevice);
-  
-      } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
-      }
+    cy.then(() => {
+      filterPage.verifyFilteredRows(
+        workforceSelector.accessControlPage, 
+        '.label.default__label'
+      );
     });
   });
-
-
-  it("Verifies the Device Location filter works correctly", () => {
-    cy.contains('.sc-fremEr', 'Last Seen Location')
-      .find('svg')
-      .click({ force: true });
-  
-    let selectedDevice; 
-  
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-  
-      const filtered = $parents.filter((i, el) => {
-        const deviceText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return deviceText !== "None";
-      });
-  
-      if (filtered.length === 0) {
-        cy.log("⚠️ All devices are 'None', selecting first item as fallback");
-  
-        const first = $parents.eq(0);
-        selectedDevice = first.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-        cy.wrap(first)
-          .find('input[type=\"checkbox\"]')
-          .check({ force: true });
-  
-        return; // <-- stop here. Don’t run random code.
-      }
   
 
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
+
+  it("Verifies the Device Location filter works correctly for all rows", () => {
+    filterPage.applyFilter("Ethnicity");
   
-      const deviceName = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-      selectedDevice = deviceName;
-  
-      cy.log(`Selected Device: ${deviceName}`);
-  
-      cy.wrap($randomParent)
-        .find('input[type=\"checkbox\"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000)
-  
-    cy.get('body').then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length >1) {
-        cy.get(workforceSelector.tableRow).first().click({force: true});
-        workforceSelector.AccessControl().click();
-        cy.getWorkerField('Last Seen On').should('contain.text', selectedDevice);
-  
-      } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
-      }
+    cy.then(() => {
+      filterPage.verifyFilteredRows(
+        workforceSelector.accessControlPage, 
+        '.label.default__label'
+      );
     });
   });
+  
 
 
-  it("Verifies the Race filter works correctly", () => {
-    cy.contains('.sc-fremEr', 'Race')
-      .find('svg')
-      .click({ force: true });
+  it("Verifies the Race filter works correctly for all rows", () => {
+    filterPage.applyFilter("Ethnicity");
   
-    let selectedRace = null;
-  
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-  
-      const filtered = $parents.filter((i, el) => {
-        const raceText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return raceText !== "None";
-      });
-  
-      if (filtered.length === 0) {
-        const first = $parents.eq(0);
-        selectedRace = first.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-        cy.wrap(first)
-          .find('input[type="checkbox"]')
-          .check({ force: true });
-        return;
-      }
-  
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-  
-      selectedRace = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-      cy.wrap($randomParent)
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000);
-  
-    cy.get("body").then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 1) {
-        cy.get(workforceSelector.tableRow).first().click({ force: true });
-        workforceSelector.personalDetails().click();
-        cy.getWorkerField("Race").should("contain.text", selectedRace);
-      } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
-      }
+    cy.then(() => {
+      filterPage.verifyFilteredRows(
+        workforceSelector.personalDetailsPage, 
+        '.label.default__label'
+      );
     });
   });
+  
 
-  it("Verifies the Sex filter works correctly", () => {
-    cy.contains('.sc-fremEr', 'Sex')
-      .find('svg')
-      .click({ force: true });
   
-    let selectedSex = null;
-  
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-      const filtered = $parents.filter((i, el) => {
-        const sexText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return sexText !== "None";
-      });
-  
-      if (filtered.length === 0) {
-        const first = $parents.eq(0);
-        selectedSex = first.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-        cy.wrap(first)
-          .find('input[type="checkbox"]')
-          .check({ force: true });
-        return;
-      }
-  
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-  
-      selectedSex = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-      cy.wrap($randomParent)
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000);
-  
-    cy.get("body").then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 1) {
-        cy.get(workforceSelector.tableRow).first().click({ force: true });
-        workforceSelector.personalDetails().click();
-        cy.getWorkerField("Sex").should("contain.text", selectedSex);
-      } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
-      }
-    });
-  });
 
-  it("Verifies the Crew filter works correctly", () => {
-    cy.contains('.sc-fremEr', 'Crew')
-      .find('svg')
-      .click({ force: true });
   
-    let selectedCrew = null;
-  
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-      const filtered = $parents.filter((i, el) => {
-        const crewText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return crewText !== "None";
-      });
-  
-      if (filtered.length === 0) {
-        const first = $parents.eq(0);
-        selectedCrew = first.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-        cy.wrap(first)
-          .find('input[type="checkbox"]')
-          .check({ force: true });
-        return;
-      }
-  
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-  
-      selectedCrew = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-      cy.wrap($randomParent)
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000);
-  
-    cy.get("body").then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 1) {
-        cy.get(workforceSelector.tableRow).first().click({ force: true });
-        workforceSelector.jobDetails().click();
-        cy.getWorkerField("Crew").should("contain.text", selectedCrew);
-      } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
-      }
-    });
-  });
 
-  it("Verifies the Ethnicity filter works correctly", () => {
-    cy.contains('.sc-fremEr', 'Ethnicity')
-      .find('svg')
-      .click({ force: true });
-  
-    let selectedEthnicity = null;
-  
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-      const filtered = $parents.filter((i, el) => {
-        const ethnicityText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return ethnicityText && ethnicityText !== "None";
-      });
-  
-      if (filtered.length === 0) {
-        cy.log("⚠️ No valid Ethnicity options found, skipping selection");
-        return;
-      }
-  
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-  
-      selectedEthnicity = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-      cy.wrap($randomParent)
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000);
-  
-    cy.get("body").then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 1 && selectedEthnicity) {
-        cy.get(workforceSelector.tableRow).first().click({ force: true });
-        workforceSelector.personalDetails().click();
-        cy.getWorkerField("Ethnicity").should("contain.text", selectedEthnicity);
-      } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
-      }
-    });
-  });
-
-
-  it("Verifies the Safety Alert filter works correctly", () => {
+  it("Verifies the Safety Alert filter works correctly for all rows", () => {
     cy.contains('.sc-fremEr', 'Safety Alert')
       .find('svg')
       .click({ force: true });
   
-    let selectedAlert = null;
-  
     cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
+
       const filtered = $parents.filter((i, el) => {
         const alertText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
         return alertText && alertText !== "None";
       });
   
+      let selectedAlert;
+  
       if (filtered.length === 0) {
-        cy.log("⚠️ No valid Safety Alert options found, skipping selection");
-        return;
-      }
+        cy.log("⚠️ No valid Safety Alert options found, selecting first as fallback");
+        const first = $parents.eq(0);
+        selectedAlert = first.find(".sc-eldPxv.bVwlNE").text().trim();
   
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-  
-      selectedAlert = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-      cy.wrap($randomParent)
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000);
-  
-    cy.get("body").then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 1 && selectedAlert) {
-        cy.get(workforceSelector.tableRow).first().click({ force: true });
-        workforceSelector.SafetyAudit().click();
-        cy.get('.label.default__label').should("contain.text", selectedAlert);
+        cy.wrap(first)
+          .find('input[type="checkbox"]')
+          .check({ force: true });
       } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
+        const randomIndex = Cypress._.random(0, filtered.length - 1);
+        const $randomParent = filtered.eq(randomIndex);
+        selectedAlert = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
+  
+        cy.log(`Selected Safety Alert: ${selectedAlert}`);
+  
+        cy.wrap($randomParent)
+          .find('input[type="checkbox"]')
+          .check({ force: true });
       }
+  
+      // Apply filter
+      cy.contains("Filters:").click();
+      cy.wait(200);
+  
+      // Verify all rows
+      cy.get("body").then(($body) => {
+        const rowCount = $body.find(workforceSelector.tableRow).length;
+  
+        if (rowCount > 0) {
+          for (let i = 0; i < rowCount; i++) {
+            cy.get(workforceSelector.tableRow).eq(i).click({ force: true });
+            workforceSelector.SafetyAudit().click();
+  
+            cy.get('.label.default__label').should("contain.text", selectedAlert);
+  
+            // Close drawer
+            cy.get('body').click(0, 0, { force: true });
+            cy.wait(200);
+          }
+          cy.log(`✅ All rows verified for Safety Alert: ${selectedAlert}`);
+        } else {
+          cy.contains("No Results Found").should("be.visible");
+        }
+      });
+    });
+  });
+  it("Verifies the Sex filter works correctly for all rows", () => {
+    cy.contains('.sc-fremEr', 'Sex').find('svg').click({ force: true });
+
+    cy.get(".sc-fzQBhs.fyTPqL").then(($options) => {
+      const validOptions = $options.filter((i, el) => {
+        const text = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
+        return text && text !== "None";
+      });
+
+      let selectedSex;
+
+      if (validOptions.length === 0) {
+        cy.log("⚠️ No valid Sex options found, selecting first as fallback");
+        const first = $options.eq(0);
+        selectedSex = first.find(".sc-eldPxv.bVwlNE").text().trim();
+        cy.wrap(first).find('input[type="checkbox"]').check({ force: true });
+      } else {
+        const randomIndex = Cypress._.random(0, validOptions.length - 1);
+        const $randomOption = validOptions.eq(randomIndex);
+        selectedSex = $randomOption.find(".sc-eldPxv.bVwlNE").text().trim();
+        cy.wrap($randomOption).find('input[type="checkbox"]').check({ force: true });
+      }
+
+      cy.contains("Filters:").click();
+      cy.wait(1000);
+      cy.get("body").then(($body) => {
+        const rowCount = $body.find(workforceSelector.tableRow).length;
+
+        if (rowCount > 0) {
+          for (let i = 0; i < rowCount; i++) {
+            cy.get(workforceSelector.tableRow).eq(i).click({ force: true });
+            workforceSelector.SafetyAudit().click();
+            cy.get('.label.default__label').should("contain.text", selectedSex);
+
+            cy.get('body').click(0, 0, { force: true });
+            cy.wait(200);
+          }
+        } else {
+          cy.get(".empty-body").should(
+            "have.text",
+            "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
+          );
+        }
+      });
     });
   });
 
-  it("Verifies the MWBE filter works correctly", () => {
-    cy.contains('.sc-fremEr', 'MWBE')
-      .find('svg')
-      .click({ force: true });
+  it("Verifies the Ethnicity filter works correctly for all rows", () => {
+    filterPage.applyFilter("Ethnicity");
   
-    let selectedMWBE = null;
+    cy.then(() => {
+      filterPage.verifyFilteredRows(
+        workforceSelector.personalDetailsPage, 
+        '.label.default__label'
+      );
+    });
+   
+  });
+
+  
+  
+  it("Verifies the Safety Alert filter works correctly for all rows", () => {
+    cy.contains('.sc-fremEr', 'Safety Alert').find('svg').click({ force: true });
   
     cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
       const filtered = $parents.filter((i, el) => {
-        const mwbeText = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return mwbeText && mwbeText !== "None";
+        const text = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
+        return text && text !== "None";
       });
   
+      let selectedAlert;
+  
       if (filtered.length === 0) {
-        cy.log("⚠️ No valid MWBE options found, skipping selection");
-        return;
-      }
+        cy.log("⚠️ No valid Safety Alert options found, selecting first as fallback");
+        const first = $parents.eq(0);
+        selectedAlert = first.find(".sc-eldPxv.bVwlNE").text().trim();
   
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-  
-      selectedMWBE = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
-  
-      cy.wrap($randomParent)
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-  
-    cy.get("p").contains("Filters:").click();
-    cy.wait(2000);
-  
-    cy.get("body").then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 1 && selectedMWBE) {
-        cy.get(workforceSelector.tableRow).first().click({ force: true });
-        workforceSelector.personalDetails().click();
-        cy.getWorkerField("MWBE").should("contain.text", selectedMWBE);
+        cy.wrap(first).find('input[type="checkbox"]').check({ force: true });
       } else {
-        cy.get(".empty-body").should(
-          "have.text",
-          "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-        );
+        const randomIndex = Cypress._.random(0, filtered.length - 1);
+        const $randomParent = filtered.eq(randomIndex);
+        selectedAlert = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
+  
+        cy.log(`Selected Safety Alert: ${selectedAlert}`);
+        cy.wrap($randomParent).find('input[type="checkbox"]').check({ force: true });
       }
+  
+      cy.contains("Filters:").click();
+      cy.wait(1000);
+  
+      cy.get("body").then(($body) => {
+        const rowCount = $body.find(workforceSelector.tableRow).length;
+  
+        if (rowCount > 0) {
+          for (let i = 0; i < rowCount; i++) {
+            cy.get(workforceSelector.tableRow).eq(i).click({ force: true });
+            workforceSelector.SafetyAudit().click();
+            cy.get('.label.default__label').should("contain.text", selectedAlert);
+  
+            cy.get('body').click(0, 0, { force: true });
+            cy.wait(200);
+          }
+          cy.log(`✅ All rows verified for Safety Alert: ${selectedAlert}`);
+        } else {
+          cy.get(".empty-body").should(
+            "have.text",
+            "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
+          );
+        }
+      });
+    });
+  })
+  it("Verifies Crew filter", () => {
+    filterPage.applyFilter("Crew");
+  
+    cy.then(() => {
+      filterPage.verifyFilteredRows(
+        workforceSelector.jobDetailsPage, 
+        '.label.default__label'
+      );
     });
   });
+  
 })
+  

@@ -32,8 +32,15 @@ export const workforceSelector = {
     // lastNameInput:'input[name=lastName]',
     // companyNameInput:'input[name="company"]',
     searchInput:'#search-input',
+
+
     updateButton:'button >p:contains("Update")',
-    
+    jobDetailsPage: '.sc-jXbUNg.gDlPVv:eq(3)',
+    personalDetailsPage: '.sc-jXbUNg.gDlPVv:eq(2)',
+    accessControlPage: '.sc-jXbUNg.gDlPVv:eq(5)',
+    personalDetailsPage: '.sc-jXbUNg.gDlPVv:eq(2)',
+
+
     saveButton:'button >p:contains("Save")',
     tableRow:'.sc-cRmqLi',
     
@@ -61,6 +68,8 @@ export const workforceSelector = {
     AccessControl:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(5),
     SafetyAudit:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(6),
    personalDetails:()=>cy.get('.sc-jXbUNg.gDlPVv').eq(2),
+
+
 
 
    selectAllCheckbox: () => cy.get('.header-checkbox-container [type="checkbox"]').eq(0),

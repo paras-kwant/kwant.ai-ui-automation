@@ -180,7 +180,6 @@ describe("Worker Module - Column", () => {
     cy.get('.sc-krNlru svg').click();
     cy.get('.columns-drawer-header').should('not.exist');
   });
-
   it("Verify clicking on Back navigates back to Column Settings page", () => {
     cy.get('.icon-button button').eq(0).click();
     cy.get('button p').contains('Add New Column').click();
