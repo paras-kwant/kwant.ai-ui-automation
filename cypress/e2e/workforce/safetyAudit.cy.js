@@ -344,7 +344,7 @@ describe("Worker Module - Safety Audit", () => {
   });
   
 
-  it.only('Should verify all safety alert filters display the correct alert types', () => {
+  it('Should verify all safety alert filters display the correct alert types', () => {
    workerHelper.openSafteyAuditModel();
   
     const verifyAlertFilter = (filterLabel, alertType) => {
