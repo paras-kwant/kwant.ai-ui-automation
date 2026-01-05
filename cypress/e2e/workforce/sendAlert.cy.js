@@ -371,6 +371,52 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
         .should("have.length.at.most", 160);
     });
   });
+
+
+
+  it.only(
+    "Enforces maximum character limit for General Communication messages",
+    () => {
+      cy.readFile("cypress/fixtures/createdWorker.json").then(
+        ({ firstName, lastName }) => {
+          const fullName = `${firstName} ${lastName}`;
+  
+          cy.get(workforceSelector.searchInput)
+            .clear()
+            .type(fullName);
+  
+          cy.wait(2000);
+
+          cy.get(".header-checkbox-container [type='checkbox']")
+            .first()
+            .check({ force: true });
+  
+          cy.get(workforceSelector.overflowMenu).click();
+          cy.contains(".dropdown-option", "Send Alert").click();
+  
+          cy.get('[label="Message Type"] [placeholder="Select"]').click();
+          cy.contains("General Communication").click();
+  
+          cy.get(".sc-dhKdcB.fOBBgu.sc-ijanKN.edANdR")
+            .invoke("text")
+            .then((text) => {
+              const maxLength = Number(text.split("/")[1]);
+  
+              cy.log(`Max allowed characters: ${maxLength}`);
+  
+              const overLimitMessage = "A".repeat(maxLength + 10);
+  
+              cy.get("textarea")
+                .clear()
+                .type(overLimitMessage)
+                .invoke("val")
+                .should("have.length", maxLength);
+            });
+        }
+      );
+    }
+  );
+  
   
   
 });

@@ -30,6 +30,7 @@ describe("Worker Module - Filter", () => {
       cy.get('[data-rbd-draggable-id="ethnicity"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="sex"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="status"] [type="checkbox"]').click();
+      cy.get('[data-rbd-draggable-id="boolean_test"] [type="checkbox"]').click();
 
       cy.wait(1000)
       cy.get('button p').contains('Save').should('be.visible').click();
@@ -924,6 +925,84 @@ describe("Worker Module - Filter", () => {
       );
     });
   });
+
+  it("Validates Boolean filter results based on checkbox state", () => {
+
+    cy.contains(".sc-fremEr", "Boolean test")
+      .find("svg")
+      .click({ force: true });
+  
+    cy.get(".sc-fzQBhs.fyTPqL").then(($options) => {
+  
+
+      const validOptions = $options.filter((i, el) => {
+        const text = Cypress.$(el)
+          .find(".sc-eldPxv.bVwlNE")
+          .text()
+          .trim();
+        return text && text !== "None";
+      });
+  
+      let selectedValue;
+  
+      const $selectedOption =
+        validOptions.length > 0
+          ? validOptions.eq(Cypress._.random(0, validOptions.length - 1))
+          : $options.eq(0);
+  
+      selectedValue = $selectedOption
+        .find(".sc-eldPxv.bVwlNE")
+        .text()
+        .trim();
+  
+      cy.wrap($selectedOption)
+        .find('input[type="checkbox"]')
+        .check({ force: true });
+  
+      cy.log(`Selected Boolean value: ${selectedValue}`);
+  
+      cy.contains("Filters:").click();
+      cy.wait(1000);
+  
+      cy.get("body").then(($body) => {
+        const rowCount = $body.find(workforceSelector.tableRow).length;
+  
+
+        if (rowCount > 0) {
+          for (let i = 0; i < rowCount; i++) {
+
+  
+  
+            if (selectedValue === "True") {
+
+             cy.get(workforceSelector.tableRow).each(($row) => {
+  cy.wrap($row).within(() => {
+
+    cy.get('.exact-toggle-switch [type="checkbox"]')
+      .should("exist")
+      .and("be.checked"); 
+  });
+});
+
+            } else if (selectedValue === "False") {
+              cy.get('.exact-toggle-switch [type="checkbox"]')
+              .should("exist")
+              .and("not.be.checked"); 
+            }
+
+            cy.wait(200);
+          }
+        }
+        else {
+          cy.get(".empty-body").should(
+            "contain.text",
+            "No Results Found"
+          );
+        }
+      });
+    });
+  });
+  
   
 })
   
