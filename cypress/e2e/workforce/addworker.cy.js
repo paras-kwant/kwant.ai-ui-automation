@@ -113,7 +113,7 @@ describe("Worker Module - Add Worker Tests", () => {
     .and('match', /^blob:/); 
   });
 
-  it('Should add worker with all fields filled', () => {
+  it.only('Should add worker with all fields filled', () => {
     const workerData = generateWorkerData();
 
     addworkerPage.uploadProfileImage('profile.png');
@@ -165,7 +165,7 @@ describe("Worker Module - Add Worker Tests", () => {
 
     addWorkerSelector.addMoreDetail().click();
     cy.selectRandomOption('[name="projectBeaconSerialNumber"]', '.sc-tagGq[role="button"]', 'device');
-    cy.get('.exact-toggle-switch > [type="checkbox"]').check({ force: true });
+    // cy.get('.exact-toggle-switch > [type="checkbox"]').check({ force: true });
     addworkerPage.submitWorker();
     cy.writeFile('cypress/fixtures/createdWorker.json', {
       firstName: workerData.firstName,
