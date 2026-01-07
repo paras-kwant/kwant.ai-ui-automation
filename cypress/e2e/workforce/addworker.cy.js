@@ -113,7 +113,7 @@ describe("Worker Module - Add Worker Tests", () => {
     .and('match', /^blob:/); 
   });
 
-  it.only('Should add worker with all fields filled', () => {
+  it('Should add worker with all fields filled', () => {
     const workerData = generateWorkerData();
 
     addworkerPage.uploadProfileImage('profile.png');
