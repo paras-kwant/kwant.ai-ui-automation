@@ -208,4 +208,4 @@ jobs:
                 }]
               }]
             }' | curl -X POST -H "Content-Type: application/json" \
-              --data @- "$SLACK_WEBHOOK_URL"
+              --data @- "$SLACK_WEBHOOK_URLs"
