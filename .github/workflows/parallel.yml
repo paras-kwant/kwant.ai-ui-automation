@@ -1,4 +1,4 @@
-name: Run Cypress UI Tests (Parallel Folders) - Clean Approach
+name: Run Cypress UI Tests (Parallel Folders) - Correct Way
 
 on:
   workflow_dispatch:
@@ -56,9 +56,9 @@ jobs:
         run: |
           echo "=== Running all tests in cypress/e2e/${{ matrix.folder }} ==="
           
-          # Clean everything first!
-          rm -rf cypress/results allure-results allure-report
-          mkdir -p cypress/results allure-results
+          # Clean everything first
+          rm -rf cypress/results
+          mkdir -p cypress/results
 
           # Run Cypress
           npx cypress run \
@@ -70,27 +70,14 @@ jobs:
             --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true \
             || true
 
-          # Copy mochawesome results to allure-results
-          cp -r cypress/results/* allure-results/ 2>/dev/null || echo "No results to copy"
+          echo "✅ Tests completed for ${{ matrix.folder }}"
+          ls -lah cypress/results/
 
-          # Output folder name for artifact
-          echo "folder_name=${{ matrix.folder }}" >> $GITHUB_OUTPUT
-
-      - name: Generate Allure Report for ${{ matrix.folder }}
-        run: |
-          echo "📊 Generating Allure report for ${{ matrix.folder }}..."
-          npm install -g allure-commandline --save-dev
-          
-          # Generate the report
-          allure generate allure-results --clean -o allure-report
-          
-          echo "✅ Allure report for ${{ matrix.folder }} generated"
-
-      - name: Upload Allure Report Artifact
+      - name: Upload Raw Test Results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.cypress.outputs.folder_name }}-report
-          path: allure-report
+          name: ${{ matrix.folder }}-raw-results
+          path: cypress/results
           if-no-files-found: warn
 
   merge-and-deploy:
@@ -111,110 +98,109 @@ jobs:
       - name: Clean workspace
         run: |
           echo "🧹 Cleaning workspace..."
-          rm -rf allure-reports allure-report-merged
-          mkdir -p allure-reports
+          rm -rf allure-results allure-report raw-results
+          mkdir -p allure-results
           echo "✅ Workspace cleaned"
 
-      - name: Download Companies Report
+      - name: Download Companies Raw Results
         uses: actions/download-artifact@v4
         with:
-          name: companies-report
-          path: allure-reports/companies
+          name: companies-raw-results
+          path: raw-results/companies
 
-      - name: Download Workers Report
+      - name: Download Workers Raw Results
         uses: actions/download-artifact@v4
         with:
-          name: workers-report
-          path: allure-reports/workers
+          name: workers-raw-results
+          path: raw-results/workers
 
-      - name: Merge Allure Reports
+      - name: Merge Raw Results
         run: |
-          echo "🔀 Merging Allure reports..."
-          npm install -g allure-commandline --save-dev
+          echo "🔀 Merging raw test results..."
           
-          # Create merged report directory
-          mkdir -p allure-report-merged/data
+          # Copy all JSON files from both folders to allure-results
+          echo "Copying companies results..."
+          cp raw-results/companies/*.json allure-results/ 2>/dev/null || echo "No companies JSON files"
           
-          # Copy data from both reports
-          echo "Copying companies data..."
-          cp -r allure-reports/companies/data/* allure-report-merged/data/ 2>/dev/null || echo "No companies data"
+          echo "Copying workers results..."
+          cp raw-results/workers/*.json allure-results/ 2>/dev/null || echo "No workers JSON files"
           
-          echo "Copying workers data..."
-          cp -r allure-reports/workers/data/* allure-report-merged/data/ 2>/dev/null || echo "No workers data"
-          
-          # Copy the static files from one report (they're the same)
-          echo "Copying static assets..."
-          cp -r allure-reports/companies/app.js allure-report-merged/ 2>/dev/null || true
-          cp -r allure-reports/companies/styles.css allure-report-merged/ 2>/dev/null || true
-          cp -r allure-reports/companies/favicon.ico allure-report-merged/ 2>/dev/null || true
-          cp -r allure-reports/companies/index.html allure-report-merged/ 2>/dev/null || true
-          cp -r allure-reports/companies/plugins allure-report-merged/ 2>/dev/null || true
-          cp -r allure-reports/companies/export allure-report-merged/ 2>/dev/null || true
-          cp -r allure-reports/companies/history allure-report-merged/ 2>/dev/null || true
-          
-          # Regenerate the widgets/summary
-          echo "Regenerating report structure..."
-          allure generate allure-report-merged/data --clean -o final-report || {
-            echo "⚠️ Direct merge failed, using alternative method..."
-            # Alternative: just use the companies report as base and copy workers data
-            cp -r allure-reports/companies final-report
-            cp -r allure-reports/workers/data/* final-report/data/ 2>/dev/null || true
-          }
-          
-          echo "✅ Reports merged successfully!"
-          ls -lah final-report/
+          echo "✅ Raw results merged. Contents:"
+          ls -lah allure-results/
 
-      - name: Extract Stats from Merged Report
+      - name: Calculate Stats from Raw Results
         id: stats
         run: |
-          echo "📊 Extracting stats from merged Allure report..."
+          echo "📊 Calculating stats from mochawesome JSON files..."
           
-          SUMMARY_FILE="final-report/widgets/summary.json"
+          TOTAL=0
+          PASSED=0
+          FAILED=0
+          SKIPPED=0
           
-          if [ -f "$SUMMARY_FILE" ]; then
-            TOTAL=$(jq -r '.statistic.total // 0' "$SUMMARY_FILE")
-            PASSED=$(jq -r '.statistic.passed // 0' "$SUMMARY_FILE")
-            FAILED=$(jq -r '.statistic.failed // 0' "$SUMMARY_FILE")
-            BROKEN=$(jq -r '.statistic.broken // 0' "$SUMMARY_FILE")
-            SKIPPED=$(jq -r '.statistic.skipped // 0' "$SUMMARY_FILE")
-            
-            # Combine failed and broken
-            TOTAL_FAILED=$((FAILED + BROKEN))
-            
-            echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
-            echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
-            echo "FAILED=$TOTAL_FAILED" >> $GITHUB_OUTPUT
-            echo "SKIPPED=$SKIPPED" >> $GITHUB_OUTPUT
-            
-            echo "✅ Stats extracted: Total=$TOTAL, Passed=$PASSED, Failed=$TOTAL_FAILED, Skipped=$SKIPPED"
+          for json_file in allure-results/*.json; do
+            if [ -f "$json_file" ]; then
+              echo "Processing: $json_file"
+              
+              T=$(jq -r '.stats.tests // 0' "$json_file")
+              P=$(jq -r '.stats.passes // 0' "$json_file")
+              F=$(jq -r '.stats.failures // 0' "$json_file")
+              S=$(jq -r '.stats.pending // 0' "$json_file")
+              
+              echo "  Tests: $T, Passed: $P, Failed: $F, Skipped: $S"
+              
+              TOTAL=$((TOTAL + T))
+              PASSED=$((PASSED + P))
+              FAILED=$((FAILED + F))
+              SKIPPED=$((SKIPPED + S))
+            fi
+          done
+          
+          echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
+          echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
+          echo "FAILED=$FAILED" >> $GITHUB_OUTPUT
+          echo "SKIPPED=$SKIPPED" >> $GITHUB_OUTPUT
+          
+          echo "✅ Stats calculated: Total=$TOTAL, Passed=$PASSED, Failed=$FAILED, Skipped=$SKIPPED"
+
+      - name: Generate Allure Report from Merged Results
+        run: |
+          echo "📊 Installing Allure..."
+          npm install -g allure-commandline --save-dev
+          
+          echo "📊 Generating Allure report from merged results..."
+          allure generate allure-results --clean -o allure-report
+          
+          echo "✅ Allure report generated!"
+          ls -lah allure-report/
+          
+          # Verify the report has data
+          if [ -f "allure-report/widgets/summary.json" ]; then
+            echo "✅ Summary file exists:"
+            cat allure-report/widgets/summary.json
           else
-            echo "⚠️ Summary file not found"
-            echo "TOTAL=0" >> $GITHUB_OUTPUT
-            echo "PASSED=0" >> $GITHUB_OUTPUT
-            echo "FAILED=0" >> $GITHUB_OUTPUT
-            echo "SKIPPED=0" >> $GITHUB_OUTPUT
+            echo "⚠️ Warning: Summary file not found"
           fi
 
-      - name: 🌍 Deploy Merged Report to Surge
+      - name: 🌍 Deploy Allure Report to Surge
         id: surge_deploy
         if: always()
         continue-on-error: true
         run: |
           npm install --global surge
           
-          echo "🚀 Deploying merged report to Surge..."
+          echo "🚀 Deploying to Surge..."
           
           # Deploy to production URL
-          surge ./final-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+          surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
           
           # Generate timestamped URL
           TIMESTAMP_ID=$(date +%s)
           PREVIEW_URL="https://kwant-${TIMESTAMP_ID}.surge.sh"
           
           # Try to deploy to timestamped URL
-          surge ./final-report $PREVIEW_URL --token $SURGE_TOKEN || PREVIEW_URL="https://kwant-ui-automation.surge.sh"
+          surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN || PREVIEW_URL="https://kwant-ui-automation.surge.sh"
           
-          # Save the preview URL
           echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "✅ Deployed to: $PREVIEW_URL"
 
@@ -232,7 +218,7 @@ jobs:
           FAILED=${{ steps.stats.outputs.FAILED }}
           SKIPPED=${{ steps.stats.outputs.SKIPPED }}
 
-          echo "📊 Sending Slack notification with stats: Total=$TOTAL, Passed=$PASSED, Failed=$FAILED, Skipped=$SKIPPED"
+          echo "📊 Slack stats: Total=$TOTAL, Passed=$PASSED, Failed=$FAILED, Skipped=$SKIPPED"
 
           if [ "$TOTAL" -gt 0 ]; then
             SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
@@ -292,4 +278,4 @@ jobs:
 
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            ${{ secrets.SLACK_WEBHOOK_URL }} || echo "Slack notification skipped (invalid webhook)"
+            ${{ secrets.SLACK_WEBHOOK_URL }} || echo "Slack notification skipped"
