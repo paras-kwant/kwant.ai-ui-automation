@@ -2,7 +2,7 @@ name: Run Cypress UI Tests
 
 on:
   workflow_dispatch:
-  schedule:
+  # schedule:
     # - cron: "05 04 * * *" # Nepali 10:05 AM
 
 jobs:
@@ -16,10 +16,6 @@ jobs:
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
-      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
 
     steps:
       - name: Checkout repository
@@ -41,7 +37,6 @@ jobs:
           key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-cypress-
-
       # Use npm ci for faster, cleaner installs
       - name: Install dependencies
         run: npm ci
@@ -86,7 +81,6 @@ jobs:
           MINUTES=$((TOTAL_TIME_MS / 60000))
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
-
           # Set outputs BEFORE any exit
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
@@ -98,7 +92,6 @@ jobs:
           
           # Debug output
           echo "Debug: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED, TIME=$TOTAL_TIME"
-
       - name: 🌍 Deploy Allure Report to Surge
         id: surge_deploy
         if: always()
@@ -120,7 +113,6 @@ jobs:
           # Save the preview URL for Slack notification
           echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "Deployed to: $PREVIEW_URL"
-
       - name: 💬 Send Slack Notification
         if: always()
         run: |
@@ -132,11 +124,9 @@ jobs:
           TOTAL_TIME="${{ steps.cypress.outputs.total_time }}"
           TIMESTAMP="${{ steps.cypress.outputs.timestamp }}"
           PREVIEW_URL="${{ steps.surge_deploy.outputs.preview_url }}"
-
           # Debug: Show what we received
           echo "Debug Slack: TOTAL=$TOTAL, PASSED=$PASSED, FAILED=$FAILED"
           echo "Preview URL: $PREVIEW_URL"
-
           # Set defaults if values are empty
           TOTAL="${TOTAL:-0}"
           PASSED="${PASSED:-0}"
@@ -146,7 +136,6 @@ jobs:
           TOTAL_TIME="${TOTAL_TIME:-0m 0s}"
           TIMESTAMP="${TIMESTAMP:-N/A}"
           PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation.surge.sh}"
-
           # Determine status and color
           if [[ "$TOTAL" -eq 0 ]]; then
             STATUS="⚠️ UI tests did not run properly"
@@ -161,7 +150,6 @@ jobs:
             STATUS="🚨 $FAILED tests failed out of $TOTAL tests in UI"
             COLOR="danger"
           fi
-
           PAYLOAD=$(jq -n \
             --arg color "$COLOR" \
             --arg status "$STATUS" \
@@ -197,7 +185,6 @@ jobs:
                 }
               ]
             }')
-
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URLs"
+            "$SLACK_WEBHOOK_URL"
