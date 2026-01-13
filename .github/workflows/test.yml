@@ -73,11 +73,21 @@ jobs:
           # Check if any JSON reports were generated
           if ! ls cypress/results/*.json 1> /dev/null 2>&1; then
             echo "Error: No test reports generated for ${{ matrix.spec }}"
-            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0}}' > cypress/results/default-report.json
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/default-report.json
           fi
+          
+          # List all generated reports for debugging
+          echo "Generated reports:"
+          ls -la cypress/results/*.json || echo "No JSON files found"
           
           # Merge all mochawesome JSON reports into one
           npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
+          
+          # Validate merged report
+          if [ ! -s cypress/results/merged-report.json ]; then
+            echo "Warning: Merged report is empty"
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report.json
+          fi
           
           # Extract stats from merged report
           TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report.json)
@@ -179,7 +189,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install -g mochawesome-merge mochawesome-report-generator
+        run: npm install -g mochawesome-merge mochawesome-report-generator allure-commandline
 
       - name: Merge all test reports
         id: aggregate
@@ -187,17 +197,63 @@ jobs:
           # Create results directory
           mkdir -p cypress/results
           
-          # Find and copy all JSON reports
-          find all-results -name "*.json" -not -name "merged-report.json" -exec cp {} cypress/results/ \;
+          # Debug: Show what we downloaded
+          echo "=== Downloaded artifacts structure ==="
+          find all-results -type f -name "*.json"
+          echo "===================================="
+          
+          # Find all JSON report files (excluding merged ones)
+          find all-results -type f -name "*.json" -not -name "merged-report.json" -exec cp {} cypress/results/ \;
+          
+          # Debug: Show what we're about to merge
+          echo "=== Files to merge ==="
+          ls -la cypress/results/*.json 2>/dev/null || echo "No JSON files to merge"
+          echo "====================="
           
           # Check if we have any reports
-          if ! ls cypress/results/*.json 1> /dev/null 2>&1; then
+          if ls cypress/results/*.json 1> /dev/null 2>&1; then
+            # Validate each JSON file before merging
+            for file in cypress/results/*.json; do
+              if ! jq empty "$file" 2>/dev/null; then
+                echo "Invalid JSON in $file, removing..."
+                rm "$file"
+              else
+                echo "Valid JSON: $file"
+                # Show structure for debugging
+                jq '.stats' "$file" || echo "No stats in $file"
+              fi
+            done
+            
+            # Try to merge if we still have valid files
+            if ls cypress/results/*.json 1> /dev/null 2>&1; then
+              echo "Attempting to merge reports..."
+              npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json || {
+                echo "Merge failed, creating manual aggregate..."
+                # Manual aggregation fallback
+                jq -s '{
+                  stats: {
+                    tests: ([.[].stats.tests // 0] | add),
+                    passes: ([.[].stats.passes // 0] | add),
+                    failures: ([.[].stats.failures // 0] | add),
+                    pending: ([.[].stats.pending // 0] | add),
+                    duration: ([.[].stats.duration // 0] | add)
+                  },
+                  results: ([.[].results // []] | add)
+                }' cypress/results/*.json > cypress/results/merged-report.json
+              }
+            else
+              echo "No valid JSON files to merge"
+              echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report.json
+            fi
+          else
             echo "No test reports found"
-            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0}}' > cypress/results/default-report.json
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report.json
           fi
           
-          # Merge all reports
-          npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
+          # Show merged report for debugging
+          echo "=== Merged report content ==="
+          cat cypress/results/merged-report.json
+          echo "============================="
           
           # Extract aggregated stats
           TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report.json)
@@ -238,10 +294,19 @@ jobs:
         run: |
           # Merge all allure-results
           mkdir -p allure-results
-          find all-results -type d -name "allure-results" -exec cp -r {}/* allure-results/ \;
           
-          # Generate report
-          npx allure generate allure-results --clean -o allure-report
+          # Find and copy allure results
+          find all-results -type d -name "allure-results" -exec sh -c 'cp -r "$1"/* allure-results/ 2>/dev/null || true' _ {} \;
+          
+          # Check if we have any allure results
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
+            echo "Generating Allure report..."
+            npx allure generate allure-results --clean -o allure-report
+          else
+            echo "No Allure results found, creating empty report"
+            mkdir -p allure-report
+            echo "<html><body><h1>No test results available</h1></body></html>" > allure-report/index.html
+          fi
 
       - name: Deploy Allure Report to Surge
         id: surge_deploy
