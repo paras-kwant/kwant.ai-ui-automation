@@ -1,4 +1,4 @@
-name: Run Cypress UI Tests (Parallel Folders)
+name: Run Cypress UI Tests (Parallel Folders) - Unified Stats
 
 on:
   workflow_dispatch:
@@ -86,6 +86,9 @@ jobs:
   merge-and-deploy:
     runs-on: ubuntu-latest
     needs: cypress-run
+    env:
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -115,51 +118,97 @@ jobs:
           allure generate allure-results/merged --clean -o allure-report
           echo "✅ Allure report generated"
 
-          - name: 🌍 Deploy Allure Report to Surge
-          id: surge_deploy
-          if: always()
-          continue-on-error: true
-          run: |
-            npx allure generate allure-results --clean -o allure-report
-            npm install --global surge
+      - name: 🌍 Deploy Allure Report to Surge
+        id: surge_deploy
+        if: always()
+        continue-on-error: true
+        run: |
+          npm install --global surge
+          
+          # Deploy to production URL
+          surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+          
+          # Generate timestamped URL (simplified format)
+          TIMESTAMP_ID=$(date +%s)
+          PREVIEW_URL="https://kwant-${TIMESTAMP_ID}.surge.sh"
+          
+          # Try to deploy to timestamped URL, but don't fail if it doesn't work
+          surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN || PREVIEW_URL="https://kwant-ui-automation.surge.sh"
+          
+          # Save the preview URL for Slack notification
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $PREVIEW_URL"
+
+      - name: Extract Stats from Allure Report
+        id: stats
+        if: always()
+        run: |
+          # Extract stats from the generated Allure report's widgets.json
+          WIDGETS_FILE="allure-report/widgets/summary.json"
+          
+          if [ -f "$WIDGETS_FILE" ]; then
+            echo "📊 Extracting stats from Allure summary..."
             
-            # Deploy to production URL
-            surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+            TOTAL=$(jq -r '.statistic.total // 0' "$WIDGETS_FILE")
+            PASSED=$(jq -r '.statistic.passed // 0' "$WIDGETS_FILE")
+            FAILED=$(jq -r '.statistic.failed // 0' "$WIDGETS_FILE")
+            BROKEN=$(jq -r '.statistic.broken // 0' "$WIDGETS_FILE")
+            SKIPPED=$(jq -r '.statistic.skipped // 0' "$WIDGETS_FILE")
+            UNKNOWN=$(jq -r '.statistic.unknown // 0' "$WIDGETS_FILE")
             
-            # Generate timestamped URL (simplified format)
-            TIMESTAMP_ID=$(date +%s)
-            PREVIEW_URL="https://kwant-${TIMESTAMP_ID}.surge.sh"
+            # Combine failed and broken as "failed" for Slack
+            TOTAL_FAILED=$((FAILED + BROKEN))
             
-            # Try to deploy to timestamped URL, but don't fail if it doesn't work
-            surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN || PREVIEW_URL="https://kwant-ui-automation.surge.sh"
+            echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
+            echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
+            echo "FAILED=$TOTAL_FAILED" >> $GITHUB_OUTPUT
+            echo "SKIPPED=$SKIPPED" >> $GITHUB_OUTPUT
             
-            # Save the preview URL for Slack notification
-            echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
-            echo "Deployed to: $PREVIEW_URL"
+            echo "Stats from Allure: Total=$TOTAL, Passed=$PASSED, Failed=$TOTAL_FAILED (Failed=$FAILED + Broken=$BROKEN), Skipped=$SKIPPED"
+          else
+            echo "⚠️ Allure summary not found, calculating from mochawesome..."
+            
+            # Fallback to mochawesome
+            TOTAL=0
+            PASSED=0
+            FAILED=0
+            SKIPPED=0
+            
+            for json_file in $(find allure-results -name "mochawesome*.json" 2>/dev/null); do
+              T=$(jq -r '.stats.tests // 0' "$json_file")
+              P=$(jq -r '.stats.passes // 0' "$json_file")
+              F=$(jq -r '.stats.failures // 0' "$json_file")
+              S=$(jq -r '.stats.pending // 0' "$json_file")
+              
+              TOTAL=$((TOTAL + T))
+              PASSED=$((PASSED + P))
+              FAILED=$((FAILED + F))
+              SKIPPED=$((SKIPPED + S))
+            done
+            
+            echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
+            echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
+            echo "FAILED=$FAILED" >> $GITHUB_OUTPUT
+            echo "SKIPPED=$SKIPPED" >> $GITHUB_OUTPUT
+            
+            echo "Stats from mochawesome: Total=$TOTAL, Passed=$PASSED, Failed=$FAILED, Skipped=$SKIPPED"
+          fi
 
       - name: Send Slack Notification
+        if: always()
         run: |
-          SURGE_URL=${{ env.SURGE_URL }}
+          SURGE_URL=${{ steps.surge_deploy.outputs.preview_url }}
+          
+          # Fallback if surge deployment failed
+          if [ -z "$SURGE_URL" ]; then
+            SURGE_URL="https://kwant-ui-automation.surge.sh"
+          fi
 
-          # Combine stats from both folders
-          TOTAL=0
-          PASSED=0
-          FAILED=0
-          SKIPPED=0
-
-          for folder in companies workers; do
-            if [ -f "allure-results/$folder/*.json" ]; then
-              T=$(jq '[.[] | select(.type=="test")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
-              P=$(jq '[.[] | select(.status=="passed")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
-              F=$(jq '[.[] | select(.status=="failed")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
-              S=$(jq '[.[] | select(.status=="skipped")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
-
-              TOTAL=$((TOTAL+T))
-              PASSED=$((PASSED+P))
-              FAILED=$((FAILED+F))
-              SKIPPED=$((SKIPPED+S))
-            fi
-          done
+          # Get stats from Allure
+          TOTAL=${{ steps.stats.outputs.TOTAL }}
+          PASSED=${{ steps.stats.outputs.PASSED }}
+          FAILED=${{ steps.stats.outputs.FAILED }}
+          SKIPPED=${{ steps.stats.outputs.SKIPPED }}
 
           if [ "$TOTAL" -gt 0 ]; then
             SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
@@ -173,7 +222,7 @@ jobs:
             STATUS="⚠️ UI tests did not run properly"
             COLOR="warning"
           elif [[ "$FAILED" -eq 0 ]]; then
-            STATUS="✅  UI tests completed successfully"
+            STATUS="✅ UI tests completed successfully"
             COLOR="good"
           elif [[ "$FAILED" -eq 1 ]]; then
             STATUS="🚨 $FAILED test failed out of $TOTAL tests in UI"
@@ -217,6 +266,7 @@ jobs:
               ]
             }')
 
+          # Keep the invalid URL to prevent notifications for now
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            ${{ secrets.SLACK_WEBHOOK_URL }}
+            ${{ secrets.SLACK_WEBHOOK_URL }} || echo "Slack notification skipped (invalid webhook)"
