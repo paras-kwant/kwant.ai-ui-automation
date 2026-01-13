@@ -389,13 +389,13 @@ jobs:
                     {title: "⏭️ Skipped", value: $skipped, short: true},
                     {title: "📈 Success Rate", value: $success_rate, short: true},
                     {title: "⏱️ Duration", value: $total_time, short: true},
-                    {title: "🕐 Timestamp", value: $timestamp, short: false},
+                    {title: "🕐 Last Checked", value: $timestamp, short: false}
                   ],
-                 actions: [
+                  actions: [
                     {
                       type: "button",
                       text: "View Detailed Report",
-                       url: $report_url
+                      url: $report_url
                     }
                   ]
                 }
