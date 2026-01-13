@@ -204,4 +204,4 @@ jobs:
 
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            ${{ secrets.SLACK_WEBHOOK_URLs }}
+            ${{ secrets.SLACK_WEBHOOK_URL }}
