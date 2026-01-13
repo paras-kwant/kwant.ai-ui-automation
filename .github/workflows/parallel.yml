@@ -86,6 +86,9 @@ jobs:
   merge-and-deploy:
     runs-on: ubuntu-latest
     needs: cypress-run
+    env:
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -115,16 +118,36 @@ jobs:
           allure generate allure-results/merged --clean -o allure-report
           echo "✅ Allure report generated"
 
-      - name: Deploy Allure Report to Surge
+      - name: 🌍 Deploy Allure Report to Surge
+        id: surge_deploy
+        if: always()
+        continue-on-error: true
         run: |
           npm install --global surge
-          SURGE_URL="https://kwant-ui-automation.surge.sh"
-          surge ./allure-report $SURGE_URL --token $SURGE_TOKEN
-          echo "SURGE_URL=$SURGE_URL" >> $GITHUB_ENV
+          
+          # Deploy to production URL
+          surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+          
+          # Generate timestamped URL (simplified format)
+          TIMESTAMP_ID=$(date +%s)
+          PREVIEW_URL="https://kwant-${TIMESTAMP_ID}.surge.sh"
+          
+          # Try to deploy to timestamped URL, but don't fail if it doesn't work
+          surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN || PREVIEW_URL="https://kwant-ui-automation.surge.sh"
+          
+          # Save the preview URL for Slack notification
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $PREVIEW_URL"
 
       - name: Send Slack Notification
+        if: always()
         run: |
-          SURGE_URL=${{ env.SURGE_URL }}
+          SURGE_URL=${{ steps.surge_deploy.outputs.preview_url }}
+          
+          # Fallback if surge deployment failed
+          if [ -z "$SURGE_URL" ]; then
+            SURGE_URL="https://kwant-ui-automation.surge.sh"
+          fi
 
           # Combine stats from both folders
           TOTAL=0
@@ -133,11 +156,11 @@ jobs:
           SKIPPED=0
 
           for folder in companies workers; do
-            if [ -f "allure-results/$folder/*.json" ]; then
-              T=$(jq '[.[] | select(.type=="test")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
-              P=$(jq '[.[] | select(.status=="passed")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
-              F=$(jq '[.[] | select(.status=="failed")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
-              S=$(jq '[.[] | select(.status=="skipped")] | length' allure-results/$folder/*.json | awk '{s+=$1} END {print s}')
+            if ls allure-results/$folder/*.json 1> /dev/null 2>&1; then
+              T=$(jq '[.[] | select(.type=="test")] | length' allure-results/$folder/*.json 2>/dev/null | awk '{s+=$1} END {print s+0}')
+              P=$(jq '[.[] | select(.status=="passed")] | length' allure-results/$folder/*.json 2>/dev/null | awk '{s+=$1} END {print s+0}')
+              F=$(jq '[.[] | select(.status=="failed")] | length' allure-results/$folder/*.json 2>/dev/null | awk '{s+=$1} END {print s+0}')
+              S=$(jq '[.[] | select(.status=="skipped")] | length' allure-results/$folder/*.json 2>/dev/null | awk '{s+=$1} END {print s+0}')
 
               TOTAL=$((TOTAL+T))
               PASSED=$((PASSED+P))
@@ -202,6 +225,7 @@ jobs:
               ]
             }')
 
+          # Keep the invalid URL to prevent notifications for now
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            ${{ secrets.SLACK_WEBHOOK_URL }}
+            ${{ secrets.SLACK_WEBHOOK_URLs }} || echo "Slack notification skipped (invalid webhook)"
