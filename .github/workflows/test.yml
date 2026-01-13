@@ -13,8 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         spec:
-          - cypress/e2e/companies/filter.cy.js
-          - cypress/e2e/workers/filter.cy.js
+          - cypress/e2e/companies/favourite.cy.js
+          - cypress/e2e/workers/favouritePage.cy.js
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
