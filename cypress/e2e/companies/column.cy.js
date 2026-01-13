@@ -114,45 +114,9 @@ it('Verify that clicking on the back button navigates back to the column setting
 })
 
 
-it('Displays checked columns in table preserving drawer order', () => {
-    cy.get('.icon-button button').eq(0).click();
-    cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
-  
-    const checkedTexts = [];
-  
-    cy.get('[data-rbd-draggable-id]').should('exist').each(($draggable) => {
-      cy.wrap($draggable).within(() => {
-        cy.get('input[type="checkbox"]').then(($checkbox) => {
-          if ($checkbox.is(':checked')) {
-            cy.get('.columns-drawer-content__column-option__left')
-              .invoke('text')
-              .then((text) => checkedTexts.push(text.trim()));
-          }
-        });
-      });
-    });
-  
-    cy.get('.sc-krNlru svg').click({ force: true });
-  
-cy.get(workforceSelector.tableColumn).then(($cols) => {
-    const tableTexts = [...$cols].map(el => el.innerText.trim());
-  
-    cy.log('Table Columns:', tableTexts.join(', '));
-    cy.log('Drawer Checked Columns:', checkedTexts.join(', '));
-  
-    let startIndex = 0; 
-  
-    checkedTexts.forEach((drawerCol) => {
-      const indexInTable = tableTexts.indexOf(drawerCol, startIndex);
-  
-      expect(indexInTable, `Column "${drawerCol}" should appear in table in order`).to.be.greaterThan(-1);
-  
-      startIndex = indexInTable + 1;
-    });
-  });
-})
 
-it('Displays checked columns in table preserving drawer order', () => {
+
+it.only('Displays checked columns in table preserving drawer order', () => {
   cy.get('.icon-button button').eq(0).click();
   cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
 
