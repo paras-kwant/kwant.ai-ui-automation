@@ -132,8 +132,6 @@ jobs:
           echo "=== Files ready for upload ==="
           ls -la cypress/results/merged-report-*.json 2>/dev/null || echo "WARNING: No merged report files found!"
           echo "==============================="
-          
-          exit $CYPRESS_EXIT_CODE
 
       - name: Upload Allure Results
         if: always()
@@ -170,6 +168,12 @@ jobs:
           path: cypress/results/merged-report-*.json
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Fail job if tests failed
+        if: steps.cypress.outputs.exit_code != '0'
+        run: |
+          echo "Tests failed with exit code ${{ steps.cypress.outputs.exit_code }}"
+          exit 1
 
   report:
     needs: cypress-run
