@@ -1,4 +1,4 @@
-name: Run Cypress UI Tests (Parallel Folders)
+name: Run Cypress UI Tests (Parallel Test Mode)
 
 on:
   workflow_dispatch:
@@ -12,9 +12,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        folder:
-          - cypress/e2e/companies
-          - cypress/e2e/workers
+        spec:
+          - cypress/e2e/companies/filter.cy.js
+          - cypress/e2e/workers/filter.cy.js
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
@@ -58,18 +58,13 @@ jobs:
           mkdir -p allure-results
           echo "Allure results directory cleaned"
 
-      - name: Run Cypress tests - ${{ matrix.folder }}
+      - name: Run Cypress test - ${{ matrix.spec }}
         id: cypress
         continue-on-error: true
         run: |
-          # Get folder name for display
-          FOLDER_NAME=$(basename "${{ matrix.folder }}")
-          
-          echo "=== Running all tests in ${{ matrix.folder }} folder ==="
-          
-          # Run all test files in the specified folder
+          # Run the specific test file for this matrix job
           npx cypress run \
-            --spec "${{ matrix.folder }}/**/*.cy.js" \
+            --spec "${{ matrix.spec }}" \
             --env email=$EMAIL,password=$PASSWORD \
             --browser chrome \
             --headless \
@@ -84,7 +79,7 @@ jobs:
           
           # Check if any JSON reports were generated
           if ! ls cypress/results/mochawesome*.json 1> /dev/null 2>&1; then
-            echo "Error: No test reports generated for ${{ matrix.folder }}"
+            echo "Error: No test reports generated for ${{ matrix.spec }}"
             echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/mochawesome-default.json
           fi
           
@@ -131,11 +126,11 @@ jobs:
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "exit_code=$CYPRESS_EXIT_CODE" >> $GITHUB_OUTPUT
-          echo "folder=$FOLDER_NAME" >> $GITHUB_OUTPUT
+          echo "spec_file=${{ matrix.spec }}" >> $GITHUB_OUTPUT
           
           # Debug output
           echo "=== TEST EXECUTION SUMMARY ==="
-          echo "Folder: $FOLDER_NAME"
+          echo "File: ${{ matrix.spec }}"
           echo "Total: $TOTAL | Passed: $PASSED | Failed: $FAILED | Skipped: $SKIPPED"
           echo "Duration: $TOTAL_TIME | Success Rate: $SUCCESS_RATE%"
           echo "Exit Code: $CYPRESS_EXIT_CODE"
@@ -379,16 +374,13 @@ jobs:
 
           # Determine status
           if [[ "$TOTAL" -eq 0 ]]; then
-            STATUS="⚠️ UI tests did not run properly"
+            STATUS="⚠️ UI tests did not run properly (Parallel Test Mode)"
             COLOR="warning"
           elif [[ "$FAILED" -eq 0 ]]; then
-            STATUS="✅ All UI tests passed successfully"
+            STATUS="✅ All filter tests passed (Parallel: 2 files)"
             COLOR="good"
-          elif [[ "$FAILED" -eq 1 ]]; then
-            STATUS="🚨 1 test failed out of $TOTAL tests"
-            COLOR="danger"
           else
-            STATUS="🚨 $FAILED tests failed out of $TOTAL tests"
+            STATUS="🚨 $FAILED tests failed (Parallel Test Mode)"
             COLOR="danger"
           fi
 
@@ -410,7 +402,7 @@ jobs:
                   color: $color,
                   title: $status,
                   title_link: $workflow_url,
-                  text: "🔄 Parallel execution: Companies & Workers modules",
+                  text: "🔄 Tests ran in parallel: companies/filter.cy.js & workers/filter.cy.js",
                   fields: [
                     {title: "📊 Total Tests", value: $total, short: true},
                     {title: "✅ Passed", value: $passed, short: true},
@@ -421,7 +413,7 @@ jobs:
                     {title: "🕐 Timestamp", value: $timestamp, short: false},
                     {title: "🔗 Report", value: ("<" + $report_url + "|View Full Report>"), short: false}
                   ],
-                  footer: "Kwant UI Automation",
+                  footer: "Kwant UI Automation (PARALLEL TEST MODE)",
                   footer_icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
                   ts: now
                 }
