@@ -85,7 +85,24 @@ jobs:
           echo "Generated mochawesome reports:"
           ls -la cypress/results/mochawesome*.json || echo "No mochawesome JSON files found"
           
-          npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json
+          echo "=== Attempting to merge mochawesome reports ==="
+          if npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json; then
+            echo "✓ Merge successful"
+          else
+            echo "✗ Merge failed, creating default report"
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json
+          fi
+          
+          echo "=== Checking merged report file ==="
+          if [ -f cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json ]; then
+            echo "✓ File exists: cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json"
+            ls -lh cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json
+            echo "File contents preview:"
+            head -n 5 cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json
+          else
+            echo "✗ File does NOT exist!"
+          fi
+          echo "==========================================="
           
           if [ ! -s cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json ]; then
             echo "Warning: Merged report is empty"
