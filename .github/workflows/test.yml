@@ -2,8 +2,8 @@ name: Run Cypress UI Tests (Parallel)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "05 04 * * *" # 10:05 AM Nepal Time
+  # schedule:
+    # - cron: "05 04 * * *" # 10:05 AM Nepal Time
 
 jobs:
   companies-tests:
