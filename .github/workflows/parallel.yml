@@ -38,10 +38,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Cache Cypress binary and node_modules
+      - name: Cache dependencies & Cypress
         uses: actions/cache@v4
         with:
           path: |
+            ~/.npm
             ~/.cache/Cypress
             node_modules
           key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
@@ -54,49 +55,50 @@ jobs:
       - name: Verify Cypress
         run: npx cypress verify
 
-      - name: Clean Allure results
-        run: |
-          rm -rf allure-results
-          mkdir -p allure-results
-
       - name: Run Cypress tests - ${{ matrix.folder }}
         id: cypress
         continue-on-error: true
         run: |
           FOLDER_NAME=$(basename "${{ matrix.folder }}")
-          echo "=== Running all tests in ${{ matrix.folder }} folder ==="
+          echo "=== Running all tests in ${{ matrix.folder }} ==="
 
+          # Run Cypress tests
           npx cypress run \
             --spec "${{ matrix.folder }}/**/*.cy.js" \
             --env email=$EMAIL,password=$PASSWORD \
             --browser chrome \
             --headless \
             --reporter mochawesome \
-            --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true || true
+            --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true \
+            || true
 
           mkdir -p cypress/results
 
           # Merge mochawesome JSON reports
-          npx mochawesome-merge cypress/results/*.json > cypress/results/merged-${FOLDER_NAME}.json
+          VALID_FILES=()
+          for file in cypress/results/mochawesome*.json; do
+            if jq empty "$file" >/dev/null 2>&1; then
+              VALID_FILES+=("$file")
+            fi
+          done
 
-          # Extract stats
-          TOTAL=$(jq '.stats.tests' cypress/results/merged-${FOLDER_NAME}.json)
-          PASSED=$(jq '.stats.passes' cypress/results/merged-${FOLDER_NAME}.json)
-          FAILED=$(jq '.stats.failures' cypress/results/merged-${FOLDER_NAME}.json)
-          SKIPPED=$(jq '.stats.pending' cypress/results/merged-${FOLDER_NAME}.json)
-          TOTAL_TIME_MS=$(jq '.stats.duration' cypress/results/merged-${FOLDER_NAME}.json)
-
-          if [ "$TOTAL" -gt 0 ]; then
-            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          if [ ${#VALID_FILES[@]} -eq 0 ]; then
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-${FOLDER_NAME}.json
           else
-            SUCCESS_RATE="0.00"
+            npx mochawesome-merge "${VALID_FILES[@]}" > cypress/results/merged-${FOLDER_NAME}.json
           fi
 
-          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-
+          # Extract stats
+          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-${FOLDER_NAME}.json)
+          PASSED=$(jq -r '.stats.passes // 0' cypress/results/merged-${FOLDER_NAME}.json)
+          FAILED=$(jq -r '.stats.failures // 0' cypress/results/merged-${FOLDER_NAME}.json)
+          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/merged-${FOLDER_NAME}.json)
+          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/merged-${FOLDER_NAME}.json)
+          SUCCESS_RATE=$(awk "BEGIN {if ($TOTAL>0) printf \"%.2f\", ($PASSED/$TOTAL)*100; else print 0.00}")
           MINUTES=$((TOTAL_TIME_MS / 60000))
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
 
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
@@ -110,17 +112,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results-${{ matrix.folder//\//- }}
           path: allure-results
+          name: ${{ matrix.folder }}-allure
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: Upload Test Results
+      - name: Upload Cypress Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.folder//\//- }}
           path: cypress/results/merged-*.json
+          name: ${{ matrix.folder }}-results
           if-no-files-found: warn
           retention-days: 7
 
@@ -137,13 +139,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download all test results
+      - name: Download all Cypress results
         uses: actions/download-artifact@v4
         with:
           path: all-results
-          pattern: test-results-*
 
-      - name: Merge all reports safely
+      - name: Merge all test reports
         id: merge
         run: |
           mkdir -p cypress/results
@@ -167,13 +168,11 @@ jobs:
           FAILED=$(jq -r '.stats.failures // 0' cypress/results/final-report.json)
           SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/final-report.json)
           TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/final-report.json)
-
           if [ "$TOTAL" -gt 0 ]; then
             SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
           else
             SUCCESS_RATE="0.00"
           fi
-
           MINUTES=$((TOTAL_TIME_MS / 60000))
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
@@ -185,7 +184,7 @@ jobs:
           echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
 
-      - name: Generate combined Allure Report
+      - name: Generate Allure Report
         run: |
           rm -rf allure-results allure-report
           mkdir -p allure-results
@@ -248,13 +247,12 @@ jobs:
             --arg total_time "$TOTAL_TIME" \
             --arg timestamp "$TIMESTAMP" \
             --arg report_url "$PREVIEW_URL" \
-            --arg workflow_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             '{
               attachments: [
                 {
                   color: $color,
                   title: $status,
-                  title_link: $workflow_url,
+                  title_link: $report_url,
                   text: "🔄 Parallel execution: Companies & Workers modules",
                   fields: [
                     {title: "📊 Total Tests", value: $total, short: true},
@@ -278,4 +276,4 @@ jobs:
 
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URL"
+            "$SLACK_WEBHOOK_URLs"
