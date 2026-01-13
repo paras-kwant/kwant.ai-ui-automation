@@ -118,15 +118,9 @@ jobs:
       - name: Deploy Allure Report to Surge
         run: |
           npm install --global surge
-            if [ -d "allure-report" ]; then
-              echo "✅ Allure report exists, deploying..."
-              SURGE_URL="kwant-ui-automation.surge.sh"
-              surge allure-report $SURGE_URL --token $SURGE_TOKEN
-              echo "SURGE_URL=$SURGE_URL" >> $GITHUB_ENV
-            else
-              echo "❌ allure-report folder not found, skipping deploy"
-              exit 1
-            fi
+          SURGE_URL="https://kwant-ui-automation.surge.sh"
+          surge ./allure-report $SURGE_URL --token $SURGE_TOKEN
+          echo "SURGE_URL=$SURGE_URL" >> $GITHUB_ENV
 
       - name: Send Slack Notification
         run: |
