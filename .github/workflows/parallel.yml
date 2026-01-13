@@ -278,4 +278,4 @@ jobs:
           # Keep the invalid URL to prevent notifications for now
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            ${{ secrets.SLACK_WEBHOOK_URLs }} || echo "Slack notification skipped (invalid webhook)"
+            ${{ secrets.SLACK_WEBHOOK_URL }} || echo "Slack notification skipped (invalid webhook)"
