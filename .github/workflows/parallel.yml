@@ -85,18 +85,18 @@ jobs:
           echo "Generated mochawesome reports:"
           ls -la cypress/results/mochawesome*.json || echo "No mochawesome JSON files found"
           
-          npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report-${FOLDER_NAME}.json
+          npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json
           
-          if [ ! -s cypress/results/merged-report-${FOLDER_NAME}.json ]; then
+          if [ ! -s cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json ]; then
             echo "Warning: Merged report is empty"
-            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report-${FOLDER_NAME}.json
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json
           fi
           
-          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
-          PASSED=$(jq -r '.stats.passes // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
-          FAILED=$(jq -r '.stats.failures // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
-          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
-          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
+          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json)
+          PASSED=$(jq -r '.stats.passes // 0' cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json)
+          FAILED=$(jq -r '.stats.failures // 0' cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json)
+          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json)
+          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json)
           
           if [ "$TOTAL" -gt 0 ]; then
             SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
@@ -122,10 +122,16 @@ jobs:
           
           echo "=== TEST EXECUTION SUMMARY ==="
           echo "Folder: $FOLDER_NAME"
+          echo "Job Index: ${{ strategy.job-index }}"
+          echo "Report file: merged-report-${FOLDER_NAME}-${{ strategy.job-index }}.json"
           echo "Total: $TOTAL | Passed: $PASSED | Failed: $FAILED | Skipped: $SKIPPED"
           echo "Duration: $TOTAL_TIME | Success Rate: $SUCCESS_RATE%"
           echo "Exit Code: $CYPRESS_EXIT_CODE"
           echo "============================="
+          
+          echo "=== Files ready for upload ==="
+          ls -la cypress/results/merged-report-*.json 2>/dev/null || echo "WARNING: No merged report files found!"
+          echo "==============================="
           
           exit $CYPRESS_EXIT_CODE
 
@@ -185,6 +191,29 @@ jobs:
           path: all-results
           pattern: test-results-*
 
+      - name: Debug - Check downloaded artifacts
+        run: |
+          echo "=== Checking if all-results directory exists ==="
+          if [ -d "all-results" ]; then
+            echo "✓ all-results directory exists"
+            echo "Contents:"
+            ls -la all-results/
+            echo ""
+            echo "Subdirectories:"
+            find all-results -type d
+            echo ""
+            echo "All files:"
+            find all-results -type f
+            echo ""
+            echo "JSON files specifically:"
+            find all-results -name "*.json" -type f
+          else
+            echo "✗ all-results directory does NOT exist"
+            echo "Current directory contents:"
+            ls -la
+          fi
+          echo "=========================================="
+
       - name: Download all Allure results
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -222,12 +251,22 @@ jobs:
           else
             echo "=== Downloaded artifacts structure ==="
             find all-results -type f -name "*.json" 2>/dev/null || echo "No JSON files"
+            echo "Total JSON files found: $(find all-results -type f -name '*.json' 2>/dev/null | wc -l)"
             echo "======================================"
             
-            find all-results -type f -name "merged-report-*.json" -exec cp {} cypress/results/ \; 2>/dev/null || echo "No merged reports"
+            echo "=== Looking for merged-report files ==="
+            find all-results -type f -name "merged-report-*.json" 2>/dev/null || echo "No merged-report files"
+            echo "========================================"
+            
+            # Copy with verbose output
+            find all-results -type f -name "merged-report-*.json" | while read file; do
+              echo "Copying: $file"
+              cp "$file" cypress/results/
+            done
             
             echo "=== Merged reports from parallel jobs ==="
             ls -la cypress/results/merged-report-*.json 2>/dev/null || echo "No merged reports found"
+            echo "Total merged reports: $(ls cypress/results/merged-report-*.json 2>/dev/null | wc -l)"
             echo "=========================================="
             
             if ls cypress/results/merged-report-*.json 1> /dev/null 2>&1; then
@@ -389,7 +428,7 @@ jobs:
                     {title: "⏭️ Skipped", value: $skipped, short: true},
                     {title: "📈 Success Rate", value: $success_rate, short: true},
                     {title: "⏱️ Duration", value: $total_time, short: true},
-                    {title: "🕐 Last Checked", value: $timestamp, short: false}
+                    {title: "🕐 Timestamp", value: $timestamp, short: false}
                   ],
                   actions: [
                     {
@@ -397,10 +436,7 @@ jobs:
                       text: "View Detailed Report",
                       url: $report_url
                     }
-                  ],
-                  footer: "Kwant UI Automation",
-                  footer_icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                  ts: now
+                  ]
                 }
               ]
             }')
