@@ -1,0 +1,12 @@
+{
+  "reporterEnabled": "mochawesome, mocha-allure-reporter",
+  "mochawesomeReporterOptions": {
+    "reportDir": "cypress/results",
+    "overwrite": false,
+    "html": false,
+    "json": true
+  },
+  "mochaAllureReporterReporterOptions": {
+    "resultsDir": "allure-results"
+  }
+}
