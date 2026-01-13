@@ -115,12 +115,27 @@ jobs:
           allure generate allure-results/merged --clean -o allure-report
           echo "✅ Allure report generated"
 
-      - name: Deploy Allure Report to Surge
-        run: |
-          npm install --global surge
-          SURGE_URL="https://kwant-ui-automation.surge.sh"
-          surge ./allure-report $SURGE_URL --token $SURGE_TOKEN
-          echo "SURGE_URL=$SURGE_URL" >> $GITHUB_ENV
+          - name: 🌍 Deploy Allure Report to Surge
+          id: surge_deploy
+          if: always()
+          continue-on-error: true
+          run: |
+            npx allure generate allure-results --clean -o allure-report
+            npm install --global surge
+            
+            # Deploy to production URL
+            surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+            
+            # Generate timestamped URL (simplified format)
+            TIMESTAMP_ID=$(date +%s)
+            PREVIEW_URL="https://kwant-${TIMESTAMP_ID}.surge.sh"
+            
+            # Try to deploy to timestamped URL, but don't fail if it doesn't work
+            surge ./allure-report $PREVIEW_URL --token $SURGE_TOKEN || PREVIEW_URL="https://kwant-ui-automation.surge.sh"
+            
+            # Save the preview URL for Slack notification
+            echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+            echo "Deployed to: $PREVIEW_URL"
 
       - name: Send Slack Notification
         run: |
