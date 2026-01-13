@@ -92,21 +92,21 @@ jobs:
           echo "Generated mochawesome reports:"
           ls -la cypress/results/mochawesome*.json || echo "No mochawesome JSON files found"
           
-          # Merge all mochawesome JSON reports into one
-          npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report.json
+          # Merge all mochawesome JSON reports into one for this folder
+          npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report-${FOLDER_NAME}.json
           
           # Validate merged report
-          if [ ! -s cypress/results/merged-report.json ]; then
+          if [ ! -s cypress/results/merged-report-${FOLDER_NAME}.json ]; then
             echo "Warning: Merged report is empty"
-            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report.json
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report-${FOLDER_NAME}.json
           fi
           
           # Extract stats from merged report
-          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report.json)
-          PASSED=$(jq -r '.stats.passes // 0' cypress/results/merged-report.json)
-          FAILED=$(jq -r '.stats.failures // 0' cypress/results/merged-report.json)
-          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/merged-report.json)
-          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/merged-report.json)
+          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
+          PASSED=$(jq -r '.stats.passes // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
+          FAILED=$(jq -r '.stats.failures // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
+          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
+          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
           
           # Calculate success rate
           if [ "$TOTAL" -gt 0 ]; then
@@ -174,8 +174,7 @@ jobs:
         with:
           name: test-results-${{ strategy.job-index }}
           path: |
-            cypress/results/mochawesome*.json
-            cypress/results/merged-report.json
+            cypress/results/merged-report-*.json
           if-no-files-found: ignore
 
   # Aggregate results and send notification
@@ -222,73 +221,62 @@ jobs:
           find all-results -type f -name "*.json"
           echo "===================================="
           
-          # Find and copy ONLY mochawesome JSON files (not Allure JSONs)
-          find all-results -type f -name "mochawesome*.json" -not -name "merged-report.json" -exec cp {} cypress/results/ \;
+          # Find and copy ALL merged report JSON files from both folders
+          find all-results -type f -name "merged-report-*.json" -exec cp {} cypress/results/ \;
           
           # Debug: Show what we're about to merge
-          echo "=== Mochawesome files to merge ==="
-          ls -la cypress/results/mochawesome*.json 2>/dev/null || echo "No mochawesome JSON files to merge"
-          echo "=================================="
+          echo "=== Merged reports from parallel jobs ==="
+          ls -la cypress/results/merged-report-*.json 2>/dev/null || echo "No merged reports found"
+          echo "=========================================="
           
-          # Check if we have any mochawesome reports
-          if ls cypress/results/mochawesome*.json 1> /dev/null 2>&1; then
-            # Validate each mochawesome JSON file before merging
-            for file in cypress/results/mochawesome*.json; do
-              if ! jq empty "$file" 2>/dev/null; then
-                echo "Invalid JSON in $file, removing..."
-                rm "$file"
-              else
-                echo "Valid mochawesome JSON: $file"
-                # Show structure for debugging
-                jq '.stats' "$file" 2>/dev/null || echo "No stats in $file"
-              fi
+          # Check if we have any merged reports
+          if ls cypress/results/merged-report-*.json 1> /dev/null 2>&1; then
+            # Show each report's stats before final merge
+            for file in cypress/results/merged-report-*.json; do
+              echo "=== Stats from $file ==="
+              jq '.stats' "$file" 2>/dev/null || echo "Could not read stats"
+              echo "======================="
             done
             
-            # Try to merge if we still have valid files
-            if ls cypress/results/mochawesome*.json 1> /dev/null 2>&1; then
-              echo "Attempting to merge mochawesome reports..."
-              if npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report.json; then
-                echo "✓ Successfully merged reports with mochawesome-merge"
-              else
-                echo "✗ Mochawesome-merge failed, creating manual aggregate..."
-                # Manual aggregation fallback
-                jq -s '{
-                  stats: {
-                    suites: ([.[].stats.suites // 0] | add),
-                    tests: ([.[].stats.tests // 0] | add),
-                    passes: ([.[].stats.passes // 0] | add),
-                    pending: ([.[].stats.pending // 0] | add),
-                    failures: ([.[].stats.failures // 0] | add),
-                    start: (.[0].stats.start // ""),
-                    end: (.[-1].stats.end // ""),
-                    duration: ([.[].stats.duration // 0] | add),
-                    testsRegistered: ([.[].stats.testsRegistered // 0] | add),
-                    passPercent: (([.[].stats.passes // 0] | add) / ([.[].stats.tests // 1] | add) * 100),
-                    pendingPercent: (([.[].stats.pending // 0] | add) / ([.[].stats.tests // 1] | add) * 100)
-                  },
-                  results: ([.[].results // []] | add)
-                }' cypress/results/mochawesome*.json > cypress/results/merged-report.json
-              fi
+            echo "Attempting to merge all folder reports..."
+            if npx mochawesome-merge "cypress/results/merged-report-*.json" > cypress/results/final-report.json; then
+              echo "✓ Successfully merged all folder reports"
             else
-              echo "No valid mochawesome JSON files to merge"
-              echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report.json
+              echo "✗ Mochawesome-merge failed, creating manual aggregate..."
+              # Manual aggregation fallback
+              jq -s '{
+                stats: {
+                  suites: ([.[].stats.suites // 0] | add),
+                  tests: ([.[].stats.tests // 0] | add),
+                  passes: ([.[].stats.passes // 0] | add),
+                  pending: ([.[].stats.pending // 0] | add),
+                  failures: ([.[].stats.failures // 0] | add),
+                  start: (.[0].stats.start // ""),
+                  end: (.[-1].stats.end // ""),
+                  duration: ([.[].stats.duration // 0] | add),
+                  testsRegistered: ([.[].stats.testsRegistered // 0] | add),
+                  passPercent: (([.[].stats.passes // 0] | add) / ([.[].stats.tests // 1] | add) * 100),
+                  pendingPercent: (([.[].stats.pending // 0] | add) / ([.[].stats.tests // 1] | add) * 100)
+                },
+                results: ([.[].results // []] | add)
+              }' cypress/results/merged-report-*.json > cypress/results/final-report.json
             fi
           else
-            echo "No mochawesome test reports found"
-            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report.json
+            echo "No merged test reports found"
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/final-report.json
           fi
           
-          # Show merged report for debugging
-          echo "=== Merged report stats ==="
-          jq '.stats' cypress/results/merged-report.json 2>/dev/null || echo "Error reading merged report"
-          echo "==========================="
+          # Show final aggregated report for debugging
+          echo "=== FINAL AGGREGATED REPORT STATS ==="
+          jq '.stats' cypress/results/final-report.json 2>/dev/null || echo "Error reading final report"
+          echo "====================================="
           
-          # Extract aggregated stats
-          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report.json)
-          PASSED=$(jq -r '.stats.passes // 0' cypress/results/merged-report.json)
-          FAILED=$(jq -r '.stats.failures // 0' cypress/results/merged-report.json)
-          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/merged-report.json)
-          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/merged-report.json)
+          # Extract aggregated stats from final report
+          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/final-report.json)
+          PASSED=$(jq -r '.stats.passes // 0' cypress/results/final-report.json)
+          FAILED=$(jq -r '.stats.failures // 0' cypress/results/final-report.json)
+          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/final-report.json)
+          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/final-report.json)
           
           # Calculate success rate
           if [ "$TOTAL" -gt 0 ]; then
@@ -313,10 +301,10 @@ jobs:
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           
-          echo "=== AGGREGATED RESULTS ==="
+          echo "=== FINAL AGGREGATED RESULTS ==="
           echo "Total: $TOTAL | Passed: $PASSED | Failed: $FAILED"
           echo "Success Rate: $SUCCESS_RATE% | Duration: $TOTAL_TIME"
-          echo "========================="
+          echo "================================"
 
       - name: Generate combined Allure Report
         run: |
@@ -329,8 +317,7 @@ jobs:
           find all-allure-results -type f -exec cp {} allure-results/ \; 2>/dev/null || true
           
           # Check what we collected
-          echo "Allure results files:"
-          ls -la allure-results/ || echo "No Allure results found"
+          echo "Allure results files count: $(ls allure-results/ 2>/dev/null | wc -l)"
           
           # Generate report only from current run's data
           if [ -d "allure-results" ] && [ "$(ls -A allure-results 2>/dev/null)" ]; then
