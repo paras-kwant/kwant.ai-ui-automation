@@ -7,178 +7,292 @@ on:
 
 jobs:
   cypress-run:
-    name: Cypress - ${{ matrix.folder }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         folder:
-          - companies
-          - workers
-
+          - cypress/e2e/companies
+          - cypress/e2e/workers
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
+      TERM: xterm
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
+          cache: 'npm'
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-binary-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cypress-binary-
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Cypress tests
+      - name: Verify Cypress
+        run: npx cypress verify
+
+      - name: Clean Allure results
+        run: |
+          rm -rf allure-results
+          mkdir -p allure-results
+
+      - name: Run Cypress tests - ${{ matrix.folder }}
+        id: cypress
         continue-on-error: true
         run: |
-          mkdir -p cypress/results
+          FOLDER_NAME=$(basename "${{ matrix.folder }}")
+          echo "=== Running all tests in ${{ matrix.folder }} folder ==="
+          
           npx cypress run \
-            --spec "cypress/e2e/${{ matrix.folder }}/**/*.cy.js" \
+            --spec "${{ matrix.folder }}/**/*.cy.js" \
+            --env email=$EMAIL,password=$PASSWORD \
             --browser chrome \
             --headless \
             --reporter mochawesome \
             --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true
+          
+          CYPRESS_EXIT_CODE=$?
 
-      - name: Merge module report
-        run: |
-          MODULE=${{ matrix.folder }}
-          npx mochawesome-merge "cypress/results/*.json" \
-            > cypress/results/merged-${MODULE}.json
+          mkdir -p cypress/results
 
-      - name: Upload test results
+          # Validate JSON and merge only valid files
+          VALID_FILES=()
+          for file in cypress/results/mochawesome*.json; do
+            if jq empty "$file" >/dev/null 2>&1; then
+              VALID_FILES+=("$file")
+            else
+              echo "⚠️ Skipping invalid JSON: $file"
+            fi
+          done
+
+          if [ ${#VALID_FILES[@]} -eq 0 ]; then
+            echo "⚠️ No valid JSON files for $FOLDER_NAME, creating default empty report"
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-${FOLDER_NAME}.json
+          else
+            npx mochawesome-merge "${VALID_FILES[@]}" > cypress/results/merged-${FOLDER_NAME}.json
+          fi
+
+          echo "Files ready for upload:"
+          ls -la cypress/results/merged-${FOLDER_NAME}.json || echo "No merged report found"
+
+          echo "total=0" >> $GITHUB_OUTPUT
+          echo "passed=0" >> $GITHUB_OUTPUT
+          echo "failed=0" >> $GITHUB_OUTPUT
+          echo "skipped=0" >> $GITHUB_OUTPUT
+          echo "success_rate=0" >> $GITHUB_OUTPUT
+          echo "total_time=0m 0s" >> $GITHUB_OUTPUT
+          echo "exit_code=$CYPRESS_EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "folder=$FOLDER_NAME" >> $GITHUB_OUTPUT
+
+      - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ matrix.folder }}
-          path: cypress/results/merged-${{ matrix.folder }}.json
-          retention-days: 7
-
-      - name: Upload Allure results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-${{ matrix.folder }}
+          name: allure-results-${{ strategy.job-index }}
           path: allure-results
           if-no-files-found: ignore
           retention-days: 7
 
-  report:
-    name: Aggregate Reports & Notify
+      - name: Upload Cypress Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-${{ strategy.job-index }}
+          path: cypress/screenshots
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Cypress Videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos-${{ strategy.job-index }}
+          path: cypress/videos
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ strategy.job-index }}
+          path: cypress/results/merged-*.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  aggregate:
     needs: cypress-run
     runs-on: ubuntu-latest
     if: always()
-
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TERM: xterm
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Download test reports
+      - name: Download all test results
         uses: actions/download-artifact@v4
         with:
           path: all-results
-          pattern: results-*
+          pattern: test-results-*
 
-      - name: Download Allure results
-        uses: actions/download-artifact@v4
-        with:
-          path: all-allure
-          pattern: allure-*
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install tools
-        run: npm install -g mochawesome-merge allure-commandline jq surge
-
-      - name: Merge all reports
-        id: aggregate
+      - name: Merge all reports safely
         run: |
           mkdir -p cypress/results
-          find all-results -name "*.json" -exec cp {} cypress/results/ \;
+          cp all-results/*/*.json cypress/results/ 2>/dev/null || true
 
-          FILE_COUNT=$(ls cypress/results/*.json 2>/dev/null | wc -l)
-          if [ "$FILE_COUNT" -eq 0 ]; then
-            echo "❌ No reports found"
-            exit 1
+          VALID_FILES=()
+          for file in cypress/results/*.json; do
+            if jq empty "$file" >/dev/null 2>&1; then
+              VALID_FILES+=("$file")
+            else
+              echo "⚠️ Skipping invalid JSON in final merge: $file"
+            fi
+          done
+
+          if [ ${#VALID_FILES[@]} -eq 0 ]; then
+            echo "❌ No valid merged reports found, creating empty report"
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/final-report.json
+          else
+            npx mochawesome-merge "${VALID_FILES[@]}" > cypress/results/final-report.json
           fi
 
-          npx mochawesome-merge "cypress/results/*.json" \
-            > cypress/results/final-report.json
-
-          TOTAL=$(jq '.stats.tests' cypress/results/final-report.json)
-          PASSED=$(jq '.stats.passes' cypress/results/final-report.json)
-          FAILED=$(jq '.stats.failures' cypress/results/final-report.json)
-          SKIPPED=$(jq '.stats.pending' cypress/results/final-report.json)
-          DURATION=$(jq '.stats.duration' cypress/results/final-report.json)
-
-          SUCCESS=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          TOTAL=$(jq -r '.stats.tests // 0' cypress/results/final-report.json)
+          PASSED=$(jq -r '.stats.passes // 0' cypress/results/final-report.json)
+          FAILED=$(jq -r '.stats.failures // 0' cypress/results/final-report.json)
+          SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/final-report.json)
+          TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/final-report.json)
+          if [ "$TOTAL" -gt 0 ]; then
+            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          else
+            SUCCESS_RATE="0.00"
+          fi
+          MINUTES=$((TOTAL_TIME_MS / 60000))
+          SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
+          TOTAL_TIME="${MINUTES}m ${SECONDS}s"
 
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
           echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
-          echo "success_rate=$SUCCESS" >> $GITHUB_OUTPUT
-          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+          echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
 
-      - name: Generate Allure Report
+      - name: Generate combined Allure Report
         run: |
+          rm -rf allure-results allure-report
           mkdir -p allure-results
-          find all-allure -type f -exec cp {} allure-results/ \;
-          allure generate allure-results --clean -o allure-report
+          cp -r all-results/*/allure-results/* allure-results/ 2>/dev/null || true
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results 2>/dev/null)" ]; then
+            npx allure generate allure-results --clean -o allure-report
+          else
+            mkdir -p allure-report
+            echo "<html><body><h1>No test results available</h1></body></html>" > allure-report/index.html
+          fi
 
-      - name: Deploy to Surge
-        id: surge
+      - name: Deploy Allure Report to Surge
+        id: surge_deploy
         run: |
+          npm install --global surge
           surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
-          echo "url=https://kwant-ui-automation.surge.sh" >> $GITHUB_OUTPUT
+          echo "preview_url=https://kwant-ui-automation.surge.sh" >> $GITHUB_OUTPUT
 
       - name: Send Slack Notification
         run: |
-          TOTAL=${{ steps.aggregate.outputs.total }}
-          PASSED=${{ steps.aggregate.outputs.passed }}
-          FAILED=${{ steps.aggregate.outputs.failed }}
-          SUCCESS=${{ steps.aggregate.outputs.success_rate }}
-          URL=${{ steps.surge.outputs.url }}
+          TOTAL="${{ steps.merge.outputs.total }}"
+          PASSED="${{ steps.merge.outputs.passed }}"
+          FAILED="${{ steps.merge.outputs.failed }}"
+          SKIPPED="${{ steps.merge.outputs.skipped }}"
+          SUCCESS_RATE="${{ steps.merge.outputs.success_rate }}"
+          TOTAL_TIME="${{ steps.merge.outputs.total_time }}"
+          PREVIEW_URL="${{ steps.surge_deploy.outputs.preview_url }}"
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
 
-          if [ "$FAILED" -gt 0 ]; then
-            STATUS="🚨 $FAILED test(s) failed out of $TOTAL"
+          TOTAL="${TOTAL:-0}"
+          PASSED="${PASSED:-0}"
+          FAILED="${FAILED:-0}"
+          SKIPPED="${SKIPPED:-0}"
+          SUCCESS_RATE="${SUCCESS_RATE:-0.00}"
+          TOTAL_TIME="${TOTAL_TIME:-0m 0s}"
+          PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation.surge.sh}"
+
+          if [[ "$TOTAL" -eq 0 ]]; then
+            STATUS="⚠️ UI tests did not run properly"
+            COLOR="warning"
+          elif [[ "$FAILED" -eq 0 ]]; then
+            STATUS="✅ All UI tests passed successfully"
+            COLOR="good"
+          elif [[ "$FAILED" -eq 1 ]]; then
+            STATUS="🚨 1 test failed out of $TOTAL tests"
             COLOR="danger"
           else
-            STATUS="✅ All $TOTAL UI tests passed"
-            COLOR="good"
+            STATUS="🚨 $FAILED tests failed out of $TOTAL tests"
+            COLOR="danger"
           fi
 
-          jq -n \
+          PAYLOAD=$(jq -n \
             --arg color "$COLOR" \
             --arg status "$STATUS" \
             --arg total "$TOTAL" \
             --arg passed "$PASSED" \
             --arg failed "$FAILED" \
-            --arg success "$SUCCESS%" \
-            --arg url "$URL" \
+            --arg skipped "$SKIPPED" \
+            --arg success_rate "$SUCCESS_RATE%" \
+            --arg total_time "$TOTAL_TIME" \
+            --arg timestamp "$TIMESTAMP" \
+            --arg report_url "$PREVIEW_URL" \
+            --arg workflow_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             '{
               attachments: [
                 {
                   color: $color,
                   title: $status,
+                  title_link: $workflow_url,
+                  text: "🔄 Parallel execution: Companies & Workers modules",
                   fields: [
-                    {title: "Total", value: $total, short: true},
-                    {title: "Passed", value: $passed, short: true},
-                    {title: "Failed", value: $failed, short: true},
-                    {title: "Success Rate", value: $success, short: true}
+                    {title: "📊 Total Tests", value: $total, short: true},
+                    {title: "✅ Passed", value: $passed, short: true},
+                    {title: "❌ Failed", value: $failed, short: true},
+                    {title: "⏭️ Skipped", value: $skipped, short: true},
+                    {title: "📈 Success Rate", value: $success_rate, short: true},
+                    {title: "⏱️ Duration", value: $total_time, short: true},
+                    {title: "🕐 Timestamp", value: $timestamp, short: false}
                   ],
                   actions: [
-                    {type: "button", text: "View Report", url: $url}
+                    {
+                      type: "button",
+                      text: "View Detailed Report",
+                      url: $report_url
+                    }
                   ]
                 }
               ]
-            }' | curl -X POST -H 'Content-type: application/json' \
-              --data @- "$SLACK_WEBHOOK_URL"
+            }')
+
+          curl -X POST -H 'Content-type: application/json' \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL"
