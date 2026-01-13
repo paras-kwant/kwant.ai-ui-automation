@@ -1,4 +1,4 @@
-name: Run Cypress UI Tests (Parallel Test Mode)
+name: Run Cypress UI Tests (Parallel Folders)
 
 on:
   workflow_dispatch:
@@ -12,15 +12,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        spec:
-          - cypress/e2e/companies/filter.cy.js
-          - cypress/e2e/workers/filter.cy.js
+        folder:
+          - cypress/e2e/companies
+          - cypress/e2e/workers
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URLs }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
       TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
       TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
@@ -58,13 +58,18 @@ jobs:
           mkdir -p allure-results
           echo "Allure results directory cleaned"
 
-      - name: Run Cypress test - ${{ matrix.spec }}
+      - name: Run Cypress tests - ${{ matrix.folder }}
         id: cypress
         continue-on-error: true
         run: |
-          # Run the specific test file for this matrix job
+          # Get folder name for display
+          FOLDER_NAME=$(basename "${{ matrix.folder }}")
+          
+          echo "=== Running all tests in ${{ matrix.folder }} folder ==="
+          
+          # Run all test files in the specified folder
           npx cypress run \
-            --spec "${{ matrix.spec }}" \
+            --spec "${{ matrix.folder }}/**/*.cy.js" \
             --env email=$EMAIL,password=$PASSWORD \
             --browser chrome \
             --headless \
@@ -79,7 +84,7 @@ jobs:
           
           # Check if any JSON reports were generated
           if ! ls cypress/results/mochawesome*.json 1> /dev/null 2>&1; then
-            echo "Error: No test reports generated for ${{ matrix.spec }}"
+            echo "Error: No test reports generated for ${{ matrix.folder }}"
             echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/mochawesome-default.json
           fi
           
@@ -126,11 +131,11 @@ jobs:
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "exit_code=$CYPRESS_EXIT_CODE" >> $GITHUB_OUTPUT
-          echo "spec_file=${{ matrix.spec }}" >> $GITHUB_OUTPUT
+          echo "folder=$FOLDER_NAME" >> $GITHUB_OUTPUT
           
           # Debug output
           echo "=== TEST EXECUTION SUMMARY ==="
-          echo "File: ${{ matrix.spec }}"
+          echo "Folder: $FOLDER_NAME"
           echo "Total: $TOTAL | Passed: $PASSED | Failed: $FAILED | Skipped: $SKIPPED"
           echo "Duration: $TOTAL_TIME | Success Rate: $SUCCESS_RATE%"
           echo "Exit Code: $CYPRESS_EXIT_CODE"
@@ -374,13 +379,16 @@ jobs:
 
           # Determine status
           if [[ "$TOTAL" -eq 0 ]]; then
-            STATUS="⚠️ UI tests did not run properly (Parallel Test Mode)"
+            STATUS="⚠️ UI tests did not run properly"
             COLOR="warning"
           elif [[ "$FAILED" -eq 0 ]]; then
-            STATUS="✅ All filter tests passed (Parallel: 2 files)"
+            STATUS="✅ All UI tests passed successfully"
             COLOR="good"
+          elif [[ "$FAILED" -eq 1 ]]; then
+            STATUS="🚨 1 test failed out of $TOTAL tests"
+            COLOR="danger"
           else
-            STATUS="🚨 $FAILED tests failed (Parallel Test Mode)"
+            STATUS="🚨 $FAILED tests failed out of $TOTAL tests"
             COLOR="danger"
           fi
 
@@ -402,7 +410,7 @@ jobs:
                   color: $color,
                   title: $status,
                   title_link: $workflow_url,
-                  text: "🔄 Tests ran in parallel: companies/favourite.cy.js & workers/favouritePage.cy.js",
+                  text: "🔄 Parallel execution: Companies & Workers modules",
                   fields: [
                     {title: "📊 Total Tests", value: $total, short: true},
                     {title: "✅ Passed", value: $passed, short: true},
@@ -413,7 +421,7 @@ jobs:
                     {title: "🕐 Timestamp", value: $timestamp, short: false},
                     {title: "🔗 Report", value: ("<" + $report_url + "|View Full Report>"), short: false}
                   ],
-                  footer: "Kwant UI Automation (PARALLEL TEST MODE)",
+                  footer: "Kwant UI Automation",
                   footer_icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
                   ts: now
                 }
@@ -422,4 +430,4 @@ jobs:
 
           curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URLs"
+            "$SLACK_WEBHOOK_URL"
