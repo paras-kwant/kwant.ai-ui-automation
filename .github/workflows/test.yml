@@ -13,8 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         spec:
-          - cypress/e2e/companies/favourite.cy.js
-          - cypress/e2e/workers/favouritePage.cy.js
+          - cypress/e2e/companies/filter.cy.js
+          - cypress/e2e/workers/filter.cy.js
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
@@ -50,6 +50,13 @@ jobs:
 
       - name: Verify Cypress
         run: npx cypress verify
+
+      - name: Clean Allure results
+        run: |
+          # Remove old allure-results to prevent mixing old and new data
+          rm -rf allure-results
+          mkdir -p allure-results
+          echo "Allure results directory cleaned"
 
       - name: Run Cypress test - ${{ matrix.spec }}
         id: cypress
@@ -132,11 +139,13 @@ jobs:
           # Exit with Cypress exit code
           exit $CYPRESS_EXIT_CODE
 
-      - name: Generate Allure Report
+      - name: Upload Allure Results (raw data only)
         if: always()
-        run: |
-          mkdir -p allure-results
-          npx allure generate allure-results --clean -o allure-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ strategy.job-index }}
+          path: allure-results
+          if-no-files-found: ignore
 
       - name: Upload Cypress Screenshots
         if: failure()
@@ -162,7 +171,6 @@ jobs:
           path: |
             cypress/results/mochawesome*.json
             cypress/results/merged-report.json
-            allure-report
           if-no-files-found: ignore
 
   # Aggregate results and send notification
@@ -183,6 +191,12 @@ jobs:
         with:
           path: all-results
           pattern: test-results-*
+
+      - name: Download all Allure results
+        uses: actions/download-artifact@v4
+        with:
+          path: all-allure-results
+          pattern: allure-results-*
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -301,20 +315,27 @@ jobs:
 
       - name: Generate combined Allure Report
         run: |
-          # Merge all allure-results
+          # Clean and create fresh allure-results directory
+          rm -rf allure-results allure-report
           mkdir -p allure-results
           
-          # Find and copy allure results (but not the allure-report directory)
-          find all-results -type d -name "allure-report" -prune -o -type f -path "*/allure-results/*" -print -exec cp {} allure-results/ \; 2>/dev/null || true
+          echo "=== Merging Allure results from parallel runs ==="
+          # Copy all allure results from both parallel jobs
+          find all-allure-results -type f -exec cp {} allure-results/ \; 2>/dev/null || true
           
-          # Check if we have any allure results
-          if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
-            echo "Generating Allure report..."
+          # Check what we collected
+          echo "Allure results files:"
+          ls -la allure-results/ || echo "No Allure results found"
+          
+          # Generate report only from current run's data
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results 2>/dev/null)" ]; then
+            echo "Generating fresh Allure report from current run only..."
             npx allure generate allure-results --clean -o allure-report
+            echo "✓ Allure report generated successfully"
           else
-            echo "No Allure results found, creating empty report"
+            echo "⚠ No Allure results found, creating placeholder report"
             mkdir -p allure-report
-            echo "<html><body><h1>No test results available</h1></body></html>" > allure-report/index.html
+            echo "<html><body><h1>No test results available for this run</h1></body></html>" > allure-report/index.html
           fi
 
       - name: Deploy Allure Report to Surge
@@ -323,10 +344,12 @@ jobs:
         run: |
           npm install --global surge
           
+          echo "Deploying fresh Allure report to Surge..."
           # Deploy to production URL
           surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
           
           echo "preview_url=https://kwant-ui-automation.surge.sh" >> $GITHUB_OUTPUT
+          echo "✓ Deployed to: https://kwant-ui-automation.surge.sh"
 
       - name: Send Slack Notification
         run: |
