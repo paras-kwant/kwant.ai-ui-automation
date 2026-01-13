@@ -390,11 +390,14 @@ jobs:
                     {title: "📈 Success Rate", value: $success_rate, short: true},
                     {title: "⏱️ Duration", value: $total_time, short: true},
                     {title: "🕐 Timestamp", value: $timestamp, short: false},
-                    {title: "🔗 Report", value: ("<" + $report_url + "|View Full Report>"), short: false}
                   ],
-                  footer: "Kwant UI Automation",
-                  footer_icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                  ts: now
+                 actions: [
+                    {
+                      type: "button",
+                      text: "View Detailed Report",
+                       url: $report_url
+                    }
+                  ]
                 }
               ]
             }')
