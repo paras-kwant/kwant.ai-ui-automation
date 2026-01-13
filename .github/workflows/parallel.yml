@@ -397,7 +397,10 @@ jobs:
                       text: "View Detailed Report",
                       url: $report_url
                     }
-                  ]
+                  ],
+                  footer: "Kwant UI Automation",
+                  footer_icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+                  ts: now
                 }
               ]
             }')
