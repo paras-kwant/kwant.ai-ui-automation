@@ -18,22 +18,20 @@ Cypress.Commands.add('login', () => {
 
 
   Cypress.Commands.add("searchAndDeleteWorker", (firstName, lastName) => {
-    cy.get(workforceSelector.searchInput).type(firstName + " " + lastName);
+    cy.get(workforceSelector.searchInput).clear().type(firstName + " " + lastName);
   
     cy.get(".personal-info-content > .personal-info-content__title")
       .contains(`${firstName} ${lastName}`)
       .should("be.visible");
   
-    // Delete workflow
-    cy.get(".checkboxCheckmark").each(($checkbox) => {
-      cy.wrap($checkbox).click({ force: true });
-    });
+      cy.get('.header-checkbox-container [type="checkbox"]')
+      .eq(0)
+      .check({ force: true });
     
     cy.get(".sc-gFAWRd>.sc-aXZVg>button").click();
     cy.get(".delete-btn").click();
     cy.get("button>p").contains("Delete").click();
   
-    // Assertion after deletion
     cy.get(".sc-kOPcWz")
       .contains("successfully deleted")
       .should("be.visible");
@@ -43,21 +41,28 @@ Cypress.Commands.add('login', () => {
   Cypress.Commands.add(
     'verifyTableorEmptyState',
     ({ tableRowSelector, cellSelector, expectedText }) => {
-      cy.get('body').then(($body) => {
-        cy.wait(2000); // allow UI to render
   
+      cy.wait(2000); // allow UI render
+  
+      cy.get('body').then(($body) => {
         const hasRows = $body.find(tableRowSelector).length > 0;
   
         if (hasRows) {
-          cy.get(cellSelector).each(($cell) => {
-            cy.wrap($cell)
-              .invoke("text")
-              .then((txt) => {
-                expect(txt.trim()).to.include(
-                  expectedText,
-                  `Cell text "${txt.trim()}" should include "${expectedText}"`
+          cy.get(tableRowSelector).each(($row) => {
+  
+            cy.wrap($row)
+              .find(cellSelector)
+              .then(($cells) => {
+                const hasMatch = [...$cells].some(cell =>
+                  cell.innerText.trim().includes(expectedText)
                 );
+  
+                expect(
+                  hasMatch,
+                  `Row should contain "${expectedText}"`
+                ).to.be.true;
               });
+  
           });
   
         } else {
@@ -69,6 +74,7 @@ Cypress.Commands.add('login', () => {
       });
     }
   );
+  
   
 
 

@@ -78,6 +78,6 @@ export const workforceSelector = {
 
 
 
-   nameFilter: () => cy.contains('.sc-fremEr.jImTfM', 'Name').find('.table-header-filter-btn')  , 
+   nameFilter: () => cy.contains('.sc-fremEr.jImTfM', 'Name').find('.table-header-filter-btn'), 
   };
    

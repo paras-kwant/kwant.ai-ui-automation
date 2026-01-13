@@ -17,7 +17,7 @@ module.exports = defineConfig({
     requestTimeout: 30000,
     responseTimeout: 30000,
     pageLoadTimeout: 30000,
-    retries: { runMode: 1, openMode: 0 },
+    retries: { runMode: 0, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
     testIsolation: false,
 
