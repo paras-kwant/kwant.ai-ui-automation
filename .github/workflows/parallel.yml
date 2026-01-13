@@ -53,7 +53,6 @@ jobs:
 
       - name: Clean Allure results
         run: |
-          # Remove old allure-results to prevent mixing old and new data
           rm -rf allure-results
           mkdir -p allure-results
           echo "Allure results directory cleaned"
@@ -62,12 +61,10 @@ jobs:
         id: cypress
         continue-on-error: true
         run: |
-          # Get folder name for display
           FOLDER_NAME=$(basename "${{ matrix.folder }}")
           
           echo "=== Running all tests in ${{ matrix.folder }} folder ==="
           
-          # Run all test files in the specified folder
           npx cypress run \
             --spec "${{ matrix.folder }}/**/*.cy.js" \
             --env email=$EMAIL,password=$PASSWORD \
@@ -76,39 +73,31 @@ jobs:
             --reporter mochawesome \
             --reporter-options reportDir=cypress/results,overwrite=false,html=false,json=true
           
-          # Store exit code
           CYPRESS_EXIT_CODE=$?
           
-          # Ensure results directory exists
           mkdir -p cypress/results
           
-          # Check if any JSON reports were generated
           if ! ls cypress/results/mochawesome*.json 1> /dev/null 2>&1; then
-            echo "Error: No test reports generated for ${{ matrix.folder }}"
+            echo "Warning: No test reports generated for ${{ matrix.folder }}"
             echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/mochawesome-default.json
           fi
           
-          # List all generated mochawesome reports for debugging
           echo "Generated mochawesome reports:"
           ls -la cypress/results/mochawesome*.json || echo "No mochawesome JSON files found"
           
-          # Merge all mochawesome JSON reports into one for this folder
           npx mochawesome-merge "cypress/results/mochawesome*.json" > cypress/results/merged-report-${FOLDER_NAME}.json
           
-          # Validate merged report
           if [ ! -s cypress/results/merged-report-${FOLDER_NAME}.json ]; then
             echo "Warning: Merged report is empty"
             echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/merged-report-${FOLDER_NAME}.json
           fi
           
-          # Extract stats from merged report
           TOTAL=$(jq -r '.stats.tests // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
           PASSED=$(jq -r '.stats.passes // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
           FAILED=$(jq -r '.stats.failures // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
           SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
           TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/merged-report-${FOLDER_NAME}.json)
           
-          # Calculate success rate
           if [ "$TOTAL" -gt 0 ]; then
             SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
           else
@@ -117,12 +106,10 @@ jobs:
           
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           
-          # Convert milliseconds to minutes and seconds
           MINUTES=$((TOTAL_TIME_MS / 60000))
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
 
-          # Set outputs
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
@@ -133,7 +120,6 @@ jobs:
           echo "exit_code=$CYPRESS_EXIT_CODE" >> $GITHUB_OUTPUT
           echo "folder=$FOLDER_NAME" >> $GITHUB_OUTPUT
           
-          # Debug output
           echo "=== TEST EXECUTION SUMMARY ==="
           echo "Folder: $FOLDER_NAME"
           echo "Total: $TOTAL | Passed: $PASSED | Failed: $FAILED | Skipped: $SKIPPED"
@@ -141,16 +127,16 @@ jobs:
           echo "Exit Code: $CYPRESS_EXIT_CODE"
           echo "============================="
           
-          # Exit with Cypress exit code
           exit $CYPRESS_EXIT_CODE
 
-      - name: Upload Allure Results (raw data only)
+      - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-results-${{ strategy.job-index }}
           path: allure-results
           if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload Cypress Screenshots
         if: failure()
@@ -159,6 +145,7 @@ jobs:
           name: cypress-screenshots-${{ strategy.job-index }}
           path: cypress/screenshots
           if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload Cypress Videos
         if: failure()
@@ -167,17 +154,17 @@ jobs:
           name: cypress-videos-${{ strategy.job-index }}
           path: cypress/videos
           if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ strategy.job-index }}
-          path: |
-            cypress/results/merged-report-*.json
-          if-no-files-found: ignore
+          path: cypress/results/merged-report-*.json
+          if-no-files-found: warn
+          retention-days: 7
 
-  # Aggregate results and send notification
   report:
     needs: cypress-run
     runs-on: ubuntu-latest
@@ -192,12 +179,16 @@ jobs:
 
       - name: Download all test results
         uses: actions/download-artifact@v4
+        continue-on-error: true
+        id: download_results
         with:
           path: all-results
           pattern: test-results-*
 
       - name: Download all Allure results
         uses: actions/download-artifact@v4
+        continue-on-error: true
+        id: download_allure
         with:
           path: all-allure-results
           pattern: allure-results-*
@@ -213,72 +204,76 @@ jobs:
       - name: Merge all test reports
         id: aggregate
         run: |
-          # Create results directory
           mkdir -p cypress/results
           
-          # Debug: Show what we downloaded
-          echo "=== Downloaded artifacts structure ==="
-          find all-results -type f -name "*.json"
-          echo "===================================="
-          
-          # Find and copy ALL merged report JSON files from both folders
-          find all-results -type f -name "merged-report-*.json" -exec cp {} cypress/results/ \;
-          
-          # Debug: Show what we're about to merge
-          echo "=== Merged reports from parallel jobs ==="
-          ls -la cypress/results/merged-report-*.json 2>/dev/null || echo "No merged reports found"
-          echo "=========================================="
-          
-          # Check if we have any merged reports
-          if ls cypress/results/merged-report-*.json 1> /dev/null 2>&1; then
-            # Show each report's stats before final merge
-            for file in cypress/results/merged-report-*.json; do
-              echo "=== Stats from $file ==="
-              jq '.stats' "$file" 2>/dev/null || echo "Could not read stats"
-              echo "======================="
-            done
-            
-            echo "Attempting to merge all folder reports..."
-            if npx mochawesome-merge "cypress/results/merged-report-*.json" > cypress/results/final-report.json; then
-              echo "✓ Successfully merged all folder reports"
-            else
-              echo "✗ Mochawesome-merge failed, creating manual aggregate..."
-              # Manual aggregation fallback
-              jq -s '{
-                stats: {
-                  suites: ([.[].stats.suites // 0] | add),
-                  tests: ([.[].stats.tests // 0] | add),
-                  passes: ([.[].stats.passes // 0] | add),
-                  pending: ([.[].stats.pending // 0] | add),
-                  failures: ([.[].stats.failures // 0] | add),
-                  start: (.[0].stats.start // ""),
-                  end: (.[-1].stats.end // ""),
-                  duration: ([.[].stats.duration // 0] | add),
-                  testsRegistered: ([.[].stats.testsRegistered // 0] | add),
-                  passPercent: (([.[].stats.passes // 0] | add) / ([.[].stats.tests // 1] | add) * 100),
-                  pendingPercent: (([.[].stats.pending // 0] | add) / ([.[].stats.tests // 1] | add) * 100)
-                },
-                results: ([.[].results // []] | add)
-              }' cypress/results/merged-report-*.json > cypress/results/final-report.json
-            fi
-          else
-            echo "No merged test reports found"
-            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/final-report.json
+          # Check if we have any downloaded artifacts
+          ARTIFACTS_FOUND=false
+          if [ -d "all-results" ] && [ "$(ls -A all-results 2>/dev/null)" ]; then
+            ARTIFACTS_FOUND=true
           fi
           
-          # Show final aggregated report for debugging
-          echo "=== FINAL AGGREGATED REPORT STATS ==="
-          jq '.stats' cypress/results/final-report.json 2>/dev/null || echo "Error reading final report"
-          echo "====================================="
+          echo "=== Artifact Download Status ==="
+          echo "Artifacts found: $ARTIFACTS_FOUND"
+          echo "================================"
           
-          # Extract aggregated stats from final report
+          if [ "$ARTIFACTS_FOUND" = false ]; then
+            echo "⚠️  No test artifacts found - tests may have failed to run"
+            echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/final-report.json
+          else
+            echo "=== Downloaded artifacts structure ==="
+            find all-results -type f -name "*.json" 2>/dev/null || echo "No JSON files"
+            echo "======================================"
+            
+            find all-results -type f -name "merged-report-*.json" -exec cp {} cypress/results/ \; 2>/dev/null || echo "No merged reports"
+            
+            echo "=== Merged reports from parallel jobs ==="
+            ls -la cypress/results/merged-report-*.json 2>/dev/null || echo "No merged reports found"
+            echo "=========================================="
+            
+            if ls cypress/results/merged-report-*.json 1> /dev/null 2>&1; then
+              for file in cypress/results/merged-report-*.json; do
+                echo "=== Stats from $file ==="
+                jq '.stats' "$file" 2>/dev/null || echo "Could not read stats"
+              done
+              
+              echo "Merging all folder reports..."
+              if npx mochawesome-merge "cypress/results/merged-report-*.json" > cypress/results/final-report.json; then
+                echo "✓ Successfully merged all folder reports"
+              else
+                echo "✗ Merge failed, using manual aggregation..."
+                jq -s '{
+                  stats: {
+                    suites: ([.[].stats.suites // 0] | add),
+                    tests: ([.[].stats.tests // 0] | add),
+                    passes: ([.[].stats.passes // 0] | add),
+                    pending: ([.[].stats.pending // 0] | add),
+                    failures: ([.[].stats.failures // 0] | add),
+                    start: (.[0].stats.start // ""),
+                    end: (.[-1].stats.end // ""),
+                    duration: ([.[].stats.duration // 0] | add),
+                    testsRegistered: ([.[].stats.testsRegistered // 0] | add),
+                    passPercent: (([.[].stats.passes // 0] | add) / ([.[].stats.tests // 1] | add) * 100),
+                    pendingPercent: (([.[].stats.pending // 0] | add) / ([.[].stats.tests // 1] | add) * 100)
+                  },
+                  results: ([.[].results // []] | add)
+                }' cypress/results/merged-report-*.json > cypress/results/final-report.json
+              fi
+            else
+              echo "No merged reports found, creating empty report"
+              echo '{"stats":{"tests":0,"passes":0,"failures":0,"pending":0,"duration":0},"results":[]}' > cypress/results/final-report.json
+            fi
+          fi
+          
+          echo "=== FINAL AGGREGATED REPORT ==="
+          jq '.stats' cypress/results/final-report.json 2>/dev/null || echo "Error reading report"
+          echo "==============================="
+          
           TOTAL=$(jq -r '.stats.tests // 0' cypress/results/final-report.json)
           PASSED=$(jq -r '.stats.passes // 0' cypress/results/final-report.json)
           FAILED=$(jq -r '.stats.failures // 0' cypress/results/final-report.json)
           SKIPPED=$(jq -r '.stats.pending // 0' cypress/results/final-report.json)
           TOTAL_TIME_MS=$(jq -r '.stats.duration // 0' cypress/results/final-report.json)
           
-          # Calculate success rate
           if [ "$TOTAL" -gt 0 ]; then
             SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
           else
@@ -286,13 +281,10 @@ jobs:
           fi
           
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-          
-          # Convert milliseconds to minutes and seconds
           MINUTES=$((TOTAL_TIME_MS / 60000))
           SECONDS=$(((TOTAL_TIME_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
           
-          # Set outputs
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
@@ -301,33 +293,32 @@ jobs:
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
           
-          echo "=== FINAL AGGREGATED RESULTS ==="
+          echo "=== FINAL RESULTS ==="
           echo "Total: $TOTAL | Passed: $PASSED | Failed: $FAILED"
-          echo "Success Rate: $SUCCESS_RATE% | Duration: $TOTAL_TIME"
-          echo "================================"
+          echo "Success: $SUCCESS_RATE% | Duration: $TOTAL_TIME"
+          echo "===================="
 
       - name: Generate combined Allure Report
         run: |
-          # Clean and create fresh allure-results directory
           rm -rf allure-results allure-report
           mkdir -p allure-results
           
-          echo "=== Merging Allure results from parallel runs ==="
-          # Copy all allure results from both parallel jobs
-          find all-allure-results -type f -exec cp {} allure-results/ \; 2>/dev/null || true
-          
-          # Check what we collected
-          echo "Allure results files count: $(ls allure-results/ 2>/dev/null | wc -l)"
-          
-          # Generate report only from current run's data
-          if [ -d "allure-results" ] && [ "$(ls -A allure-results 2>/dev/null)" ]; then
-            echo "Generating fresh Allure report from current run only..."
-            npx allure generate allure-results --clean -o allure-report
-            echo "✓ Allure report generated successfully"
+          if [ -d "all-allure-results" ] && [ "$(ls -A all-allure-results 2>/dev/null)" ]; then
+            echo "Merging Allure results..."
+            find all-allure-results -type f -exec cp {} allure-results/ \; 2>/dev/null || true
+            echo "Allure files collected: $(ls allure-results/ 2>/dev/null | wc -l)"
           else
-            echo "⚠ No Allure results found, creating placeholder report"
+            echo "⚠️  No Allure results found"
+          fi
+          
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results 2>/dev/null)" ]; then
+            echo "Generating Allure report..."
+            npx allure generate allure-results --clean -o allure-report
+            echo "✓ Report generated"
+          else
+            echo "Creating placeholder report"
             mkdir -p allure-report
-            echo "<html><body><h1>No test results available for this run</h1></body></html>" > allure-report/index.html
+            echo "<html><body><h1>No test results available</h1></body></html>" > allure-report/index.html
           fi
 
       - name: Deploy Allure Report to Surge
@@ -335,13 +326,8 @@ jobs:
         continue-on-error: true
         run: |
           npm install --global surge
-          
-          echo "Deploying fresh Allure report to Surge..."
-          # Deploy to production URL
           surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
-          
           echo "preview_url=https://kwant-ui-automation.surge.sh" >> $GITHUB_OUTPUT
-          echo "✓ Deployed to: https://kwant-ui-automation.surge.sh"
 
       - name: Send Slack Notification
         run: |
@@ -354,7 +340,6 @@ jobs:
           TIMESTAMP="${{ steps.aggregate.outputs.timestamp }}"
           PREVIEW_URL="${{ steps.surge_deploy.outputs.preview_url }}"
 
-          # Set defaults
           TOTAL="${TOTAL:-0}"
           PASSED="${PASSED:-0}"
           FAILED="${FAILED:-0}"
@@ -364,7 +349,6 @@ jobs:
           TIMESTAMP="${TIMESTAMP:-$(date -u '+%Y-%m-%d %H:%M:%S UTC')}"
           PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation.surge.sh}"
 
-          # Determine status
           if [[ "$TOTAL" -eq 0 ]]; then
             STATUS="⚠️ UI tests did not run properly"
             COLOR="warning"
