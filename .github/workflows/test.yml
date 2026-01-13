@@ -1,0 +1,211 @@
+name: Run Cypress UI Tests (Parallel)
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "05 04 * * *" # Nepali 10:05 AM
+
+env:
+  EMAIL: ${{ secrets.EMAIL }}
+  PASSWORD: ${{ secrets.PASSWORD }}
+  GMAIL_USER: ${{ secrets.GMAIL_USER }}
+  GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+  TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+  TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+  TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+  EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
+
+# -------------------------------
+# JOB 1: Companies Tests
+# -------------------------------
+jobs:
+  companies-tests:
+    name: 🏢 Companies UI Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/Cypress
+            node_modules
+          key: ${{ runner.os }}-companies-${{ hashFiles('**/package-lock.json') }}
+
+      - run: npm ci
+
+      - run: npx cypress verify
+
+      - name: Run Companies Cypress Tests
+        continue-on-error: true
+        run: |
+          npx cypress run \
+            --spec "cypress/e2e/companies/**/*.cy.js" \
+            --browser chrome \
+            --headless \
+            --env email=$EMAIL,password=$PASSWORD \
+            --reporter mochawesome \
+            --reporter-options reportDir=cypress/results/companies,json=true,html=false,overwrite=false
+
+      - name: Upload Companies Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: companies-results
+          path: |
+            cypress/results
+            allure-results
+
+# -------------------------------
+# JOB 2: Workers Tests
+# -------------------------------
+  workers-tests:
+    name: 👷 Workers UI Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/Cypress
+            node_modules
+          key: ${{ runner.os }}-workers-${{ hashFiles('**/package-lock.json') }}
+
+      - run: npm ci
+
+      - run: npx cypress verify
+
+      - name: Run Workers Cypress Tests
+        continue-on-error: true
+        run: |
+          npx cypress run \
+            --spec "cypress/e2e/workers/**/*.cy.js" \
+            --browser chrome \
+            --headless \
+            --env email=$EMAIL,password=$PASSWORD \
+            --reporter mochawesome \
+            --reporter-options reportDir=cypress/results/workers,json=true,html=false,overwrite=false
+
+      - name: Upload Workers Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: workers-results
+          path: |
+            cypress/results
+            allure-results
+
+# -------------------------------
+# JOB 3: Merge Reports + Allure + Slack
+# -------------------------------
+  merge-and-report:
+    name: 📊 Merge Reports & Notify
+    runs-on: ubuntu-latest
+    needs: [companies-tests, workers-tests]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Download Companies Results
+        uses: actions/download-artifact@v4
+        with:
+          name: companies-results
+          path: ./companies
+
+      - name: Download Workers Results
+        uses: actions/download-artifact@v4
+        with:
+          name: workers-results
+          path: ./workers
+
+      - name: Merge Mochawesome Reports
+        run: |
+          mkdir -p cypress/results
+          find . -name "*.json" -exec cp {} cypress/results \;
+          npx mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json
+
+      - name: Extract Test Stats
+        id: stats
+        run: |
+          TOTAL=$(jq '.stats.tests' cypress/results/merged-report.json)
+          PASSED=$(jq '.stats.passes' cypress/results/merged-report.json)
+          FAILED=$(jq '.stats.failures' cypress/results/merged-report.json)
+          SKIPPED=$(jq '.stats.pending' cypress/results/merged-report.json)
+          DURATION=$(jq '.stats.duration' cypress/results/merged-report.json)
+
+          if [ "$TOTAL" -gt 0 ]; then
+            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          else
+            SUCCESS_RATE="0.00"
+          fi
+
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+
+      - name: Generate & Deploy Allure Report
+        continue-on-error: true
+        run: |
+          npx allure generate allure-results --clean -o allure-report
+          npm install -g surge
+          surge ./allure-report https://kwant-ui-automation.surge.sh --token $SURGE_TOKEN
+
+      - name: Send Slack Notification
+        run: |
+          STATUS="✅ UI Tests Completed"
+          COLOR="good"
+
+          if [[ "${{ steps.stats.outputs.failed }}" -gt 0 ]]; then
+            STATUS="🚨 UI Tests Failed"
+            COLOR="danger"
+          fi
+
+          jq -n \
+            --arg color "$COLOR" \
+            --arg status "$STATUS" \
+            --arg total "${{ steps.stats.outputs.total }}" \
+            --arg passed "${{ steps.stats.outputs.passed }}" \
+            --arg failed "${{ steps.stats.outputs.failed }}" \
+            --arg skipped "${{ steps.stats.outputs.skipped }}" \
+            --arg rate "${{ steps.stats.outputs.success_rate }}%" \
+            '{
+              attachments: [{
+                color: $color,
+                title: $status,
+                fields: [
+                  {title: "Total", value: $total, short: true},
+                  {title: "Passed", value: $passed, short: true},
+                  {title: "Failed", value: $failed, short: true},
+                  {title: "Skipped", value: $skipped, short: true},
+                  {title: "Success Rate", value: $rate, short: true}
+                ],
+                actions: [{
+                  type: "button",
+                  text: "View Allure Report",
+                  url: "https://kwant-ui-automation.surge.sh"
+                }]
+              }]
+            }' | curl -X POST -H "Content-Type: application/json" \
+              --data @- "$SLACK_WEBHOOK_URL"
