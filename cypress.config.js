@@ -4,12 +4,12 @@ const fs = require("fs");
 const path = require("path");
 const xlsx = require("xlsx");
 const allureWriter = require("@shelex/cypress-allure-plugin/writer");
-const Imap = require('imap-simple');
-const twilio = require('twilio');
+const Imap = require("imap-simple");
+const twilio = require("twilio");
 
 module.exports = defineConfig({
   e2e: {
-    projectId:"qqtmqa",
+    projectId: "qqtmqa",
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
@@ -17,17 +17,18 @@ module.exports = defineConfig({
     requestTimeout: 30000,
     responseTimeout: 30000,
     pageLoadTimeout: 30000,
-    retries: { runMode: 0, openMode: 0 },
+    retries: { runMode: 1, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
     testIsolation: false,
+    specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}", 
 
     setupNodeEvents(on, config) {
       // Clean allure-results before test run
-      on('before:run', () => {
-        const allureResultsPath = path.join(__dirname, 'allure-results');
+      on("before:run", () => {
+        const allureResultsPath = path.join(__dirname, "allure-results");
         if (fs.existsSync(allureResultsPath)) {
           fs.rmSync(allureResultsPath, { recursive: true, force: true });
-          console.log('🧹 Cleaned old allure-results');
+          console.log("🧹 Cleaned old allure-results");
         }
       });
 
@@ -80,7 +81,9 @@ module.exports = defineConfig({
             .readdirSync(downloadsFolder)
             .filter((f) => f.includes(pattern) && f.endsWith(extension));
 
-          filesToDelete.forEach((file) => fs.unlinkSync(path.join(downloadsFolder, file)));
+          filesToDelete.forEach((file) =>
+            fs.unlinkSync(path.join(downloadsFolder, file))
+          );
 
           return filesToDelete.length;
         },
@@ -90,136 +93,110 @@ module.exports = defineConfig({
           return null;
         },
 
-        // ✅ Get most recent email from Gmail
         async getMostRecentEmail() {
           const imapConfig = {
             imap: {
               user: process.env.GMAIL_USER,
               password: process.env.GMAIL_APP_PASSWORD,
-              host: 'imap.gmail.com',
+              host: "imap.gmail.com",
               port: 993,
               tls: true,
-              tlsOptions: { rejectUnauthorized: false }
-            }
+              tlsOptions: { rejectUnauthorized: false },
+            },
           };
 
           try {
             const connection = await Imap.connect(imapConfig);
-            await connection.openBox('INBOX');
-            
-            const searchCriteria = [
-              ['SINCE', new Date(Date.now() - 30 * 60 * 1000)]
-            ];
-            
-            const fetchOptions = {
-              bodies: ['HEADER', 'TEXT', ''],
-              markSeen: false
-            };
-            
+            await connection.openBox("INBOX");
+
+            const searchCriteria = [["SINCE", new Date(Date.now() - 30 * 60 * 1000)]];
+
+            const fetchOptions = { bodies: ["HEADER", "TEXT", ""], markSeen: false };
+
             const messages = await connection.search(searchCriteria, fetchOptions);
             connection.end();
-            
+
             if (messages && messages.length > 0) {
               const message = messages[messages.length - 1];
               const parts = message.parts;
-              
-              let body = '';
+              let body = "";
               let headers = {};
-              
-              parts.forEach(part => {
-                if (part.which === 'TEXT' || part.which === '') {
-                  body += part.body;
-                }
-                if (part.which === 'HEADER') {
-                  headers = part.body;
-                }
+
+              parts.forEach((part) => {
+                if (part.which === "TEXT" || part.which === "") body += part.body;
+                if (part.which === "HEADER") headers = part.body;
               });
-              
+
               return {
-                subject: headers.subject ? headers.subject[0] : '',
-                from: headers.from ? headers.from[0] : '',
+                subject: headers.subject ? headers.subject[0] : "",
+                from: headers.from ? headers.from[0] : "",
                 body: body,
-                date: headers.date ? headers.date[0] : ''
+                date: headers.date ? headers.date[0] : "",
               };
             }
-            
+
             return null;
           } catch (error) {
-            console.error('❌ Error getting most recent email:', error.message);
+            console.error("❌ Error getting most recent email:", error.message);
             return null;
           }
         },
 
-        // ✅ List all recent emails (for debugging)
         async listRecentEmails() {
           const imapConfig = {
             imap: {
               user: process.env.GMAIL_USER,
               password: process.env.GMAIL_APP_PASSWORD,
-              host: 'imap.gmail.com',
+              host: "imap.gmail.com",
               port: 993,
               tls: true,
-              tlsOptions: { rejectUnauthorized: false }
-            }
+              tlsOptions: { rejectUnauthorized: false },
+            },
           };
 
           try {
-            console.log('🔍 Fetching all recent emails...');
             const connection = await Imap.connect(imapConfig);
-            await connection.openBox('INBOX');
-            
-            const searchCriteria = [
-              ['SINCE', new Date(Date.now() - 30 * 60 * 1000)]
-            ];
-            
-            const fetchOptions = {
-              bodies: ['HEADER'],
-              markSeen: false
-            };
-            
+            await connection.openBox("INBOX");
+
+            const searchCriteria = [["SINCE", new Date(Date.now() - 30 * 60 * 1000)]];
+            const fetchOptions = { bodies: ["HEADER"], markSeen: false };
+
             const messages = await connection.search(searchCriteria, fetchOptions);
             connection.end();
-            
-            const emailList = messages.map(msg => {
-              const headers = msg.parts.find(p => p.which === 'HEADER').body;
+
+            return messages.map((msg) => {
+              const headers = msg.parts.find((p) => p.which === "HEADER").body;
               return {
-                subject: headers.subject ? headers.subject[0] : 'No Subject',
-                from: headers.from ? headers.from[0] : 'Unknown',
-                date: headers.date ? headers.date[0] : 'Unknown'
+                subject: headers.subject ? headers.subject[0] : "No Subject",
+                from: headers.from ? headers.from[0] : "Unknown",
+                date: headers.date ? headers.date[0] : "Unknown",
               };
             });
-            
-            console.log(`✅ Found ${emailList.length} recent emails`);
-            return emailList;
           } catch (error) {
-            console.error('❌ Error listing emails:', error.message);
+            console.error("❌ Error listing emails:", error.message);
             return [];
           }
         },
 
         getTwilioOtp({ accountSid, authToken, to }) {
           const client = twilio(accountSid, authToken);
-    
+
           return client.messages
             .list({ to, limit: 5 })
-            .then(messages => {
-              // Find the latest OTP message
-              const otpMessage = messages.find(msg => msg.body.includes('Your OTP'));
-              if (otpMessage) {
-                const otp = otpMessage.body.match(/\d{4,6}/)[0]; // extract 4-6 digit OTP
-                return otp;
-              }
+            .then((messages) => {
+              const otpMessage = messages.find((msg) => msg.body.includes("Your OTP"));
+              if (otpMessage) return otpMessage.body.match(/\d{4,6}/)[0];
               return null;
             });
-        }
+        },
       });
-    
+
       return config;
     },
 
     env: {
       allure: true,
-      allureResultsPath: "allure-results",
+      allureResultsPath: "allure-results", // single folder for both companies & workers
       allureSkipCommands: "wrap",
       allureAddVideoOnPass: false,
       allureSkipAutomaticScreenshots: false,
