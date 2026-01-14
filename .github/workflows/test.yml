@@ -161,11 +161,6 @@ jobs:
       - name: Install Allure CLI
         run: npm install -g allure-commandline
 
-      - name: Clean previous reports
-        run: |
-          rm -rf merged-results allure-report
-          mkdir -p merged-results allure-report
-
       - name: Download Companies Results
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -265,7 +260,7 @@ jobs:
           node-version: 18
 
       - name: 🌍 Deploy Allure Report to Surge
-        if: always()
+      if: always()
         id: surge_deploy
         run: |
           if [ ! -d "./allure-report" ] || [ -z "$(ls -A allure-report)" ]; then
@@ -276,9 +271,9 @@ jobs:
           echo "✅ allure-report exists and has files: $(find allure-report -type f | wc -l)"
           npm install --global surge
 
-          # Deploy to a fixed URL with --force to overwrite old files
-          SURGE_URL="https://kwant-ui-automation-dashboard.surge.sh/"
-          surge ./allure-report $SURGE_URL --token $SURGE_TOKEN --force
+          # Deploy to a fixed URL
+          SURGE_URL="https://kwant-ui-automation.surge.sh"
+          surge ./allure-report $SURGE_URL --token $SURGE_TOKEN
           echo "✅ Deployed successfully to $SURGE_URL"
 
           echo "preview_url=$SURGE_URL" >> $GITHUB_OUTPUT
@@ -304,7 +299,7 @@ jobs:
           SUCCESS_RATE="${SUCCESS_RATE:-0.00}"
           TOTAL_TIME="${TOTAL_TIME:-0m 0s}"
           TIMESTAMP="${TIMESTAMP:-N/A}"
-          PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation-dashboard.surge.sh/}"
+          PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation.surge.sh}"
 
           TOTAL_FAILURES=$((FAILED + BROKEN))
 
