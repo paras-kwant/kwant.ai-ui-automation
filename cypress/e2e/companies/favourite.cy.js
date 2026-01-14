@@ -46,7 +46,7 @@ describe("Workforce Company - Favourite page", () => {
   });
 
   it("Verify adding company as favourite", () => {
-     cy.get('.top-nav-left-section [role="button"]').click();
+     cy.get('.top-nav-left-section [role="buttonnn"]').click();
 
     cy.get('.sc-kOPcWz', { timeout: 10000 }) //change here
       .should('contain.text', 'Added to favorite');
