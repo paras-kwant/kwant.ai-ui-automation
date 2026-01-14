@@ -20,10 +20,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node 20 (Required for Cypress 15)
+      - name: Setup Node 18
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Cache dependencies
         uses: actions/cache@v3
@@ -72,10 +72,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node 20 (Required for Cypress 15)
+      - name: Setup Node 18
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Cache dependencies
         uses: actions/cache@v3
@@ -123,10 +123,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 18
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install Allure CLI
         run: npm install -g allure-commandline
