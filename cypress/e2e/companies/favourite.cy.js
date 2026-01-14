@@ -36,7 +36,7 @@ describe("Workforce Company - Favourite page", () => {
   
   it("Verify remove company from Favorite", () => {
 	cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/companies`);
-    cy.get('.top-nav-left-section [role="buttonnn"]') //cjhange
+    cy.get('.top-nav-left-section [role="button"]') //cjhange
       .should('be.visible')
       .click();
     cy.get('.sc-kOPcWz')
@@ -46,7 +46,7 @@ describe("Workforce Company - Favourite page", () => {
   });
 
   it("Verify adding company as favourite", () => {
-     cy.get('.top-nav-left-section [role="buttonnn"]').click();
+     cy.get('.top-nav-left-section [role="button"]').click();
 
     cy.get('.sc-kOPcWz', { timeout: 10000 }) //change here
       .should('contain.text', 'Added to favorite');
