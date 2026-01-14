@@ -23,14 +23,19 @@ module.exports = defineConfig({
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}", 
 
     setupNodeEvents(on, config) {
-      // Clean allure-results before test run
-      on("before:run", () => {
-        const allureResultsPath = path.join(__dirname, "allure-results");
-        if (fs.existsSync(allureResultsPath)) {
-          fs.rmSync(allureResultsPath, { recursive: true, force: true });
-          console.log("🧹 Cleaned old allure-results");
-        }
-      });
+      // Only clean allure-results in local development, not in CI
+      // This prevents conflicts when running parallel jobs in GitHub Actions
+      if (!process.env.CI) {
+        on("before:run", () => {
+          const allureResultsPath = path.join(__dirname, "allure-results");
+          if (fs.existsSync(allureResultsPath)) {
+            fs.rmSync(allureResultsPath, { recursive: true, force: true });
+            console.log("🧹 Cleaned old allure-results");
+          }
+        });
+      } else {
+        console.log("ℹ️ Running in CI - skipping allure-results cleanup (handled by workflow)");
+      }
 
       // Allure plugin
       allureWriter(on, config);
