@@ -198,7 +198,7 @@ jobs:
 
       - name: Setup Node 18 for Surge
         uses: actions/setup-node@v4
-          with:
+        with:
           node-version: 18
 
       - name: 🌍 Deploy Allure Report to Surge
