@@ -3,7 +3,7 @@ name: Run Cypress UI Tests (Parallel)
 on:
   workflow_dispatch:
   # schedule:
-  #   - cron: "10 04 * * *" # 10:10 AM Nepal Time
+    # - cron: "10 04 * * *" # 10:10 AM Nepal Time
 
 jobs:
   companies-tests:
@@ -17,23 +17,30 @@ jobs:
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node 20 (Required for Cypress 15)
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - uses: actions/cache@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
         with:
           path: |
             ~/.npm
             ~/.cache/Cypress
             node_modules
           key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cypress-
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npx cypress verify
+      - name: Verify Cypress
+        run: npx cypress verify
 
       - name: Clean allure-results
         run: rm -rf allure-results && mkdir -p allure-results
@@ -46,13 +53,24 @@ jobs:
             --browser chrome \
             --headless || true
 
+      - name: 🐛 Verify Companies Results
+        run: |
+          echo "=== Companies Allure Results ==="
+          if [ -d "allure-results" ]; then
+            echo "✅ allure-results exists"
+            ls -la allure-results/
+            echo "Total files: $(find allure-results -type f | wc -l)"
+          else
+            echo "❌ No allure-results!"
+            mkdir -p allure-results
+          fi
+
       - name: Upload Companies Allure Results
-        if: always()
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: companies-allure-results
           path: allure-results
-
 
   workers-tests:
     name: 👷 Workers UI Tests
@@ -65,23 +83,30 @@ jobs:
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node 20 (Required for Cypress 15)
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - uses: actions/cache@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
         with:
           path: |
             ~/.npm
             ~/.cache/Cypress
             node_modules
           key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cypress-
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npx cypress verify
+      - name: Verify Cypress
+        run: npx cypress verify
 
       - name: Clean allure-results
         run: rm -rf allure-results && mkdir -p allure-results
@@ -94,13 +119,24 @@ jobs:
             --browser chrome \
             --headless || true
 
+      - name: 🐛 Verify Workers Results
+        run: |
+          echo "=== Workers Allure Results ==="
+          if [ -d "allure-results" ]; then
+            echo "✅ allure-results exists"
+            ls -la allure-results/
+            echo "Total files: $(find allure-results -type f | wc -l)"
+          else
+            echo "❌ No allure-results!"
+            mkdir -p allure-results
+          fi
+
       - name: Upload Workers Allure Results
-        if: always()
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: workers-allure-results
           path: allure-results
-
 
   merge-reports:
     name: 📊 Merge Allure Reports & Deploy
@@ -112,44 +148,65 @@ jobs:
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install Allure & jq
-        run: npm install -g allure-commandline jq
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline
 
       - name: Download Companies Results
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: companies-allure-results
           path: merged-results/companies
 
       - name: Download Workers Results
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: workers-allure-results
           path: merged-results/workers
 
+      - name: 🐛 Debug - Check Downloads
+        run: |
+          echo "=== Merged results folder ==="
+          ls -la merged-results || echo "❌ merged-results missing!"
+          ls -la merged-results/companies || echo "❌ companies folder missing!"
+          ls -la merged-results/workers || echo "❌ workers folder missing!"
+          echo "Files in companies: $(find merged-results/companies -type f | wc -l)"
+          echo "Files in workers: $(find merged-results/workers -type f | wc -l)"
+
       - name: Merge Allure Results
         run: |
           mkdir -p merged-results/allure-results
-          cp -rv merged-results/companies/* merged-results/allure-results/ || true
-          cp -rv merged-results/workers/* merged-results/allure-results/ || true
-          echo "Merged files:"
-          find merged-results/allure-results -type f | wc -l
 
-      - name: Generate Allure Report (Always)
+          echo "=== Copying companies results ==="
+          if [ -d "merged-results/companies" ]; then
+            cp -rv merged-results/companies/* merged-results/allure-results/ || echo "⚠️ No company results"
+          fi
+
+          echo "=== Copying workers results ==="
+          if [ -d "merged-results/workers" ]; then
+            cp -rv merged-results/workers/* merged-results/allure-results/ || echo "⚠️ No workers results"
+          fi
+
+          echo "=== Final merged results ==="
+          ls -la merged-results/allure-results
+          echo "Total files: $(find merged-results/allure-results -type f | wc -l)"
+
+      - name: Generate Allure Report
         run: |
           rm -rf allure-report
           mkdir -p allure-report
-          allure generate merged-results/allure-results \
-            --clean \
-            -o allure-report || true
-          echo "Report files:"
-          find allure-report -type f | wc -l
+          allure generate merged-results/allure-results --clean -o allure-report || true
+          echo "✅ Allure report generated"
+          echo "Files in report: $(find allure-report -type f | wc -l)"
 
       - name: Extract Allure Summary
         id: summary
@@ -173,30 +230,46 @@ jobs:
           FAILED=$(jq '.statistic.failed' $SUMMARY)
           BROKEN=$(jq '.statistic.broken' $SUMMARY)
           SKIPPED=$(jq '.statistic.skipped' $SUMMARY)
-          DURATION=$(jq '.time.duration' $SUMMARY)
+          DURATION_MS=$(jq '.time.duration' $SUMMARY)
 
-          RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
-          MIN=$((DURATION / 60000))
-          SEC=$(((DURATION % 60000) / 1000))
+          if [ "$TOTAL" -gt 0 ]; then
+            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
+          else
+            SUCCESS_RATE="0.00"
+          fi
+
+          MINUTES=$((DURATION_MS / 60000))
+          SECONDS=$(((DURATION_MS % 60000) / 1000))
+          TOTAL_TIME="${MINUTES}m ${SECONDS}s"
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
 
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
           echo "failed=$FAILED" >> $GITHUB_OUTPUT
           echo "broken=$BROKEN" >> $GITHUB_OUTPUT
           echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
-          echo "success_rate=$RATE" >> $GITHUB_OUTPUT
-          echo "total_time=${MIN}m ${SEC}s" >> $GITHUB_OUTPUT
-          echo "timestamp=$(date -u)" >> $GITHUB_OUTPUT
+          echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+          echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node 18 for Surge
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: 🌍 Deploy Allure Report to Surge
+        id: surge_deploy
         run: |
-          npm install -g surge
+          if [ ! -d "./allure-report" ] || [ -z "$(ls -A allure-report)" ]; then
+            echo "❌ allure-report is empty or missing!"
+          fi
+
+          echo "✅ allure-report exists and has files: $(find allure-report -type f | wc -l)"
+          npm install --global surge
           SURGE_URL="https://kwant-ui-automation.surge.sh"
           surge ./allure-report $SURGE_URL --token $SURGE_TOKEN
+          echo "✅ Deployed successfully to $SURGE_URL"
+          echo "preview_url=$SURGE_URL" >> $GITHUB_OUTPUT
 
       - name: 💬 Send Slack Notification
         if: always()
@@ -209,6 +282,7 @@ jobs:
           SUCCESS_RATE="${{ steps.summary.outputs.success_rate }}"
           TOTAL_TIME="${{ steps.summary.outputs.total_time }}"
           TIMESTAMP="${{ steps.summary.outputs.timestamp }}"
+          PREVIEW_URL="${{ steps.surge_deploy.outputs.preview_url }}"
 
           TOTAL="${TOTAL:-0}"
           PASSED="${PASSED:-0}"
@@ -218,8 +292,8 @@ jobs:
           SUCCESS_RATE="${SUCCESS_RATE:-0.00}"
           TOTAL_TIME="${TOTAL_TIME:-0m 0s}"
           TIMESTAMP="${TIMESTAMP:-N/A}"
+          PREVIEW_URL="${PREVIEW_URL:-https://kwant-ui-automation-parallel.surge.sh}"
 
-          SURGE_URL="https://kwant-ui-automation.surge.sh"
           TOTAL_FAILURES=$((FAILED + BROKEN))
 
           if [[ "$TOTAL" -eq 0 ]]; then
@@ -228,8 +302,11 @@ jobs:
           elif [[ "$TOTAL_FAILURES" -eq 0 ]]; then
             STATUS="✅ Parallel UI tests completed successfully"
             COLOR="good"
+          elif [[ "$TOTAL_FAILURES" -eq 1 ]]; then
+            STATUS="🚨 $TOTAL_FAILURES test failed out of $TOTAL tests (Parallel)"
+            COLOR="danger"
           else
-            STATUS="🚨 $TOTAL_FAILURES test(s) failed out of $TOTAL (Parallel)"
+            STATUS="🚨 $TOTAL_FAILURES tests failed out of $TOTAL tests (Parallel)"
             COLOR="danger"
           fi
 
@@ -244,7 +321,7 @@ jobs:
             --arg success_rate "$SUCCESS_RATE%" \
             --arg total_time "$TOTAL_TIME" \
             --arg timestamp "$TIMESTAMP" \
-            --arg report_url "$SURGE_URL" \
+            --arg preview_url "$PREVIEW_URL" \
             '{
               attachments: [
                 {
@@ -258,20 +335,19 @@ jobs:
                     {title: "⏭️ Skipped", value: $skipped, short: true},
                     {title: "📈 Success Rate", value: $success_rate, short: true},
                     {title: "⏱️ Duration", value: $total_time, short: true},
-                    {title: "🕐 Executed At", value: $timestamp, short: false}
+                    {title: "🕐 Last Checked", value: $timestamp, short: false}
                   ],
                   actions: [
                     {
                       type: "button",
-                      text: "📊 View Allure Report",
-                      url: $report_url
+                      text: "View Parallel Report",
+                      url: $preview_url
                     }
                   ]
                 }
               ]
             }')
 
-          curl -X POST \
-            -H "Content-Type: application/json" \
+          curl -X POST -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
             "$SLACK_WEBHOOK_URLs"
