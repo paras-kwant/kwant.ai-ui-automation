@@ -201,17 +201,25 @@ jobs:
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
       - name: 🌍 Deploy Allure Report to GitHub Pages
-        id: ghpages_deploy
+        if: always()
         run: |
-          if [ ! -d "allure-report" ] || [ -z "$(ls -A allure-report)" ]; then
-            echo "❌ allure-report is empty or missing!"
-            exit 1
-          fi
-          echo "✅ allure-report exists and has files: $(find allure-report -type f | wc -l)"
-          npx gh-pages -d allure-report -b gh-pages -r https://github.com/${{ github.repository }}.git -t
-          GITHUB_PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.repository }}/"
-          echo "preview_url=$GITHUB_PAGES_URL" >> $GITHUB_OUTPUT
-          echo "✅ Deployed successfully to $GITHUB_PAGES_URL"
+            # Set bot identity to allow gh-pages to commit
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+            # Make sure report exists
+            if [ ! -d "allure-report" ] || [ -z "$(ls -A allure-report)" ]; then
+              echo "❌ allure-report is empty or missing!"
+              exit 1
+            fi
+        
+            echo "✅ allure-report exists and has files: $(find allure-report -type f | wc -l)"
+        
+            # Deploy to GitHub Pages
+            npx gh-pages -d allure-report -b gh-pages -r "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+        
+            echo "✅ Allure report deployed to GitHub Pages"
+        
 
       - name: 💬 Send Slack Notification
         if: always()
