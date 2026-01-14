@@ -2,8 +2,6 @@ name: Run Cypress UI Tests (Parallel)
 
 on:
   workflow_dispatch:
-  # schedule:
-    # - cron: "05 04 * * *" # 10:05 AM Nepal Time
 
 jobs:
   companies-tests:
@@ -20,39 +18,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node 20 (Required for Cypress 15)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.npm
-            ~/.cache/Cypress
-            node_modules
-          key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-cypress-
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Cypress
-        run: npx cypress verify
-
-      - name: Clean allure-results
-        run: rm -rf allure-results && mkdir -p allure-results
-
       - name: Run Companies Cypress Tests
         run: |
+          rm -rf allure-results && mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/companies/**/*.cy.js" \
             --env email=$EMAIL,password=$PASSWORD \
-            --browser chrome \
-            --headless \
-            || true
+            --browser chrome --headless || true
 
       - name: Upload Companies Allure Results
         uses: actions/upload-artifact@v4
@@ -75,39 +55,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node 20 (Required for Cypress 15)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.npm
-            ~/.cache/Cypress
-            node_modules
-          key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-cypress-
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Cypress
-        run: npx cypress verify
-
-      - name: Clean allure-results
-        run: rm -rf allure-results && mkdir -p allure-results
-
       - name: Run Workers Cypress Tests
         run: |
+          rm -rf allure-results && mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/workers/**/*.cy.js" \
             --env email=$EMAIL,password=$PASSWORD \
-            --browser chrome \
-            --headless \
-            || true
+            --browser chrome --headless || true
 
       - name: Upload Workers Allure Results
         uses: actions/upload-artifact@v4
@@ -123,12 +85,13 @@ jobs:
     if: always()
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -139,14 +102,12 @@ jobs:
 
       - name: Download Companies Results
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: companies-allure-results
           path: merged-results/companies
 
       - name: Download Workers Results
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: workers-allure-results
           path: merged-results/workers
@@ -154,23 +115,21 @@ jobs:
       - name: Merge Allure Results
         run: |
           mkdir -p merged-results/allure-results
-          cp -rv merged-results/companies/* merged-results/allure-results/ 2>/dev/null || echo "⚠️ No company results"
-          cp -rv merged-results/workers/* merged-results/allure-results/ 2>/dev/null || echo "⚠️ No workers results"
-          echo "=== Final merged results ==="
-          ls -la merged-results/allure-results
-          echo "Total files: $(find merged-results/allure-results -type f | wc -l)"
+          cp -rv merged-results/companies/* merged-results/allure-results/ || true
+          cp -rv merged-results/workers/* merged-results/allure-results/ || true
 
       - name: Generate Allure Report
         run: |
-          if [ ! -d "merged-results/allure-results" ] || [ -z "$(ls -A merged-results/allure-results)" ]; then
-            echo "❌ No results to generate Allure report!"
-            exit 1
-          fi
           rm -rf allure-report
           mkdir -p allure-report
           allure generate merged-results/allure-results --clean -o allure-report
-          echo "✅ Allure report generated"
-          echo "Files in report: $(find allure-report -type f | wc -l)"
+          echo "✅ Allure report generated with $(find allure-report -type f | wc -l) files"
+
+      - name: Deploy Allure Report to GitHub Pages
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          npx gh-pages -d allure-report -r https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Extract Allure Summary
         id: summary
@@ -182,11 +141,7 @@ jobs:
           BROKEN=$(jq '.statistic.broken' $SUMMARY)
           SKIPPED=$(jq '.statistic.skipped' $SUMMARY)
           DURATION_MS=$(jq '.time.duration' $SUMMARY)
-          if [ "$TOTAL" -gt 0 ]; then
-            SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
-          else
-            SUCCESS_RATE="0.00"
-          fi
+          SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($PASSED/$TOTAL)*100}")
           MINUTES=$((DURATION_MS / 60000))
           SECONDS=$(((DURATION_MS % 60000) / 1000))
           TOTAL_TIME="${MINUTES}m ${SECONDS}s"
@@ -200,30 +155,9 @@ jobs:
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
-      - name: 🌍 Deploy Allure Report to GitHub Pages
-        if: always()
-        run: |
-            # Set bot identity to allow gh-pages to commit
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        
-            # Make sure report exists
-            if [ ! -d "allure-report" ] || [ -z "$(ls -A allure-report)" ]; then
-              echo "❌ allure-report is empty or missing!"
-              exit 1
-            fi
-        
-            echo "✅ allure-report exists and has files: $(find allure-report -type f | wc -l)"
-        
-            # Deploy to GitHub Pages
-            npx gh-pages -d allure-report -b gh-pages -r "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-        
-            echo "✅ Allure report deployed to GitHub Pages"
-        
-
       - name: 💬 Send Slack Notification
-        if: always()
         run: |
+          PREVIEW_URL="https://${{ github.repository_owner }}.github.io/${{ github.repository }}/"
           TOTAL="${{ steps.summary.outputs.total }}"
           PASSED="${{ steps.summary.outputs.passed }}"
           FAILED="${{ steps.summary.outputs.failed }}"
@@ -232,7 +166,7 @@ jobs:
           SUCCESS_RATE="${{ steps.summary.outputs.success_rate }}"
           TOTAL_TIME="${{ steps.summary.outputs.total_time }}"
           TIMESTAMP="${{ steps.summary.outputs.timestamp }}"
-          PREVIEW_URL="${{ steps.ghpages_deploy.outputs.preview_url }}"
+
           TOTAL_FAILURES=$((FAILED + BROKEN))
           if [[ "$TOTAL" -eq 0 ]]; then
             STATUS="⚠️ Parallel UI tests did not run properly"
@@ -247,6 +181,7 @@ jobs:
             STATUS="🚨 $TOTAL_FAILURES tests failed out of $TOTAL tests (Parallel)"
             COLOR="danger"
           fi
+
           PAYLOAD=$(jq -n \
             --arg color "$COLOR" \
             --arg status "$STATUS" \
@@ -275,15 +210,10 @@ jobs:
                     {title: "🕐 Last Checked", value: $timestamp, short: false}
                   ],
                   actions: [
-                    {
-                      type: "button",
-                      text: "View Parallel Report",
-                      url: $preview_url
-                    }
+                    {type: "button", text: "View Report", url: $preview_url}
                   ]
                 }
               ]
             }')
-          curl -X POST -H 'Content-type: application/json' \
-            --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URL"
+
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
