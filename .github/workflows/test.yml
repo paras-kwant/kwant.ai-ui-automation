@@ -153,9 +153,13 @@ jobs:
 
       - name: Generate Allure Report
         run: |
-          allure generate merged-results/allure-results \
-            --clean \
-            -o allure-report
+          # Delete old report completely
+          rm -rf allure-report
+          mkdir -p allure-report
+        
+          # Generate fresh report from merged results
+          allure generate merged-results/allure-results --clean -o allure-report
+        
 
       - name: Extract Allure Summary
         id: summary
