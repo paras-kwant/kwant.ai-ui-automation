@@ -36,7 +36,7 @@ describe("Workforce Company - Favourite page", () => {
   
   it("Verify remove company from Favorite", () => {
 	cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/companies`);
-    cy.get('.top-nav-left-section [role="buttonn"]') //cjhange
+    cy.get('.top-nav-left-section [role="button"]') //cjhange
       .should('be.visible')
       .click();
     cy.get('.sc-kOPcWz')
