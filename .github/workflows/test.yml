@@ -196,6 +196,11 @@ jobs:
           echo "total_time=$TOTAL_TIME" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
+      - name: Setup Node 18 for Surge
+        uses: actions/setup-node@v4
+         with:
+          node-version: 18
+
       - name: 🌍 Deploy Allure Report to Surge
         id: surge_deploy
         continue-on-error: true
