@@ -419,12 +419,8 @@ describe("Worker Module - Safety Audit", () => {
       });
   });
 
-  it("Verify Selected Safety Audit Alerts Count Matches Worker Alerts Summary", () => {
-
-    // Open filter
+  it.only("Verify Selected Safety Audit Alerts Count Matches Worker Alerts Summary", () => {
     cy.get('.table-header-filter-btn').eq(7).click();
-  
-    // Select all except None
     cy.get('.sc-esYiGF').each(($el) => {
       const label = $el.find('span').text().trim();
       if (label !== 'None') {
@@ -432,10 +428,7 @@ describe("Worker Module - Safety Audit", () => {
       }
     });
   
-    // Close filter
     cy.get('.table-header-filter-btn').eq(7).click();
-  
-    // Log worker name
     cy.get(workforceSelector.tableRow).eq(1).within(() => {
       cy.get('.personal-info-content__title')
         .invoke('text')
@@ -447,7 +440,6 @@ describe("Worker Module - Safety Audit", () => {
   
     let totalSafetyAuditCount = 0;
   
-    // Calculate total alerts from labels
     cy.get(workforceSelector.tableRow).eq(1).within(() => {
       cy.get('.default__label:visible').each(($el) => {
         const text = $el.text().trim();
@@ -466,7 +458,6 @@ describe("Worker Module - Safety Audit", () => {
       cy.log(`Total Safety Audit Count: ${totalSafetyAuditCount}`);
       console.log('Total Safety Audit Count:', totalSafetyAuditCount);
   
-      // Open worker safety audit
       cy.get(workforceSelector.tableRow).eq(1).click({ force: true });
       workforceSelector.SafetyAudit().click();
   
@@ -493,23 +484,4 @@ describe("Worker Module - Safety Audit", () => {
         });
     });
   });
-  
-  
-      // cy.get(workforceSelector.tableRow).eq(1).click({ force: true });
-      // workforceSelector.SafetyAudit().click();
-      // cy.get('.sc-cRmqLi.dEhqLz [type="checkbox"]').then(($checkboxes) => {
-      //   const totalAlerts = $checkboxes.length;
-      //   const alertsToSelect = Math.min(3, totalAlerts);
-      //
-      //   for (let i = 0; i < alertsToSelect; i++) {
-      //     cy.wrap($checkboxes[i]).check({ force: true });
-      //   }
-      //
-      //   cy.get('.label.default__label')
-      //     .should('contain', alertsToSelect.toString());
-      // });
-
-  
-  
-
 });

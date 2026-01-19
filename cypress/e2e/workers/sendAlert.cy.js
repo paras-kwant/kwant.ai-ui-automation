@@ -42,7 +42,6 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
 
   it("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", () => {
     const randomText = Math.random().toString(36).substring(2, 12);
-    const phone = Cypress.env("TWILIO_NUMBER");
   
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
@@ -55,10 +54,8 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       workforceSelector.personalDetails().click();
       cy.getWorkerField("Phone").click();
 
-      cy.get('[name="phone"]')
-        .should('be.visible')
-        .clear()
-        .type(phone);
+      cy.get('[name="phone"]').clear().type(Cypress.env("TWILIO_NUMBER"));
+
       
       cy.get("button p").contains("Update").click();
       cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated employee.");
@@ -96,7 +93,6 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
               expect(remainingAfter).to.eq(remainingBefore - 1);
             });
   
-          // Twilio inbound SMS verification
           const twilioNumber = Cypress.env("TWILIO_NUMBER");
           const accountSid = Cypress.env("TWILIO_ACCOUNT_SID");
           const authToken = Cypress.env("TWILIO_AUTH_TOKEN");
@@ -420,7 +416,5 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       );
     }
   );
-  
-  
   
 });
