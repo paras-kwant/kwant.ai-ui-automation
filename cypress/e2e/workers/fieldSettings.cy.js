@@ -186,25 +186,28 @@ describe("Worker Module - Field Settings", () => {
       const fullName = `${firstName} ${lastName}`;
       let newlyToggledField = "";
       let initialCheckedCount = 0;
+      
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
       cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
       cy.contains("p", "Field Settings").should("be.visible");
+      
+      // Get initial checked count
       cy.get(".columns-drawer-content__column-option").then(($options) => {
         const checkedOptions = $options.filter((i, el) => {
           return Cypress.$(el).find('input[type="checkbox"]').is(':checked');
         });
-
+  
         initialCheckedCount = checkedOptions.length;
         cy.log(`Initially checked items: ${initialCheckedCount}`);
-
-        // Find unchecked options
+  
+        // Find and toggle an unchecked option
         const uncheckedOptions = $options.filter((i, el) => {
           return !Cypress.$(el).find('input[type="checkbox"]').is(':checked');
         });
-
+  
         const randomIndex = Math.floor(Math.random() * uncheckedOptions.length);
         const randomOption = uncheckedOptions.eq(randomIndex);
-
+  
         cy.wrap(randomOption)
           .find(".columns-drawer-content__column-option__left")
           .invoke("text")
@@ -212,44 +215,41 @@ describe("Worker Module - Field Settings", () => {
             newlyToggledField = text.trim();
             cy.log(`Toggling field: ${newlyToggledField}`);
           });
-
+  
         cy.wrap(randomOption).find('input[type="checkbox"]').check({ force: true });
       });
-
+  
+      // KEY FIX: Wait for DOM to stabilize and re-query
+      cy.wait(500); // Adjust based on your app's re-render speed
+      
+      // Or better - wait for the list to update
+      cy.get(".columns-drawer-content__column-option")
+        .should('have.length.at.least', initialCheckedCount + 1);
+  
+      // Now verify position with fresh DOM query
       cy.then(() => {
+        const expectedPosition = initialCheckedCount === 0 ? 0 : initialCheckedCount;
+        
+        cy.get(".columns-drawer-content__column-option")
+          .eq(expectedPosition)
+          .find(".columns-drawer-content__column-option__left")
+          .invoke("text")
+          .should("include", newlyToggledField);
+        
         if (initialCheckedCount === 0) {
-          cy.get(".columns-drawer-content__column-option")
-            .eq(0)
-            .find(".columns-drawer-content__column-option__left")
-            .invoke("text")
-            .should("include", newlyToggledField);
           cy.log(`✓ "${newlyToggledField}" is at top (no previous checked items)`);
         } else {
-          cy.get(".columns-drawer-content__column-option")
-            .eq(initialCheckedCount)
-            .find(".columns-drawer-content__column-option__left")
-            .invoke("text")
-            .should("include", newlyToggledField);
-          cy.log(`✓ "${newlyToggledField}" is at position ${initialCheckedCount} (bottom of checked items)`);
+          cy.log(`✓ "${newlyToggledField}" is at position ${expectedPosition} (bottom of checked items)`);
         }
-
-        cy.get(".columns-drawer-content__column-option").each(($option) => {
-          cy.wrap($option)
-            .find(".columns-drawer-content__column-option__left")
-            .invoke("text")
-            .then((text) => {
-              if (text.trim() === newlyToggledField) {
-                cy.wrap($option)
-                  .find('input[type="checkbox"]')
-                  .should('be.checked');
-                return false;
-              }
-            });
-        });
+  
+        // Verify it's actually checked
+        cy.get(".columns-drawer-content__column-option")
+          .eq(expectedPosition)
+          .find('input[type="checkbox"]')
+          .should('be.checked');
       });
     });
   });
-
   it("X clicking should collapse the Field Settings drawer", () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then(({ firstName, lastName }) => {
       const fullName = `${firstName} ${lastName}`;

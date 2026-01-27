@@ -124,19 +124,18 @@ describe("Company Module - File Upload", () => {
       });
 
      cy.get('.sc-kOPcWz').should('contain.text', '1 new company(s) will be imported.');
-     cy.get('button p').contains('Submit').click().click()
+     cy.wait(1000)
+     cy.get('button p').contains('Submit').click({force:true})
      cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
      cy.get(workforceSelector.searchInput).clear().type('Test Company');
+     cy.get(workforceSelector.tableRow).should('contain.text', 'Test Company').click({force:true});
      cy.wait('@searchApi').its('response.statusCode').should('eq', 200);
-    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.getWorkerField('Company Name').contains('Test Company');
-    cy.getWorkerField('Phone Number').contains('986-8757379')
+    cy.getWorkerField('Phone Number').contains('+9779868757379')
     cy.getWorkerField('E Mail').contains('paras@kwant.ai')
     cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
     cy.searchAndDeleteWorker('Test', 'Company');
    });
-
-
 
 
 
@@ -215,6 +214,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
       });
   
      cy.get('.sc-kOPcWz').should('contain.text', '1 new company(s) will be imported.');
+     cy.wait(1000)
      cy.get('button p').contains('Submit').click({force:true})
   
     workerHelper.openUploadModal()
@@ -288,6 +288,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
         );
       })
       cy.get('.sc-kOPcWz').should('contain.text', '2 new company(s) will be imported.').should('be.visible')
+      cy.wait(1000)
       cy.get('button p').contains('Submit').click({force:true})
       cy.searchAndDeleteWorker('Test', 'Company1');
       cy.searchAndDeleteWorker('Test', 'Company2');

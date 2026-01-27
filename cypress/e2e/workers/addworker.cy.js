@@ -80,12 +80,51 @@ describe("Worker Module - Add Worker Tests", () => {
   });
 
   it('Should add worker with only mandatory fields', () => {
+
+    let workerId;
+    let authHeaders = {};
+  
+    cy.intercept('POST', '/api/worker/save', (req) => {
+      authHeaders = {
+        'x-auth-token': req.headers['x-auth-token'],
+        'x-auth-project': req.headers['x-auth-project'],
+      };
+    }).as('addedworker');
+  
     const workerData = generateWorkerData();
     addworkerPage.fillWorkerName(workerData);
-    cy.selectRandomOption('input[name="company"]','.sc-tagGq[role="button"]','company');
+  
+    cy.selectRandomOption(
+      'input[name="company"]',
+      '.sc-tagGq[role="button"]',
+      'company'
+    );
+  
     addworkerPage.submitWorker();
+  
     cy.writeFile('cypress/fixtures/noEmailWorker.json', workerData);
+  
+    // cy.wait('@addedworker').then(({ response }) => {
+    //   workerId = response.body.id; // ✅ THIS
+    //   expect(workerId, 'worker id').to.exist;
+    //   expect(authHeaders['x-auth-token']).to.exist;
+    // });
+
+    // cy.then(() => {
+    //   cy.request({
+    //     method: 'POST',
+    //     url: '/api/worker/bulkdelete',
+    //     headers: authHeaders,
+    //     body: {
+    //       workersId: [workerId],
+    //     },
+    //   }).then((res) => {
+    //     expect(res.status).to.be.oneOf([200, 204]);
+    //   });
+    // });
+  
   });
+  
   
 
   it('Should add worker with profile picture', () => {
@@ -106,6 +145,7 @@ describe("Worker Module - Add Worker Tests", () => {
     addWorkerSelector.profileImageUploadButton().click();
     addWorkerSelector.takeAPictureButton().click();
     cy.get('.video_viewer').should('be.visible')
+    cy.wait(1000)
     addWorkerSelector.clickPictureButton().click();
     addWorkerSelector.submitPhotoButton().click();
     cy.get('.upload-avatar img')
@@ -171,4 +211,41 @@ describe("Worker Module - Add Worker Tests", () => {
       lastName: workerData.lastName
     });
   });
+  // it("Should merge companies successfully by selecting a primary company", () => {
+
+  //   let authHeaders = {};
+  
+  //   cy.intercept('GET', '**/api/projectTaskTradesForTracking', (req) => {
+  //     authHeaders = {
+  //       'x-auth-token': req.headers['x-auth-token'],
+  //       'x-auth-project': req.headers['x-auth-project'],
+  //     };
+  //   }).as('getConfig');
+  
+  //   cy.reload();
+  
+  //   cy.wait('@getConfig').then(() => {
+  //     expect(authHeaders['x-auth-token']).to.exist;
+  //   });
+  
+  //   cy.then(() => {
+  //     const payload = {
+  //       firstName: "paras test111",
+  //       lastName: "worker",
+  //       projectId: "500526306",
+  //       projectTaskTradeId:"1228",
+  //       projectTaskTradeName: "ACI",
+  //     };
+  
+  //     cy.request({
+  //       method: "POST",
+  //       url: "/api/worker/save",
+  //       headers: authHeaders,
+  //       body: payload,
+  //     }).then((res) => {
+  //       expect(res.status).to.be.oneOf([200, 201]);
+  //     });
+  //   });
+  // });
+  
 })

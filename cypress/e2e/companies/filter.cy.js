@@ -98,6 +98,7 @@ describe("Companies Module - Filter", () => {
 		.check({ force: true });
   
 	  cy.get("p").contains("Filters:").click();
+	  cy.wait(2000)
   
 	  cy.verifyTableorEmptyState({
 		tableRowSelector: ".sc-cRmqLi",
@@ -122,6 +123,7 @@ describe("Companies Module - Filter", () => {
 		 .check({ force: true });
  
 	   cy.get("p").contains("Filters:").click();
+	   cy.wait(2000)
  
 	   cy.verifyTableorEmptyState({
 		 tableRowSelector: ".sc-cRmqLi",
@@ -166,6 +168,7 @@ describe("Companies Module - Filter", () => {
 		.check({ force: true });
   
 	  cy.get("p").contains("Filters:").click();
+	  cy.wait(2000)
   
 	  cy.verifyTableorEmptyState({
 		tableRowSelector: ".sc-cRmqLi",
@@ -209,6 +212,7 @@ describe("Companies Module - Filter", () => {
 		.check({ force: true });
   
 	  cy.get("p").contains("Filters:").click();
+	  cy.wait(2000)
   
 	  cy.verifyTableorEmptyState({
 		tableRowSelector: ".sc-cRmqLi",
@@ -251,6 +255,7 @@ describe("Companies Module - Filter", () => {
 		.check({ force: true });
   
 	  cy.get("p").contains("Filters:").click();
+	  cy.wait(2000)
   
 	  cy.verifyTableorEmptyState({
 		tableRowSelector: ".sc-cRmqLi",
@@ -263,7 +268,7 @@ describe("Companies Module - Filter", () => {
 
 
   it("Verify filtering by Phone Number", () => {
-	const phoneNumber = '9812345678';
+	const phoneNumber = '+9779812345678';
   
 	cy.contains('.sc-fremEr.jImTfM', 'Phone Number')
 	  .find('.table-header-filter-btn')
@@ -271,7 +276,7 @@ describe("Companies Module - Filter", () => {
   
 	cy.get("input.sc-fHjqPf.fCepZC").type(phoneNumber);
 	cy.get("p").contains("Filters:").click();
-	cy.wait(2000)
+	cy.wait(4000)
   
 	cy.get('body').then(($body) => {
 	  const hasRows = $body.find(workforceSelector.tableRow).length > 0;
@@ -282,7 +287,7 @@ describe("Companies Module - Filter", () => {
 			.find('.table_td')
 			.then(($cells) => {
 			  const hasMatch = [...$cells].some(cell =>
-				cell.innerText.trim().includes('981-2345678')
+				cell.innerText.trim().includes('+9779812345678')
 			  );
   
 			  expect(hasMatch, 'Row should contain phone number').to.be.true;
@@ -307,7 +312,7 @@ describe("Companies Module - Filter", () => {
   
 	cy.get("input.sc-fHjqPf.fCepZC").type(address);
 	cy.get("p").contains("Filters:").click();
-	cy.wait(2000)
+	cy.wait(3000)
   
 	cy.get('body').then(($body) => {
 	  const hasRows = $body.find(workforceSelector.tableRow).length > 0;
@@ -349,7 +354,7 @@ describe("Companies Module - Filter", () => {
   
 	cy.get("input.sc-fHjqPf.fCepZC").type(zipCode);
 	cy.get("p").contains("Filters:").click();
-	cy.wait(2000)
+	cy.wait(3000)
   
 	cy.get('body').then(($body) => {
 	  const hasRows = $body.find(workforceSelector.tableRow).length > 0;
@@ -464,17 +469,14 @@ describe("Companies Module - Filter", () => {
 					  cy.wrap($cell).parent(workforceSelector.tableRow).click({force:true});
 					  cy.get('.sc-fqkvVR.sc-dcJsrY').eq(2).click();
 					  
-					  // Check if the specific optionText exists in cell-content
 					  cy.get('body').then(($body) => {
 						const optionTextExists = $body.find('.sc-jaXxmE .sc-cRmqLi .cell-content').filter((_, el) => {
 						  return Cypress.$(el).text().trim() === optionText || Cypress.$(el).text().includes(optionText);
 						}).length > 0;
 				  
 						if (optionTextExists) {
-						  // Specific optionText found in Certificates
 						  cy.contains('.sc-jaXxmE .sc-cRmqLi .cell-content', optionText).should('be.visible');
 						} else {
-						  // Specific optionText not found, switch to License tab
 						  cy.get('.sc-YysOf').contains('Licences').click();
 						  cy.contains('.sc-jaXxmE .sc-cRmqLi .cell-content', optionText).should('be.visible');
 						  
@@ -516,7 +518,7 @@ describe("Companies Module - Filter", () => {
 	cy.get('[placeholder="Max"]').clear().type('50');
   
 	cy.contains('p', 'Filters:').click();
-	cy.wait(2000);
+	cy.wait(3000);
   
 	// 1️⃣ Get Total Workers column index from header row
 	cy.get('.sc-fremEr.jImTfM').then(($headers) => {

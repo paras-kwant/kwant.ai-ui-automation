@@ -233,53 +233,53 @@ describe("Worker Module - overflowMenu", () => {
       .should("be.visible");
   });
 
-  it.skip("Validate worker download functionlity from the overflow menu", () => {
-    const FILE_NAME = "Ontarget-Employee-Report.csv";
-    const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
-    const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
+  // it.skip("Validate worker download functionlity from the overflow menu", () => {
+  //   const FILE_NAME = "Ontarget-Employee-Report.csv";
+  //   const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
+  //   const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
 
 
-    cy.intercept("POST", "/api/filterProjectWorker*").as("getWorkers");
-    cy.wait("@getWorkers");
+  //   cy.intercept("POST", "/api/filterProjectWorker*").as("getWorkers");
+  //   cy.wait("@getWorkers");
 
-    cy.get("body").then(($body) => {
-      if ($body.find(".personal-info-content__title").length > 0) {
-        cy.get(".personal-info-content__title").last().scrollIntoView();
-        cy.wait(2000);
-      }
-    });
+  //   cy.get("body").then(($body) => {
+  //     if ($body.find(".personal-info-content__title").length > 0) {
+  //       cy.get(".personal-info-content__title").last().scrollIntoView();
+  //       cy.wait(2000);
+  //     }
+  //   });
 
-    cy.get(".personal-info-content__title")
-      .should("have.length.at.least", 1)
-      .then(($els) => {
-        const uiNames = [...$els]
-          .map((el) => el.innerText.trim())
-          .filter((name) => name !== "");
+  //   cy.get(".personal-info-content__title")
+  //     .should("have.length.at.least", 1)
+  //     .then(($els) => {
+  //       const uiNames = [...$els]
+  //         .map((el) => el.innerText.trim())
+  //         .filter((name) => name !== "");
 
-        cy.log(`Found ${uiNames.length} workers in UI`);
-        uiNames.forEach((name, i) => cy.log(`UI Worker ${i + 1}: ${name}`));
+  //       cy.log(`Found ${uiNames.length} workers in UI`);
+  //       uiNames.forEach((name, i) => cy.log(`UI Worker ${i + 1}: ${name}`));
 
-        cy.task("deleteDownloadedFiles", {
-          downloadsFolder: DOWNLOADS_FOLDER,
-          pattern: "Ontarget-Employee-Report",
-          extension: ".csv",
-        });
+  //       cy.task("deleteDownloadedFiles", {
+  //         downloadsFolder: DOWNLOADS_FOLDER,
+  //         pattern: "Ontarget-Employee-Report",
+  //         extension: ".csv",
+  //       });
 
-        cy.intercept("POST", "/api/downloadworkers").as("downloadWorkers");
-        cy.get(".sc-gFAWRd>.sc-aXZVg>button").click();
-        cy.get(".dropdown-option").contains("Download").click();
-        cy.wait("@downloadWorkers");
+  //       cy.intercept("POST", "/api/downloadworkers").as("downloadWorkers");
+  //       cy.get(".sc-gFAWRd>.sc-aXZVg>button").click();
+  //       cy.get(".dropdown-option").contains("Download").click();
+  //       cy.wait("@downloadWorkers");
 
-        cy.readFile(FILE_PATH, { timeout: 30000 }).then(() => {
-          cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
-            const csvNames = extractWorkerNamesFromCSV(rows);
+  //       cy.readFile(FILE_PATH, { timeout: 30000 }).then(() => {
+  //         cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
+  //           const csvNames = extractWorkerNamesFromCSV(rows);
 
-            logComparisonResults(uiNames, csvNames);
-            validateNamesMatch(uiNames, csvNames);
-          });
-        });
-      });
-  });
+  //           logComparisonResults(uiNames, csvNames);
+  //           validateNamesMatch(uiNames, csvNames);
+  //         });
+  //       });
+  //     });
+  // });
 
   function extractWorkerNamesFromCSV(rows) {
     const header = rows[1];

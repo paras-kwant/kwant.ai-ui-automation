@@ -813,7 +813,7 @@ describe("Worker Module - Documents Page", () => {
       .click({ force: true });
   
     // Find img inside .sc-fvtFIe container
-    cy.get('.sc-fvtFIe img', { timeout: 30000 })
+    cy.get('.sc-fvtFIe iframe', { timeout: 30000 })
       .filter('[src*="s3"], [src*="cloudfront"]')
       .should('have.length.greaterThan', 0)
       .first()

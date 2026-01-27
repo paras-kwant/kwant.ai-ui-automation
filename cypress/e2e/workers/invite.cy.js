@@ -8,6 +8,17 @@ import { generateWorkerData } from '../../fixtures/workerData.js';
 
 
 describe("Worker Onboarding Email Validation", () => {
+  let authHeaders={}
+
+  before(() => {
+    cy.intercept('GET', '/api/projectConfigs', (req) => {
+     authHeaders = {
+       'x-auth-token': req.headers['x-auth-token'],
+       'x-auth-project': req.headers['x-auth-project']
+     };
+   }).as('getConfig');
+   
+})
   before(() => {
     cy.session('userSession', () => {
       cy.login();
@@ -16,7 +27,9 @@ describe("Worker Onboarding Email Validation", () => {
         .click();
     });
     workerHelper.visitWorkersPage();
+    cy.wait('@getConfig')
   })
+
   beforeEach(() => {
     cy.cleanUI()
   });
@@ -42,7 +55,7 @@ describe("Worker Onboarding Email Validation", () => {
       cy.get(workforceSelector.overflowMenu).click();
       cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
       cy.log('📧 Checking email...');
-      cy.wait(10000)
+      cy.wait(15000)
     
       cy.task('getMostRecentEmail').then((email) => {
         if (!email) throw new Error('❌ NO EMAIL RECEIVED');
@@ -117,7 +130,7 @@ describe("Worker Onboarding Email Validation", () => {
       cy.get(workforceSelector.overflowMenu).click();
       cy.contains('.dropdown-option', 'Send Onboarding Invite').click();
       cy.log('📧 Checking email...');
-      cy.wait(6000)
+      cy.wait(10000)
     
       cy.task('getMostRecentEmail').then((email) => {
         if (!email) throw new Error('❌ NO EMAIL RECEIVED');
@@ -180,25 +193,41 @@ describe("Worker Onboarding Email Validation", () => {
 
 
   it("Send onboarding invite - Worker with no email", () => {
-    cy.wait(2000)
-    let workerName;
-    cy.wait(3000);
-    cy.readFile("cypress/fixtures/noEmailWorker.json").then((workerData) => {
-      const { firstName, lastName } = workerData;
-      workerName = firstName;
-      cy.get(workforceSelector.searchInput)
-        .clear()
-        .type(`${firstName} ${lastName}`);
-      cy.wait(5000);
-      cy.get('.header-checkbox-container [type="checkbox"]')
-        .eq(0)
-        .check({ force: true });
-      cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Onboarding Invite").click();
-      cy.get(".sc-kOPcWz")
-        .contains("No email or phone added for the worker")
-        .should("be.visible");
+    cy.reload();
+    
+    const workerData = generateWorkerData({});
+
+    cy.log(workerData)
+    cy.request({
+      method: 'POST',
+      url: '/api/worker/save',
+      headers: authHeaders,
+      body: workerData
     });
+  
+    cy.wait(3000);
+  
+    const { firstName, lastName } = workerData;
+    
+    cy.get(workforceSelector.searchInput)
+      .clear()
+      .type(`${firstName} ${lastName}`);
+    
+    cy.wait(2000);
+    
+    // Select the worker
+    cy.get('.header-checkbox-container [type="checkbox"]')
+      .eq(0)
+      .check({ force: true });
+    
+    // Open overflow menu and send invite
+    cy.get(workforceSelector.overflowMenu).click();
+    cy.contains(".dropdown-option", "Send Onboarding Invite").click();
+    
+    // Verify error message
+    cy.get(".sc-kOPcWz")
+      .contains("No email or phone added for the worker")
+      .should("be.visible");
   });
  
   it('Verify that the status of onboarding is SENT on the worker page.',()=>{

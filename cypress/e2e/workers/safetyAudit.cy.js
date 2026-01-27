@@ -419,7 +419,7 @@ describe("Worker Module - Safety Audit", () => {
       });
   });
 
-  it.only("Verify Selected Safety Audit Alerts Count Matches Worker Alerts Summary", () => {
+  it("Verify Selected Safety Audit Alerts Count Matches Worker Alerts Summary", () => {
     cy.get('.table-header-filter-btn').eq(7).click();
     cy.get('.sc-esYiGF').each(($el) => {
       const label = $el.find('span').text().trim();
