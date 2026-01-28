@@ -15,6 +15,12 @@ jobs:
       PASSWORD: ${{ secrets.PASSWORD }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
 
     steps:
       - name: Checkout repo
@@ -33,7 +39,7 @@ jobs:
           rm -rf allure-results && mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/companies/**/*.cy.js" \
-            --env email=$EMAIL,password=$PASSWORD \
+            --env email=$EMAIL,password=$PASSWORD,TWILIO_NUMBER=$TWILIO_NUMBER,TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN,EXPECTED_FROM=$EXPECTED_FROM \
             --browser chrome --headless || true
 
       - name: Upload Companies Allure Results
@@ -52,6 +58,12 @@ jobs:
       PASSWORD: ${{ secrets.PASSWORD }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
 
     steps:
       - name: Checkout repo
@@ -70,7 +82,7 @@ jobs:
           rm -rf allure-results && mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/workers/**/*.cy.js" \
-            --env email=$EMAIL,password=$PASSWORD \
+            --env email=$EMAIL,password=$PASSWORD,TWILIO_NUMBER=$TWILIO_NUMBER,TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN,EXPECTED_FROM=$EXPECTED_FROM \
             --browser chrome --headless || true
 
       - name: Upload Workers Allure Results

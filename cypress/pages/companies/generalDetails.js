@@ -74,6 +74,7 @@ class GeneralDetailsPage {
 
   updateEmail(email) {
     cy.getWorkerField('E Mail')
+    .scrollIntoView()
       .realHover()
       .find('svg')
       .should('be.visible')
@@ -83,6 +84,7 @@ class GeneralDetailsPage {
 
   updateAddress(address) {
     cy.getWorkerField('Address')
+    .scrollIntoView()
       .realHover()
       .find('svg')
       .should('be.visible')

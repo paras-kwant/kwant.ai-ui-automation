@@ -47,3 +47,7 @@ export function generateRandomWorldAddress() {
   return `${street}, ${city}`;
 }
 
+export function generateTemplateName() {
+  return `Template${Math.floor(Math.random() * 1000000)}`;
+}
+

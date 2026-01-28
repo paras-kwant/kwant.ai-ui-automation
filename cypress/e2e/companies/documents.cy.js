@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 const path = require("path");
 const fs = require("fs");
+import { Subject } from 'rxjs';
 import companiesHelper from '../../support/helper/companiesHelper';
 import { workforceSelector } from '../../support/workforceSelector';
 import "cypress-real-events/support";
@@ -112,8 +113,7 @@ describe("Companies Module - Documents Page", () => {
 
 
 
-  it(
-	"Displays yellow row and red warning icon for company documents expiring within 7 days",
+  it("Displays red warning icon for company documents expired or expiring today",
 	() => {
 	  const credID = Array.from({ length: 16 }, () =>
 		Math.floor(Math.random() * 10)
@@ -141,7 +141,7 @@ describe("Companies Module - Documents Page", () => {
 		.should('exist')
 		.then(() => {
 		  cy.get('.rmdp-calendar')
-			.find(':nth-child(6) > :nth-child(4) > .sd')
+      .find('.rmdp-today').first()
 			.click({ force: true });
 		});
   
@@ -176,7 +176,7 @@ describe("Companies Module - Documents Page", () => {
 				.find('svg[fill="#DF4242"]')
 				.should('exist');
   
-			cy.contains("p", "Expiry Date ends soon. Please upload new certificate.");
+			cy.contains("p", "Expiry Date has ended. Please upload new certificate.");
 			});
 		});
 
@@ -187,6 +187,82 @@ describe("Companies Module - Documents Page", () => {
 		.should('exist');
 	}
   );
+  it("Displays Yellow warning icon for company documents expiring within 7 days",
+    () => {
+
+      const d = new Date();
+d.setDate(d.getDate() + 4);
+
+const date =
+  String(d.getMonth() + 1).padStart(2, '0') + '/' +
+  String(d.getDate()).padStart(2, '0') + '/' +
+  d.getFullYear();
+
+      const credID = Array.from({ length: 16 }, () =>
+      Math.floor(Math.random() * 10)
+      ).join("");
+    
+      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+      cy.get(':nth-child(3) > .sc-fqkvVR').click();
+    
+      cy.contains('button', 'Add Certification').click();
+      cy.selectRandomOption(
+      '[name="documentType"]',
+      '.sc-tagGq[role="button"]',
+      'documentType'
+      );
+    
+      cy.get('[name="credentialId"]').type(credID);
+    
+      // Issued Date
+      cy.get('[placeholder="Issued Date"]').click();
+      cy.get('.rmdp-today').first().click();
+    
+      // Expiry Date
+      cy.get('[placeholder="Expiry Date"]').click();
+      cy.get('[placeholder="Expiry Date"]').type(date)
+    
+      // Capture expiry date value
+      cy.get('[placeholder="Expiry Date"]')
+      .invoke('val')
+      .then((expiryDate) => {
+        cy.log(`Expiry Date selected: ${expiryDate}`);
+    
+        // Upload file
+        cy.fixture('file.pdf', 'base64').then((fileContent) => {
+        cy.get('.sc-erUUZj').attachFile(
+          {
+          fileContent,
+          fileName: 'file.pdf',
+          mimeType: 'application/pdf',
+          },
+          { subjectType: 'drag-n-drop' }
+        );
+        });
+    
+        cy.get('iframe[src^="blob:https://uat.kwant.ai"]').should('be.visible');
+    
+        cy.contains('button > p', 'Submit').click();
+    
+        cy.get('.cell-content')
+        .contains(credID)
+        .closest('.sc-cRmqLi')
+        .within(() => {
+          cy.contains(expiryDate)
+          .find('svg[fill="#DF4242"]')
+          .should('exist');
+    
+        cy.contains("p", "Expiry Date ends soon. Please upload new certificate.");
+        });
+      });
+  
+      cy.get('body').click(0, 0);
+        cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+     cy.get(':nth-child(3) > .sc-fqkvVR')
+      .find('svg path[fill="#DF4242"]')
+      .should('exist');
+    }
+    );
   
 
   it("Displays red row and red warning icon for company documents expired", () => {
@@ -366,6 +442,58 @@ describe("Companies Module - Documents Page", () => {
           });
       });
   });
+
+
+   it('send request renewal to the company', () => {
+    cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
+    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    cy.get(':nth-child(3) > .sc-fqkvVR').click()
+
+      cy.get(".sc-YysOf").contains("Certifications").click();
+      cy.get(".sc-cRmqLi.bpifwg,.sc-cRmqLi.dEhqLz")
+        .eq(0)
+        .find(".cell-content")
+        .invoke("text")
+        .then((documentName) => {
+          const docText = documentName.trim();
+          cy.log(`document name: ${docText}`);
+
+          cy.get(".sc-cRmqLi.bpifwg, .sc-cRmqLi.dEhqLz")
+            .eq(0)
+            .find(".sc-jXbUNg.jnXMtv")
+            .eq(0)
+            .click();
+
+          workforceSelector
+            .toastMessage()
+            .contains("Renewal request sent successfully")
+            .should("be.visible");
+
+          cy.task("getMostRecentEmail").then((email) => {
+            if (!email) throw new Error("❌ NO EMAIL RECEIVED");
+
+            const body = email.body
+              .toLowerCase()
+              .replace(/=\r\n/g, "")
+              .replace(/\r\n/g, " ")
+              .replace(/=3d/g, "=")
+              .replace(/=e2=80=8b/g, "")
+              .replace(/<[^>]*>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+              const subject = email.subject.toLowerCase();
+
+
+            expect(subject).to.include("document renewal request");
+            expect(body).to.include("certificate has expired");
+            expect(body).to.include("needs to be renewed");
+            expect(body).to.include("contact your project manager");
+
+
+            cy.log("✅ All validations passed!");
+          });
+        });
+    });
 
   it("Deleting a company certificate", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
