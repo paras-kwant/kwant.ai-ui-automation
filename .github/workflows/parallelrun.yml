@@ -52,7 +52,7 @@ jobs:
   workers-tests:
     name: 👷 Workers UI Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}

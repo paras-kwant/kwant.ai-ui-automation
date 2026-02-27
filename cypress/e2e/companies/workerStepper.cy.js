@@ -24,7 +24,7 @@ describe("Companies Module - Worker Stepper", () => {
     cy.cleanUI()
   });
   
-  it.only('Verify total workers count matches workers list data', () => {
+  it('Verify total workers count matches workers list data', () => {
     cy.contains(workforceSelector.tableColumn, 'Status')
 	.find('.table-header-filter-btn')
 	.click();

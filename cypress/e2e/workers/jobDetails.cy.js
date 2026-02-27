@@ -68,7 +68,7 @@ indicesToHover.forEach((i) => {
        cy.get(workforceSelector.jobDetailsPage).click();
     cy.wait(1000);
   
-    // Step 2: Edit Job Title
+
     cy.get(".hover-hoc-container__input__display-value")
       .eq(0)
       .realHover()

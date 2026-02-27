@@ -4,7 +4,7 @@ const fs = require("fs");
 import companiesHelper from '../../support/helper/companiesHelper';
 import { workforceSelector } from '../../support/workforceSelector';
 
-describe("Companies Module - column", () => {
+describe("WorkForce Companies Module - column", () => {
 
   before(() => {
     cy.session('userSession', () => {

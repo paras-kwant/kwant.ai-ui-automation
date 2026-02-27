@@ -7,7 +7,7 @@ import { generateWorkerData } from '../../fixtures/workerData.js';
 import companiesHelper from '../../support/helper/companiesHelper.js';
 
 
-describe("Company Module - File Upload", () => {
+describe("WorkForce Companies Module - File Upload", () => {
   before(() => {
     cy.session('userSession', () => {
       cy.login();

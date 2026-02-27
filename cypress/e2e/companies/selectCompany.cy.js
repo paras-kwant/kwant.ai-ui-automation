@@ -5,7 +5,7 @@ const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import companiesHelper from '../../support/helper/companiesHelper';
 
-describe("companies Module - Selection Functionality", () => {
+describe("WorkForce Companies Module - Selection Functionality", () => {
 
   before(() => {
     cy.session('userSession', () => {

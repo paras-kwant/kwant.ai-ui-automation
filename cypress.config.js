@@ -15,14 +15,13 @@ module.exports = defineConfig({
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
-    experimentalSessionAndOrigin: true,
     defaultCommandTimeout: 30000,
     requestTimeout: 30000,
     responseTimeout: 30000,
     pageLoadTimeout: 30000,
     retries: { runMode: 1, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
-    testIsolation: false,
+    testIsolation: true,   // FIX: was false — each test now gets a clean state in CI
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
 
     setupNodeEvents(on, config) {
@@ -196,7 +195,6 @@ module.exports = defineConfig({
             });
         },
 
-        // ✅ NEW TASK: fetch recent Twilio messages via Node.js (avoids browser CORS issues)
         getTwilioMessages({ accountSid, authToken, to }) {
           const client = twilio(accountSid, authToken);
 

@@ -3,7 +3,7 @@ import { workforceSelector } from "../../support/workforceSelector.js";
 import workerHelper from "../../support/helper/workerHelper.js";
 import companiesHelper from "../../support/helper/companiesHelper.js";
 
-describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", () => {
+describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twilio Integration)", () => {
   before(() => {
     cy.session("userSession", () => {
       cy.login();

@@ -1,10 +1,19 @@
 /// <reference types="cypress" />
 const path = require("path");
 const fs = require("fs");
-import { workforceSelector } from '../../support/workforceSelector';  
+import { workforceSelector } from '../../support/workforceSelector';
 import companiesHelper from '../../support/helper/companiesHelper';
 
-describe("Company Module - Pagination", () => {
+function getTotalWorkers() {
+  return cy.get('.workforce-footer')
+    .invoke('text')
+    .then((text) => {
+      const match = text.match(/(\d+)/);
+      return match ? parseInt(match[1]) : 0;
+    });
+}
+
+describe("WorkForce Companies Module - Pagination", () => {
 
   before(() => {
     cy.session('userSession', () => {
@@ -13,6 +22,10 @@ describe("Company Module - Pagination", () => {
         .contains(Cypress.env('PROJECT_NAME'))
         .click();
     });
+    companiesHelper.visitCompaniesPage();
+  });
+
+  beforeEach(() => {
     companiesHelper.visitCompaniesPage();
   });
 
@@ -26,7 +39,7 @@ describe("Company Module - Pagination", () => {
   });
 
   it('Verify pagination breaks into pages if 100+ workers exist', () => {
-    cy.getTotalWorkers().then((totalValue) => {
+    getTotalWorkers().then((totalValue) => {
       if (totalValue > 100) {
         cy.get('.workforce-footer button')
           .filter((_, el) => el.innerText.trim() === '2')
@@ -40,7 +53,7 @@ describe("Company Module - Pagination", () => {
   });
 
   it('Verify Next and previous button navigates to respective page', () => {
-    cy.getTotalWorkers().then((totalValue) => {
+    getTotalWorkers().then((totalValue) => {
       const totalPages = Math.ceil(totalValue / 100);
 
       if (totalPages > 1) {
@@ -65,7 +78,7 @@ describe("Company Module - Pagination", () => {
 
   it('Verify ellipsis appears when total pages exceed threshold', () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
-    cy.getTotalWorkers().then((totalValue) => {
+    getTotalWorkers().then((totalValue) => {
       if (totalValue > 700) {
         cy.get('.workforce-footer').contains('…').should('be.visible');
       } else {
@@ -77,7 +90,7 @@ describe("Company Module - Pagination", () => {
   it('Verify LAST page disables Next button', () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
-    cy.getTotalWorkers().then((totalValue) => {
+    getTotalWorkers().then((totalValue) => {
       const totalPages = Math.ceil(totalValue / 100);
 
       if (totalPages > 1) {
@@ -96,7 +109,7 @@ describe("Company Module - Pagination", () => {
   it('Verify FIRST page disables previous button', () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
-    cy.getTotalWorkers().then((totalValue) => {
+    getTotalWorkers().then((totalValue) => {
       const totalPages = Math.ceil(totalValue / 100);
 
       if (totalPages > 1) {
@@ -115,7 +128,7 @@ describe("Company Module - Pagination", () => {
   it('Verify clicking page numbers navigates to correct page', () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
-    cy.getTotalWorkers().then((totalValue) => {
+    getTotalWorkers().then((totalValue) => {
       const totalPages = Math.ceil(totalValue / 100);
 
       if (totalPages > 3) {
@@ -151,7 +164,7 @@ describe("Company Module - Pagination", () => {
   it('Verify page scroll resets to top after navigating between pages', () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
-    cy.getTotalWorkers().then((totalValue) => {
+    getTotalWorkers().then((totalValue) => {
       const pageSize = 100;
       const totalPages = Math.ceil(totalValue / pageSize);
 

@@ -4,7 +4,7 @@ import companiesHelper from '../../support/helper/companiesHelper';
 import generalDetailsPage from '/cypress/pages/companies/generalDetails'
 import { generateRandomEmail, generateRandomWorldAddress } from '../../fixtures/workerData';
 
-describe("Companies Module - General Details", () => {
+describe("WorkForce Companies Module - General Details", () => {
   
   before(() => {
     cy.viewport(1440, 900);

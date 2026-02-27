@@ -8,7 +8,7 @@ import { workforceSelector } from '../../support/workforceSelector';
 import { addWorkerSelector } from '../../selector/addWorker';
 import addCompanyPage from '/cypress/pages/companies/addCompany'
 
-describe("Companies Module - add Company", () => {
+describe("WorkForce Companies Module - add Company", () => {
 
   before(() => {
     cy.session('userSession', () => {

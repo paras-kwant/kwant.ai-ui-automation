@@ -3,7 +3,7 @@
 import companiesHelper from '../../support/helper/companiesHelper';
 import { workforceSelector } from '../../support/workforceSelector';
 
-describe("Workforce Company - Favourite page", () => {
+describe("WorkForce Companies Module- Favourite page", () => {
 
 	before(() => {
 		cy.session('userSession', () => {

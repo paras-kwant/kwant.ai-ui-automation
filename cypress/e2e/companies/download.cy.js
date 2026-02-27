@@ -7,7 +7,7 @@ import { generateWorkerData } from '../../fixtures/workerData.js';
 import companiesHelper from '../../support/helper/companiesHelper.js';
 
 
-describe("Companu Module -  Download", () => {
+describe("WorkForce Companies Modulee -  Download", () => {
 
   before(() => {
     cy.session('userSession', () => {
@@ -49,6 +49,7 @@ describe("Companu Module -  Download", () => {
           });
         });
     });
+
 	it('Should verify downloaded Company CSV content matches UI Company list', () => {
 		const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
 	
@@ -58,7 +59,6 @@ describe("Companu Module -  Download", () => {
 		  const uiCompanyNames = [...$els].map(el => el.innerText.trim());
 		  cy.log('UI Names:', uiCompanyNames.join(', '));
 	  
-		  // Delete old files first
 		  cy.task("deleteDownloadedFiles", {
 			downloadsFolder: DOWNLOADS_FOLDER,
 			pattern: "Company",
@@ -74,7 +74,7 @@ describe("Companu Module -  Download", () => {
 				prefix: "Company"
 			  }).then((fileName) => {
 				if (!fileName) {
-				  cy.wait(1000); // retry after 1 sec
+				  cy.wait(1000);
 				  return getFile();
 				}
 				return fileName;
@@ -85,9 +85,7 @@ describe("Companu Module -  Download", () => {
 			const FILE_PATH = path.join(DOWNLOADS_FOLDER, fileName);
 			cy.log(`Downloaded file found: ${FILE_PATH}`);
 	  
-			// Parse CSV
 			cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
-			  // Find header row
 			  const headerRowIndex = rows.findIndex(row =>
 				row.some(cell => cell?.toString().trim() === "Company Name")
 			  );
@@ -95,7 +93,6 @@ describe("Companu Module -  Download", () => {
 	  
 			  const header = rows[headerRowIndex];
 			  const companyIndex = header.findIndex(h => h?.toString().trim() === "Company Name");
-
 	  
 			  const csvCompanyNames = rows.slice(headerRowIndex + 1)
 				.map(row => row[companyIndex]?.toString().trim())
@@ -103,30 +100,22 @@ describe("Companu Module -  Download", () => {
 	  
 			  cy.log('CSV Names:', csvCompanyNames.join(', '));
 	  
-
 			  const missing = uiCompanyNames.filter(name => !csvCompanyNames.includes(name));
 			  expect(missing, `UI companies missing in CSV: ${missing.join(', ')}`).to.be.empty;
 			});
 		  });
 		});
-	  });
-	  
-	  
-	  
-	  
-	  
+	}); // closes second it
 
     it('Should verify downloaded CSV contains only the selected Company', () => {
 		const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
 	  
-
 		cy.wait(4000);
 	  
 		cy.get('.personal-info-content__title').eq(0).then(($els) => {
 		  const uiCompanyNames = [...$els].map(el => el.innerText.trim());
 		  cy.log('UI Names:', uiCompanyNames.join(', '));
 	  
-		  // Delete old files first
 		  cy.task("deleteDownloadedFiles", {
 			downloadsFolder: DOWNLOADS_FOLDER,
 			pattern: "Company",
@@ -143,7 +132,7 @@ describe("Companu Module -  Download", () => {
 				prefix: "Company"
 			  }).then((fileName) => {
 				if (!fileName) {
-				  cy.wait(1000); // retry after 1 sec
+				  cy.wait(1000);
 				  return getFile();
 				}
 				return fileName;
@@ -154,9 +143,7 @@ describe("Companu Module -  Download", () => {
 			const FILE_PATH = path.join(DOWNLOADS_FOLDER, fileName);
 			cy.log(`Downloaded file found: ${FILE_PATH}`);
 	  
-			// Parse CSV
 			cy.task("parseExcel", { filePath: FILE_PATH }).then((rows) => {
-			  // Find header row
 			  const headerRowIndex = rows.findIndex(row =>
 				row.some(cell => cell?.toString().trim() === "Company Name")
 			  );
@@ -164,7 +151,6 @@ describe("Companu Module -  Download", () => {
 	  
 			  const header = rows[headerRowIndex];
 			  const companyIndex = header.findIndex(h => h?.toString().trim() === "Company Name");
-
 	  
 			  const csvCompanyNames = rows.slice(headerRowIndex + 1)
 				.map(row => row[companyIndex]?.toString().trim())
@@ -173,15 +159,16 @@ describe("Companu Module -  Download", () => {
 			  cy.log('CSV Names:', csvCompanyNames.join(', '));
 			  expect(csvCompanyNames.length, 'Only one company should be in CSV').to.equal(1);
 	  
-
 			  const missing = uiCompanyNames.filter(name => !csvCompanyNames.includes(name));
 			  expect(missing, `UI companies missing in CSV: ${missing.join(', ')}`).to.be.empty;
 			});
 		  });
 		});
-	})
-})
-});
+    }); // closes third it
+
+  }); // closes describe('Download company CSV')
+
+}); // closes outer describe
 
 
 
@@ -203,7 +190,3 @@ function validateNamesMatch(uiNames, csvNames) {
   const missing = uiNames.filter(name => !csvNames.includes(name));
   expect(missing, `Missing workers in CSV: ${missing.join(', ')}`).to.be.empty;
 }
-
-
-
-

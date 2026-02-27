@@ -58,7 +58,7 @@ describe("Worker Onboarding Email Validation", () => {
       
       cy.contains("button p", "Send Onboarding Invite").click();
       cy.log('📧 Checking email...');
-      cy.wait(15000)
+      cy.wait(20000)
     
       cy.task('getMostRecentEmail').then((email) => {
         if (!email) throw new Error('❌ NO EMAIL RECEIVED');
@@ -133,7 +133,7 @@ describe("Worker Onboarding Email Validation", () => {
       
       cy.contains("button p", "Send Onboarding Invite").click();
       cy.log('📧 Checking email...');
-      cy.wait(10000)
+      cy.wait(5000)
     
       cy.task('getMostRecentEmail').then((email) => {
         if (!email) throw new Error('❌ NO EMAIL RECEIVED');

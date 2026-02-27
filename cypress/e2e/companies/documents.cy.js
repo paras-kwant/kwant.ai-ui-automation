@@ -6,7 +6,7 @@ import { workforceSelector } from '../../support/workforceSelector';
 import documents from '../../pages/companies/documents';
 import { generateCredentialID } from '../../fixtures/workerData';
 
-describe("Companies Module - Documents Page", () => {
+describe("WorkForce Companies Module - Documents Page", () => {
 
   before(() => {
     cy.session('userSession', () => {
@@ -124,12 +124,12 @@ describe("Companies Module - Documents Page", () => {
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)
           .find('svg')
-          .invoke('show')
+          // .invoke('show')
           .click({ force: true });
 
-        cy.get('[placeholder="Select Expiry date"]')
+          cy.get('[placeholder="Select Expiry date"]')
           .clear({ force: true })
-          .type('11/06/2026');
+          .type('11/06/2026', { delay: 100 });
         cy.get('body').click();
 
         cy.get('.hover-hoc-container__input__display-value')

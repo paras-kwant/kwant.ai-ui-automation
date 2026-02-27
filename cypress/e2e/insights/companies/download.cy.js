@@ -8,6 +8,7 @@ describe("Insights Company Module - Download", () => {
       cy.login();
       cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
     });
+    downloadPage.visitCompaniesPage();
   });
 
   beforeEach(() => {
@@ -16,7 +17,6 @@ describe("Insights Company Module - Download", () => {
 
 
   it('Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', () => { // Add a wait to ensure the page has loaded before interacting with it
-    downloadPage.visitCompaniesPage();
 	cy.wait(2000)
 
     downloadPage.getDateRangeFromFilter().then(({ startDate, endDate }) => {
@@ -33,6 +33,7 @@ describe("Insights Company Module - Download", () => {
       downloadPage.openDownloadModal();
       downloadPage.assertDatesMatch(startDate, endDate);
       downloadPage.clickDownloadButton();
+      cy.wait(4000)
 
       downloadPage.getLatestDownloadedFile().then(({ fileName }) => {
         downloadPage.assertFileIsCsv(fileName);
@@ -45,6 +46,7 @@ describe("Insights Company Module - Download", () => {
     downloadPage.visitCompaniesPage();
     downloadPage.openDownloadModal();
     downloadPage.clickDownloadButton();
+    cy.wait(4000)
 
     downloadPage.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
       downloadPage.assertFileIsCsv(fileName);
@@ -65,6 +67,7 @@ describe("Insights Company Module - Download", () => {
 
       downloadPage.openDownloadModal();
       downloadPage.clickDownloadButton();
+      cy.wait(4000)
 
       downloadPage.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
         downloadPage.parseDownloadedFile(downloadsFolder, fileName).then((rows) => {

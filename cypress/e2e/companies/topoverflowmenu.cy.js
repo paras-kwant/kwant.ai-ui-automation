@@ -4,7 +4,7 @@ import workerHelper from "../../support/helper/workerHelper.js";
 import companiesHelper from "../../support/helper/companiesHelper.js";
 import { generateCompanyData } from "../../fixtures/workerData.js";
 
-describe("Companies - overflow menu", () => {
+describe("WorkForce Companies Module - overflow menu", () => {
   let authHeaders = {};
 
   before(() => {

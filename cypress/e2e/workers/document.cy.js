@@ -315,9 +315,9 @@ cy.get(workforceSelector.documentPage)
             .find('svg')
             .click({ force: true });
 
-          cy.get('[placeholder="Select Expiry date"]')
+            cy.get('[placeholder="Select Expiry date"]')
             .clear({ force: true })
-            .type('11/06/2026');
+            .type('11/06/2026', { delay: 100 });
           cy.get('body').click();
 
           cy.get('.hover-hoc-container__input__display-value')
@@ -369,9 +369,9 @@ cy.get(workforceSelector.documentPage)
             .find('svg')
             .click({ force: true });
 
-          cy.get('[placeholder="Select Expiry date"]')
+            cy.get('[placeholder="Select Expiry date"]')
             .clear({ force: true })
-            .type('11/06/2026');
+            .type('11/06/2026', { delay: 100 });
           cy.get('body').click();
 
           cy.get('.hover-hoc-container__input__display-value')
