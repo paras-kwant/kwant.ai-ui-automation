@@ -25,17 +25,17 @@ describe("Worker Module - File Upload and Download", () => {
   it('Should add a worker by uploading a valid CSV file', () => {
    workerHelper.openUploadModal()
     workerHelper.uploadWorkerCSV('testdata/employeeUpload.csv');
-    cy.get('.sc-kOPcWz').should('contain.text', '1 worker(s) will be added.');
+    cy.get('[type="info"]').should('contain.text', '1 worker(s) will be added.');
 
   });
 
 
   it('Should download the worker CSV template successfully', () => {
     const downloadsFolder = Cypress.config('downloadsFolder');
-    const fileName = 'Ontarget-employee-upload-template.csv';
+    const fileName = 'worker-upload-template.csv';
 
    workerHelper.openUploadModal()
-    cy.get('.drawer_title>p').click();
+    cy.get('p').contains('Worker Upload Template').click({force: true});
     cy.readFile(`${downloadsFolder}/${fileName}`, { timeout: 15000 })
       .should('exist')
       .then((content) => {
@@ -68,7 +68,7 @@ describe("Worker Module - File Upload and Download", () => {
         extension: ".csv"
       });
 
-      cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+      cy.get(workforceSelector.overflowMenu).click();
       cy.get('.dropdown-option').contains('Download').click();
 
       cy.readFile(FILE_PATH, { timeout: 30000 }).then(() => {
@@ -101,7 +101,7 @@ describe("Worker Module - File Upload and Download", () => {
 
       cy.get('.checkboxCheckmark').eq(0).click({ force: true });
 
-      cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+      cy.get(workforceSelector.overflowMenu).click();
       cy.get('.dropdown-option').contains('Download').click();
 
       cy.readFile(FILE_PATH, { timeout: 30000 }).should('exist').then(() => {
@@ -119,11 +119,11 @@ describe("Worker Module - File Upload and Download", () => {
   });
 
   it('Should add a worker via drag-and-drop CSV upload', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/employeeUpload.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+      cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'employeeUpload.csv',
@@ -134,7 +134,7 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    cy.get('.sc-kOPcWz')
+    cy.get('[type="info"]')
       .should('be.visible')
       .and('contain.text', '1 worker(s) will be added.');
       cy.get('button p').contains('Submit').click();
@@ -142,11 +142,11 @@ describe("Worker Module - File Upload and Download", () => {
   });
 
   it('Should display message when uploading a CSV with no worker data', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('backup.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'EmptyCsv.csv',
@@ -157,17 +157,19 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    cy.get('.sc-kOPcWz')
+    cy.get('[type="info"]')
       .should('be.visible')
       .and('contain.text', 'No content to upload.');
   });
 
   it('Should show error when uploading non-CSV or non-Excel file', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click({force: true});
+    cy.get(workforceSelector.tableRow).should('be.visible')
+    cy.wait(1000)
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('demo.pdf', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'demo.pdf',
@@ -178,15 +180,15 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    workforceSelector.toastMessage().contains('File type unsupported').should('be.visible');
+    cy.get(workforceSelector.toastMessage).contains('File type unsupported').should('be.visible');
   });
 
   it('Should show validation error for missing Company Name', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('noCompany.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'noCompany.csv',
@@ -197,15 +199,15 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    workforceSelector.toastMessage().contains('Company Name cannot be empty.').should('be.visible');
+    cy.get(workforceSelector.toastMessage).contains('Company Name cannot be empty.').should('be.visible');
   });
 
   it('Should show validation error for missing First Name', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/noFirstName.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'noFirstName.csv',
@@ -216,15 +218,15 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    workforceSelector.toastMessage().contains('First Name or Last Name cannot be empty.').should('be.visible');
+    cy.get(workforceSelector.toastMessage).contains('First Name or Last Name cannot be empty.').should('be.visible');
   });
 
   it('Should show validation error for missing Last Name', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/noLastName.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'noLastName.csv',
@@ -235,16 +237,16 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    workforceSelector.toastMessage().contains('First Name or Last Name cannot be empty.').should('be.visible');
+    cy.get(workforceSelector.toastMessage).contains('First Name or Last Name cannot be empty.').should('be.visible');
   });
 
   it('Should show duplicate worker validation message for duplicate CSV data', () => {
     cy.wait(2000)
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/duplicateWorker.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'duplicateWorker.csv',
@@ -255,17 +257,17 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    workforceSelector.toastMessage()
+    cy.get(workforceSelector.toastMessage)
       .contains('Duplicate worker(s) found. 1 record(s) will not be uploaded.')
       .should('be.visible');
   });
 
   it('Should detect and show invalid phone number message from CSV upload', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/invalidPhoneNumber.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'invalidPhoneNumber.csv',
@@ -276,17 +278,17 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    cy.get('.sc-kOPcWz')
+    cy.get('[type="info"]')
       .should('be.visible')
       .and('contain.text', '1 Invalid Phone Number');
   });
 
   it('Should upload CSV with invalid fields and validate profile fallback values', () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/invalidFields.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'invalidFields.csv',
@@ -297,18 +299,17 @@ describe("Worker Module - File Upload and Download", () => {
       );
     });
 
-    workforceSelector.submitButton().click();
+    cy.get(workforceSelector.submitButton).click();
     cy.get('input[placeholder="Search"]').clear().type('parass');
     cy.wait(2000)
     cy.get(workforceSelector.tableRow).eq(0).click({force: true});
-    workforceSelector.personalDetails().click();
+    cy.get(workforceSelector.personalDetailsPage).click();
     cy.getWorkerField('Phone').contains('-');
     cy.getWorkerField('Sex').contains('-');
     cy.getWorkerField('Race').contains('-');
     cy.getWorkerField('MWBE').contains('-');
-
     cy.get('button p').contains('Cancel').click();
-    cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({ force: true });
+    cy.get(workforceSelector.tableRow).eq(0).find('[type="checkbox"]').check({ force: true });
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Delete").click();
     cy.get("button p").contains("Delete").click();
@@ -317,11 +318,11 @@ describe("Worker Module - File Upload and Download", () => {
 
   it('Should  showw - while the project code is invalid', () => {
     cy.wait(2000)
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/projectcode.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'projectcode.csv',
@@ -331,11 +332,11 @@ describe("Worker Module - File Upload and Download", () => {
         { subjectType: 'drag-n-drop', force: true }
       );
     });
-    workforceSelector.submitButton().click();
+    cy.get(workforceSelector.submitButton).click();
     cy.get('input[placeholder="Search"]').clear().type('James anderson112');
     cy.wait(2000)
     cy.get(workforceSelector.tableRow).eq(0).click({force: true});
-    workforceSelector.jobDetails().click();
+    cy.get(workforceSelector.jobDetailsPage).click();
     cy.getWorkerField('Project Code').contains('-');
   
   });
@@ -343,11 +344,11 @@ describe("Worker Module - File Upload and Download", () => {
 
   it('submiting device with instance id and with out mac id', () => {
     cy.wait(2000)
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get('.dropdown-option').contains('Upload').click();
 
     cy.fixture('testdata/nomacid.csv', 'base64').then(fileContent => {
-      cy.get('.sc-ewBhFl').attachFile(
+       cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName: 'nomacid.csv',
@@ -357,7 +358,7 @@ describe("Worker Module - File Upload and Download", () => {
         { subjectType: 'drag-n-drop', force: true }
       );
     });
-    workforceSelector.toastMessage().contains('MAC cannot be empty.')
+    cy.get(workforceSelector.toastMessage).contains('MAC cannot be empty.')
   });
 
 
@@ -381,7 +382,7 @@ describe("Worker Module - File Upload and Download", () => {
     const macId = generateMacId();
   
     // Open Upload modal
-    cy.get('.sc-gFAWRd > .sc-aXZVg > button')
+    cy.get(workforceSelector.overflowMenu)
       .should('be.visible')
       .click();
   
@@ -410,8 +411,7 @@ describe("Worker Module - File Upload and Download", () => {
       cy.writeFile('cypress/fixtures/testdata/validintancemacid.csv', updatedCsv);
     });
   
-    // Upload CSV
-    cy.get('.sc-ewBhFl').attachFile(
+     cy.contains('button', 'Choose File').attachFile(
       {
         filePath: 'testdata/validintancemacid.csv',
         mimeType: 'text/csv'
@@ -423,13 +423,13 @@ describe("Worker Module - File Upload and Download", () => {
       cy.get('button p').contains('Submit').click();
   
     cy.wait(3000);
-    cy.contains('.sc-fremEr', 'Device')
+    cy.contains(workforceSelector.tableColumn, 'Device')
     .scrollIntoView()
-    .find('svg')
-    .click();
+  .find('.table-header-filter-btn svg')
+  .click();
 
     cy.get('[placeholder="Search"]').eq(1).click().type(macId)
-    cy.get('.sc-eldPxv').contains(macId).should('be.visible');
+    cy.get('label[for^=":r"]').contains(macId).should('be.visible');
 
   });
   
@@ -455,7 +455,7 @@ describe("Worker Module - File Upload and Download", () => {
     const instanceId = generateInstanceId();
     const macId = generateMacId();
   
-    cy.get('.sc-gFAWRd > .sc-aXZVg > button')
+    cy.get(workforceSelector.overflowMenu)
       .should('be.visible')
       .click();
   
@@ -488,7 +488,7 @@ describe("Worker Module - File Upload and Download", () => {
       
       
 
-    cy.get('.sc-ewBhFl').attachFile(
+     cy.contains('button', 'Choose File').attachFile(
       {
         filePath: 'testdata/validintancemacid.csv',
         mimeType: 'text/csv'
@@ -503,12 +503,12 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('input[placeholder="Search"]').clear().type(`${workerData.firstName} ${workerData.lastName}`);
     cy.wait(2000)
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.AccessControl().click();
+    cy.get(workforceSelector.accessControlPage).click();
     cy.getWorkerField('Device').should('contain.text', macId);
-    workforceSelector.personalDetails().click();
+    cy.get(workforceSelector.personalDetailsPage).click();
 
     cy.get('button p').contains('Cancel').click();
-  cy.get(".sc-cRmqLi").each(($row) => {
+  cy.get(workforceSelector.tableRow).each(($row) => {
     cy.wrap($row).find('[type="checkbox"]').check({ force: true });
   });
     cy.get(workforceSelector.overflowMenu).click();
@@ -520,16 +520,16 @@ describe("Worker Module - File Upload and Download", () => {
 
   it('Uploading device with already exist ids', () => {
 
-    cy.get('.sc-gFAWRd > .sc-aXZVg > button').should('be.visible').click();
+    cy.get(workforceSelector.overflowMenu).should('be.visible').click();
     cy.get('.dropdown-option').contains('Upload').click();
 
   
-    cy.get('.sc-ewBhFl').attachFile(
+     cy.contains('button', 'Choose File').attachFile(
       { filePath: 'testdata/validintancemacid.csv', mimeType: 'text/csv' },
       { subjectType: 'drag-n-drop', force: true }
     );
   
-    workforceSelector.toastMessage().contains('1 Beacon(s) already exist.').should('be.visible');
+    cy.get(workforceSelector.toastMessage).contains('1 Beacon(s) already exist.').should('be.visible');
 
   });
 
@@ -547,7 +547,7 @@ describe("Worker Module - File Upload and Download", () => {
     const macId = generateMacId();
   
     // Open Upload modal
-    cy.get('.sc-gFAWRd > .sc-aXZVg > button')
+    cy.get(workforceSelector.overflowMenu)
       .should('be.visible')
       .click();
   
@@ -572,7 +572,7 @@ describe("Worker Module - File Upload and Download", () => {
     });
   
    
-    cy.get('.sc-ewBhFl').attachFile(
+     cy.contains('button', 'Choose File').attachFile(
       {
         filePath: 'testdata/validintancemacid.csv',
         mimeType: 'text/csv'
@@ -588,9 +588,9 @@ describe("Worker Module - File Upload and Download", () => {
     cy.get('button p').contains('Submit').click({ force: true });
   cy.get(workforceSelector.tableRow).should('be.visible')
   cy.wait(3000);
-  cy.contains('.sc-fremEr', 'Device')
+  cy.contains(workforceSelector.tableColumn, 'Device')
   .scrollIntoView()
-  .find('svg')
+  .find('.table-header-filter-btn svg')
   .click();
 
   cy.get('[placeholder="Search"]').eq(1).click().type(macId)
@@ -598,11 +598,11 @@ describe("Worker Module - File Upload and Download", () => {
   });
   
 it('Should upload CSV, verify worker details, and delete the entry ', () => {
-  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+  cy.get(workforceSelector.overflowMenu).click();
   cy.get('.dropdown-option').contains('Upload').click();
 
   cy.fixture('testdata/fulldata.csv', 'base64').then(fileContent => {
-    cy.get('.sc-ewBhFl').attachFile(
+     cy.contains('button', 'Choose File').attachFile(
       {
         fileContent,
         fileName: 'fulldata.csv',
@@ -613,11 +613,11 @@ it('Should upload CSV, verify worker details, and delete the entry ', () => {
     );
   });
 
-  workforceSelector.submitButton().click();
+  cy.get(workforceSelector.submitButton).click();
   cy.get('input[placeholder="Search"]').clear().type('james fullAnderson');
   cy.wait(2000)
   cy.get(workforceSelector.tableRow).eq(0).click({force: true});
-  workforceSelector.personalDetails().click();
+  cy.get(workforceSelector.personalDetailsPage).click();
   cy.getWorkerField('Email').contains('jamesanderson@gmail.com');
   cy.getWorkerField('Phone').contains('986-8757379');  
   cy.getWorkerField('Sex').contains('Male');
@@ -625,7 +625,7 @@ it('Should upload CSV, verify worker details, and delete the entry ', () => {
   cy.getWorkerField('MWBE').contains('Non MWBE');
 
   cy.get('button p').contains('Cancel').click();
-  cy.get(".sc-cRmqLi").each(($row) => {
+  cy.get(workforceSelector.tableRow).each(($row) => {
     cy.wrap($row).find('[type="checkbox"]').check({ force: true });
   });
     cy.get(workforceSelector.overflowMenu).click();

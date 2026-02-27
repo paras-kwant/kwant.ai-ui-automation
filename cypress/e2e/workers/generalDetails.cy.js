@@ -17,7 +17,8 @@ describe("Worker Module - General Details Page", () => {
     workerHelper.visitWorkersPage();
   });
   beforeEach(() => {
-    cy.cleanUI();
+    cy.wait(1500)
+    cy.get('body').click('bottomLeft')
   });
   
   it("Verify the UI of the General Details drawer", () => {
@@ -83,7 +84,7 @@ describe("Worker Module - General Details Page", () => {
 
   cy.get('[name="company"]').click({ force: true }).clear()
 
-  cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
+  cy.get('.select_item_container [role="button"]').then(($buttons) => {
     const randomIndex = Cypress._.random(0, $buttons.length - 1);
     const $randomButton = $buttons.eq(randomIndex);
     cy.wrap($randomButton).click({ force: true });
@@ -96,7 +97,7 @@ describe("Worker Module - General Details Page", () => {
 
 
     cy.get("button p").contains("Update").click();
-    workforceSelector.toastMessage().should("contain", "Successfully updated employee.");
+    cy.get(workforceSelector.toastMessage).contains( "Successfully updated worker.").should('be.visible')
     cy.wait(1000);
 
       cy.get(".hover-hoc-container__input__display-value").should("have.text", filledInfo);
@@ -110,18 +111,17 @@ describe("Worker Module - General Details Page", () => {
         cy.get(".personal-info-content__title")
           .invoke("text")
           .then((text) => {
-            cy.wrap(text.trim()).as("workerName"); // save alias
+            cy.wrap(text.trim()).as("workerName"); 
           });
 
         cy.get(".personal-info-content__title").click({ force: true });
       });
 
 
-    // Step 4: click info icon
-    cy.get(".sc-kSRfVL.htHbwd button").click({ force: true });
+    cy.get("header button").eq(0).click({ force: true });
 
     cy.get("@workerName").then((name) => {
-      cy.get(".sc-dhKdcB.iJWWrH")
+      cy.get("p")
         .contains(name)
         .should("be.visible");
     });

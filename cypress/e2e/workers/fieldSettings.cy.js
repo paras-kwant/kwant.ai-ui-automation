@@ -1,20 +1,25 @@
 /// <reference types="cypress" />
-import { workforceSelector } from "../../support/workforceSelector";
-import "cypress-real-events/support";
+const path = require("path");
+const fs = require("fs");
+import { workforceSelector } from '../../support/workforceSelector';
+import workerHelper from '../../support/helper/workerHelper.js';
 
 describe("Worker Module - Field Settings", () => {
 
-  // ✅ Runs only ONCE before all tests — creates a session and logs in
   before(() => {
-    cy.session("userSession", () => {
+    cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
     });
+    workerHelper.visitWorkersPage();
+
   });
 
-  // ✅ Runs before EACH test — just navigates to the workers page
   beforeEach(() => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+
+    cy.cleanUI()
   });
 
   it("Validates the UI of the Field Settings drawer", () => {
@@ -24,7 +29,7 @@ describe("Worker Module - Field Settings", () => {
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
 
-      cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
+     cy.get(workforceSelector.fieldSettingPage).click()
       cy.contains("p", "Field Settings").should("be.visible");
       cy.contains("button", "Update").should("be.disabled");
       cy.contains("button", "Add New Field").should("be.visible");
@@ -40,7 +45,7 @@ describe("Worker Module - Field Settings", () => {
       // Open the worker and Field Settings
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
+      cy.get(workforceSelector.fieldSettingPage).click()
       cy.contains("p", "Field Settings").should("be.visible");
       cy.contains("button", "Update").should("be.disabled");
 
@@ -66,7 +71,7 @@ describe("Worker Module - Field Settings", () => {
 
       // Save and verify success
       cy.contains("button", "Update").click();
-      workforceSelector.toastMessage()
+      cy.get(workforceSelector.toastMessage)
         .contains("Field settings updated successfully!")
         .should("be.visible");
 
@@ -91,7 +96,7 @@ describe("Worker Module - Field Settings", () => {
       // Open worker and Field Settings
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
+      cy.get(workforceSelector.fieldSettingPage).click()
   
       // Pick a random unchecked field
       cy.get(".columns-drawer-content__column-option").then(($options) => {
@@ -119,7 +124,7 @@ describe("Worker Module - Field Settings", () => {
             // Select a random option from first dropdown
             cy.wait(500)
             cy.get('[placeholder="Select"]').eq(0).click();
-            cy.get('.sc-tagGq[role="button"]').then(($dropdownOptions1) => {
+            cy.get('.select_item_container [role="button"]').then(($dropdownOptions1) => {
               const randomDropdownIndex1 = Cypress._.random(0, $dropdownOptions1.length - 1);
               const $randomDropdownOption1 = $dropdownOptions1.eq(randomDropdownIndex1);
               cy.wrap($randomDropdownOption1).click({ force: true });
@@ -128,7 +133,7 @@ describe("Worker Module - Field Settings", () => {
   
             // Select a random option from second dropdown
             cy.get('[placeholder="Select"]').eq(1).click();
-            cy.get('.sc-tagGq[role="button"]').then(($dropdownOptions2) => {
+            cy.get('.select_item_container [role="button"]').then(($dropdownOptions2) => {
               const randomDropdownIndex2 = Cypress._.random(0, $dropdownOptions2.length - 1);
               const $randomDropdownOption2 = $dropdownOptions2.eq(randomDropdownIndex2);
               cy.wrap($randomDropdownOption2).click({ force: true });
@@ -137,7 +142,7 @@ describe("Worker Module - Field Settings", () => {
   
             // Click "Save" or "Add" button
             cy.get('[label="Add"]').contains('Add').click({force:true});
-            workforceSelector.toastMessage().contains('The field already exists.').should('be.visible')
+            cy.get(workforceSelector.toastMessage).contains('The field already exists.').should('be.visible')
           });
       });
     });
@@ -151,7 +156,7 @@ describe("Worker Module - Field Settings", () => {
       // Open worker and Field Settings
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
+      cy.get(workforceSelector.fieldSettingPage).click()
       cy.contains("p", "Field Settings").should("be.visible");
   
       cy.get(".columns-drawer-content__column-option")
@@ -188,7 +193,7 @@ describe("Worker Module - Field Settings", () => {
       let initialCheckedCount = 0;
       
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
+      cy.get(workforceSelector.fieldSettingPage).click()
       cy.contains("p", "Field Settings").should("be.visible");
       
       // Get initial checked count
@@ -257,7 +262,7 @@ describe("Worker Module - Field Settings", () => {
       // Open worker and Field Settings
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
+      cy.get(workforceSelector.fieldSettingPage).click()
 
       // Click the close (X) button
       cy.get("header button svg").click();
@@ -274,7 +279,7 @@ describe("Worker Module - Field Settings", () => {
       // Open worker and Field Settings
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      cy.get(".sc-jXbUNg.gDlPVv").eq(7).click();
+      cy.get(workforceSelector.fieldSettingPage).click()
       cy.contains("p", "Field Settings").should("be.visible");
 
       // Uncheck all fields

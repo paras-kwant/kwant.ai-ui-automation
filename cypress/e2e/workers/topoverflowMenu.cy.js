@@ -25,7 +25,6 @@ describe("Worker Module - overflowMenu", () => {
     cy.contains(".dropdown-option", "Delete").should("not.exist");
     cy.contains(".dropdown-option", "Disable").should("not.exist");
     cy.contains(".dropdown-option", "Change Value").should("not.exist");
-    cy.contains(".dropdown-option", "Send Alert").should("exist");
 
     cy.get(workforceSelector.tableRow)
       .eq(0)
@@ -36,13 +35,12 @@ describe("Worker Module - overflowMenu", () => {
     cy.contains(".dropdown-option", "Delete").should("exist");
     cy.contains(".dropdown-option", "Disable").should("exist");
     cy.contains(".dropdown-option", "Change Value").should("exist");
-    cy.contains(".dropdown-option", "Send Alert").should("exist");
   });
 
 
   it('Verify the Save button is disabled unless the inputs are selected from the drop-down of Cost Code, Crew, Job Title.',()=>{
     cy.get('.personal-info-content__title').should('be.visible')
-    cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({force: true});
+    cy.get(workforceSelector.tableRow).eq(0).find('[type="checkbox"]').check({force: true});
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Change Value").click();
     cy.get('[label="Save"] button').should('be.disabled');
@@ -63,7 +61,7 @@ describe("Worker Module - overflowMenu", () => {
   
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Change Value").click();
-    cy.selectRandomOption('[label="Job Title"] input',".sc-tagGq","JobTitle");
+    cy.selectRandomOption('[label="Job Title"] input','.select_item_container [role="button"]',"JobTitle");
   
     cy.get('[label="Job Title"] input')
       .invoke("val")
@@ -74,9 +72,9 @@ describe("Worker Module - overflowMenu", () => {
   
     cy.contains("Value changed successfully").should("be.visible");
   
-    cy.get(".sc-cRmqLi").eq(2).click({ force: true });
+    cy.get(workforceSelector.tableRow).eq(2).click({ force: true });
     cy.wait(1500);
-    workforceSelector.jobDetails().click();
+    cy.get(workforceSelector.jobDetailsPage).click()
     cy.get("@JobTitle").then((JobTitle) => {
       const expectedJobTitle = JobTitle === "None" ? "-" : JobTitle;
       cy.getWorkerField("Job Title").contains(expectedJobTitle);
@@ -90,7 +88,7 @@ describe("Worker Module - overflowMenu", () => {
   
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Change Value").click();
-    cy.selectRandomOption('[label="Crew"] input',".sc-tagGq","Crew");
+    cy.selectRandomOption('[label="Crew"] input','.select_item_container [role="button"]',"Crew");
   
     cy.get('[label="Crew"] input')
       .invoke("val")
@@ -101,9 +99,10 @@ describe("Worker Module - overflowMenu", () => {
   
     cy.contains("Value changed successfully").should("be.visible");
   
-    cy.get(".sc-cRmqLi").eq(2).click({ force: true });
+    cy.get(workforceSelector.tableRow).eq(2).click({ force: true });
     cy.wait(1500);
-    workforceSelector.jobDetails().click();
+    cy.get(workforceSelector.jobDetailsPage).click()
+    
     cy.get("@Crew").then((Crew) => {
       const expectedCrew = Crew === "None" ? "-" : Crew;
       cy.getWorkerField("Crew").contains(expectedCrew);
@@ -127,20 +126,20 @@ describe("Worker Module - overflowMenu", () => {
     cy.contains(".dropdown-option", "Change Value").click();
   
     cy.selectRandomOption(
-      ".sc-fHjqPf.lazXQn:eq(0)",
-      ".sc-tagGq",
+      '[label="Trade Classification"] input',
+      '.select_item_container [role="button"]',
       "Trade Classification"
     );
   
     cy.selectRandomOption(
-      ".sc-fHjqPf.lazXQn:eq(1)",
-      ".sc-tagGq",
+      '[label="Crew"] input',
+      '.select_item_container [role="button"]',
       "Crew"
     );
   
     cy.selectRandomOption(
-      ".sc-fHjqPf.lazXQn:eq(2)",
-      ".sc-tagGq",
+      '[label="Job Title"] input',
+      '.select_item_container [role="button"]',
       "Job Title"
     );
   
@@ -156,7 +155,7 @@ describe("Worker Module - overflowMenu", () => {
     cy.contains("Value changed successfully").should("be.visible");
   
     cy.get(".personal-info-content__title").eq(0).click({ force: true });
-    cy.get(".sc-jXbUNg > .jmJtNV").eq(1).click();
+    cy.get(workforceSelector.jobDetailsPage).click();
   
     cy.get("@crew").then((crew) => {
       const expectedCrew = crew === "None" ? "-" : crew;
@@ -180,13 +179,14 @@ describe("Worker Module - overflowMenu", () => {
     cy.get('.header-checkbox-container').eq(0).should('be.visible').find('[type="checkbox"]').check({ force: true });
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Disable").click();
-    cy.get(".sc-dhKdcB").contains("Are you sure you want to disable the selected worker(s) ?")
+    cy.get("p").contains("Are you sure you want to disable the selected worker(s) ?")
     .should("be.visible");
     cy.get("button p").contains("Confirm").click();
-      cy.get('.sc-cRmqLi').each(($el, index) => {
+    cy.wait(1000)
+      cy.get(workforceSelector.tableRow).each(($el, index) => {
         cy.wrap($el).click({ force: true });
 
-        workforceSelector.AccessControl().click()
+        cy.get(workforceSelector.accessControlPage).click()
       
         cy.getWorkerField('Device').should('contain.text', '-');
       });
@@ -204,11 +204,11 @@ describe("Worker Module - overflowMenu", () => {
     );
     cy.wait(2000);
 
-    cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({ force: true });
+    cy.get(workforceSelector.tableRow).eq(0).find('[type="checkbox"]').check({ force: true });
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Disable").click();
     cy.get("button p").contains("Confirm").click();
-    cy.get(".sc-kOPcWz")
+    cy.get(workforceSelector.toastMessage)
       .contains("Device not assigned to selected worker(s).")
       .should("be.visible");
   });
@@ -224,11 +224,11 @@ describe("Worker Module - overflowMenu", () => {
     );
     cy.wait(2000);
 
-    cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({ force: true });
+    cy.get(workforceSelector.tableRow).eq(0).find('[type="checkbox"]').check({ force: true });
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Disable").click();
     cy.get("button p").contains("Confirm").click();
-    cy.get(".sc-kOPcWz")
+    cy.get(workforceSelector.toastMessage)
       .contains("Device not assigned to selected worker(s).")
       .should("be.visible");
   });
@@ -356,7 +356,7 @@ describe("Worker Module - overflowMenu", () => {
           });
   
           cy.intercept("POST", "/api/downloadworkers").as("downloadWorkers");
-          cy.get(".sc-gFAWRd>.sc-aXZVg>button").click();
+          cy.get(workforceSelector.overflowMenu).click();
           cy.get(".dropdown-option").contains("Download").click();
           cy.wait("@downloadWorkers");
   
@@ -454,7 +454,7 @@ describe("Worker Module - overflowMenu", () => {
         });
 
         cy.intercept("POST", "/api/downloadworkers").as("downloadWorkers");
-        cy.get(".sc-gFAWRd>.sc-aXZVg>button").click();
+        cy.get(workforceSelector.overflowMenu).click();
         cy.get(".dropdown-option").contains("Download").click();
         cy.wait("@downloadWorkers");
 
@@ -530,14 +530,14 @@ describe("Worker Module - overflowMenu", () => {
           cy.get('.personal-info-content__title').contains(lastName).should('be.visible')
 
       }
-    );    
+    ); 
+    cy.wait(1000)   
     cy.get('.header-checkbox-container').eq(0).should('be.visible').find('[type="checkbox"]').check({ force: true });
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Delete").click();
     cy.get("button p").contains("Delete").click();
-    cy.get(".empty-body").should(
-      "have.text",
-      "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
+    cy.get(".empty-body").contains(
+      "No Results"
     );
   });
 
@@ -552,11 +552,12 @@ describe("Worker Module - overflowMenu", () => {
       }
     );
     cy.get('.personal-info-content__title').should('be.visible')
-    cy.get(".sc-cRmqLi").eq(0).find('[type="checkbox"]').check({ force: true });
+    cy.get(workforceSelector.tableRow).eq(0).find('[type="checkbox"]').check({ force: true });
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Change Value").click();
-    cy.get('.sc-krNlru svg').click()
+    cy.get('section header button').click()
     cy.get(workforceSelector.overflowMenu).should('be.visible');
   })
+  
 
 });

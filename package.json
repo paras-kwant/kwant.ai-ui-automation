@@ -18,7 +18,7 @@
     "@shelex/cypress-allure-plugin": "^2.41.2",
     "allure-commandline": "^2.34.1",
     "concurrently": "^9.2.1",
-    "cypress": "^15.8.1",
+    "cypress": "^15.5.0",
     "cypress-dotenv": "^3.0.1",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^2.0.5",
@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "axios": "^1.11.0",
+    "dayjs": "^1.11.19",
     "googleapis": "^162.0.0"
   }
 }

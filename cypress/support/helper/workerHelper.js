@@ -18,13 +18,12 @@ const WorkerHelper = {
   },
 
   openUploadModal: () => {
-    cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+    cy.get(workforceSelector.overflowMenu).should('be.visible').click();
     cy.get('.dropdown-option').contains('Upload').click();  },
 
 
     closeSidebarIfOpen: () => {
       cy.url().then((url) => {
-        // Only run cleanup if we're on the workers page
         if (!url.includes('/workers')) {
           workerHelper.visitWorkersPage();
         }
@@ -58,16 +57,46 @@ const WorkerHelper = {
 
 
     openSafteyAuditModel: () => {
-      cy.get('.table-header-filter-btn').eq(7).click();
+
+      cy.contains(workforceSelector.tableColumn, 'Safety Alert')
+        .find('.table-header-filter-btn')
+        .click()
     
-      cy.get('.sc-esYiGF').each(($el) => {
-        const label = $el.find('span').text().trim();
-        if (label !== 'None') {
-          cy.wrap($el).find('input[type="checkbox"]').check({ force: true });
-        }
-      });
-      cy.get(workforceSelector.tableRow).eq(1).click({ force: true });
-          workforceSelector.SafetyAudit().click();
+      cy.get('[class*="select_item_container"]').within(() => {
+    
+        // First pass: collect indices of labels to click
+        cy.get('label[for^=":r"]').then(($labels) => {
+    
+          const indicesToClick = []
+    
+          $labels.each((index, label) => {
+            const text = Cypress.$(label)
+              .find('span[type="onDropdown"]')
+              .last()
+              .text()
+              .trim()
+    
+            if (text !== 'None') {
+              indicesToClick.push(index)
+            }
+          })
+    
+          indicesToClick.forEach((index) => {
+            cy.get('label[for^=":r"]').eq(index).click()
+          })
+    
+        })
+    
+      })
+    
+      cy.wait(5000)
+    
+      cy.get(workforceSelector.tableRow)
+        .eq(1)
+        .click({ force: true })
+    
+      cy.get(workforceSelector.SafetyAuditPage).click()
+    
     },
 
     addRandomComment: (commentPrefix = 'Auto comment') => {
@@ -91,7 +120,7 @@ const WorkerHelper = {
   uploadWorkerCSV: (filePath) => {
     cy.fixture(filePath, 'base64').then(fileContent => {
       const fileName = filePath.split('/').pop(); // extract filename
-      cy.get('.sc-ewBhFl').attachFile(
+      cy.contains('button', 'Choose File').attachFile(
         {
           fileContent,
           fileName,

@@ -14,7 +14,8 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
   });
 
   beforeEach(() => {
-	cy.get('body').click(0, 0);
+
+    cy.cleanUI()
   });
 
   it("Sending Alert to company with Missing Contact Information", () => {
@@ -27,13 +28,8 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.contains("General Communication").click();
       cy.get("textarea").type(Math.random().toString(36).substring(2, 12));
-      workforceSelector.sendAlert().click();
-      workforceSelector
-        .toastMessage()
-        .should(
-          "contain.text",
-          "None of the selected company(s) have phone number added."
-        );
+      cy.get(workforceSelector.confirmSendAlertButton).click();
+      cy.get(workforceSelector.toastMessage).contains("None of the selected company(s) have phone number added.");
     });
 
 
@@ -53,17 +49,19 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
       cy.get(workforceSelector.searchInput).clear().type('No Info Company')
       cy.get(workforceSelector.tableRow).contains('No Info Company').should('be.visible').click();
 
-
           cy.get(".header-checkbox-container [type='checkbox']")
             .first()
             .check({ force: true });
-  
-          cy.contains("button p", "Send Alert").click();
-  
+            cy.contains("button p", "Send Alert").click();
+
           cy.get('[label="Message Type"] [placeholder="Select"]').click();
           cy.contains("General Communication").click();
   
-          cy.get('.sc-grmefH > .fOBBgu')
+          cy.get('textarea[placeholder="Type message here..."]')
+  .parent()
+  .parent()
+  .find('p')
+  .contains('/')
             .invoke("text")
             .then((text) => {
               const maxLength = Number(text.split("/")[1]);
@@ -71,7 +69,7 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
               cy.log(`Max allowed characters: ${maxLength}`);
   
               const overLimitMessage = "A".repeat(maxLength + 10);
-  
+
               cy.get("textarea")
                 .clear()
                 .type(overLimitMessage)
@@ -92,7 +90,7 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.get('[role="button"]').contains("Alert").click();
       cy.get('[placeholder="Select Template"]').click();
-      cy.get(".sc-kdBSHD > :nth-child(2)").click();
+      cy.get('.select_item_container [role="button"]').eq(0).click();
       cy.get('[placeholder="Select Template"]')
         .invoke("val")
         .then((text) => {
@@ -119,15 +117,15 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
             cy.get('[label="Message Type"] [placeholder="Select"]').click();
             cy.contains("General Communication").click();
             cy.get("textarea").type(randomText);
-            cy.get("footer .sc-dhKdcB")
+            cy.get("footer p").eq(0)
             .should("exist")
             .invoke("text")
             .then((text) => {
               const match = text.match(/Remaining Alerts:\s*(\d+)\/\d+/);
               if (!match) throw new Error(`Could not parse Remaining Alerts from text: "${text}"`);
               const remainingBefore = parseInt(match[1], 10);
-            workforceSelector.sendAlert().click();
-            cy.get('.sc-gJdVPJ').should("contain.text", "Alert was successfully sent!");
+            cy.get(workforceSelector.confirmSendAlertButton).click();
+            cy.get('h4').should("contain.text", "Alert was successfully sent!");
             cy.get('body').click(0, 0);
 
   
@@ -136,7 +134,7 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
             cy.contains("button p", "Send Alert").click();
             cy.wait(1000)
   
-            cy.get("footer .sc-dhKdcB")
+            cy.get("footer p").eq(0)
               .invoke("text")
               .then((updatedText) => {
                 const updatedMatch = updatedText.match(/Remaining Alerts:\s*(\d+)\/\d+/);
@@ -201,8 +199,8 @@ describe("Companies Alerts & SMS Communication Flow (UI + Twilio Integration)", 
         cy.get('[role="button"]').contains("Alert").click();
         const specialCharMessage = "!@#$%^&*()_+{}|:\"<>?-=[]\\;',./`~";
         cy.get("textarea").type(specialCharMessage);
-        workforceSelector.sendAlert().click();
-      cy.get('.sc-gJdVPJ').should("contain.text", "Alert was successfully sent!");
+        cy.get(workforceSelector.confirmSendAlertButton).click();
+      cy.get('h4').should("contain.text", "Alert was successfully sent!");
     });
 
     it('Validating sending alert without selecting a company', ()=>{

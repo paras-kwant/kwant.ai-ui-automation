@@ -18,12 +18,16 @@ describe("Companies Module - General Details", () => {
   });
 
   beforeEach(() => {
-    generalDetailsPage.resetPageState();
+
+    cy.cleanUI()
   });
+  
+
+
   
   it('Verify company details card is displayed correctly on clicking overflow menu', () => {
     generalDetailsPage.openFirstCompany();
-    generalDetailsPage.clickOverflowMenu();
+    generalDetailsPage.clickThreeDotMenu();
     generalDetailsPage.verifyEmailAndPhoneVisible();
   });
 
@@ -35,6 +39,7 @@ describe("Companies Module - General Details", () => {
   });
 
   it('Validate table values match General Details card', () => {
+    cy.wait(2000)
     const fieldsToCheck = [
       'E Mail',
       'Address',
@@ -47,7 +52,6 @@ describe("Companies Module - General Details", () => {
       'Company Color',
       'Company Banner'
     ];
-
     generalDetailsPage.validateTableMatchesDetails(fieldsToCheck);
   });
 
@@ -56,16 +60,12 @@ describe("Companies Module - General Details", () => {
     const newAddress = generateRandomWorldAddress();
 
     generalDetailsPage.openFirstCompany();
-    
     generalDetailsPage.updateEmail(newEmail);
     generalDetailsPage.updateAddress(newAddress);
-    
-    cy.log(`✅ Generated Email: ${newEmail}`);
-    cy.log(`✅ Generated Address: ${newAddress}`);
-
+    cy.log(`Generated Email: ${newEmail}`);
+    cy.log(`Generated Address: ${newAddress}`);
     generalDetailsPage.clickUpdate();
     generalDetailsPage.verifySuccessMessage('Company updated successfully');
-
     generalDetailsPage.openFirstCompany();
     generalDetailsPage.verifyFieldValue('E Mail', newEmail);
     generalDetailsPage.verifyFieldValue('Address', newAddress);

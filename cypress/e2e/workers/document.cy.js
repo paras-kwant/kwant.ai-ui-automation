@@ -2,7 +2,6 @@
 const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
-import "cypress-real-events/support";
 import workerHelper from '../../support/helper/workerHelper.js';
 
 describe("Worker Module - Documents Page", () => {
@@ -14,31 +13,32 @@ describe("Worker Module - Documents Page", () => {
   })
   
   beforeEach(() => {
+
     cy.cleanUI()
   });
 
   it("Verify the UI of the document", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
 
     cy.get("p").contains("Documents").should("be.visible");
     workforceSelector.AddCertificationButton().should("be.visible");
 
     const headers = ["Type", "Expiry Date", "Credential ID", "Actions"];
 
-    cy.get(".sc-dhKdcB.gqyqmk").then(($els) => {
+    cy.get(`[overflow="scroll"] ${workforceSelector.tableColumn}`).then(($els) => {
       const texts = [...$els].map((el) => el.innerText.trim());
       headers.forEach((header) => {
         expect(texts).to.include(header);
       });
     });
     
-    cy.get(".sc-YysOf").contains("Licences").click();
+    cy.get(workforceSelector.licencesTab).click();
     workforceSelector.AddLicenceButton().should("be.visible");
 
     const headerLicences = ["Type", "Expiry Date", "Credential ID", "Actions"];
 
-    cy.get(".sc-dhKdcB.gqyqmk").then(($els) => {
+    cy.get(`[overflow="scroll"] ${workforceSelector.tableColumn}`).then(($els) => {
       const texts = [...$els].map((el) => el.innerText.trim());
       headerLicences.forEach((header) => {
         expect(texts).to.include(header);
@@ -48,20 +48,24 @@ describe("Worker Module - Documents Page", () => {
 
   it("Validate the ui of the document form", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
-    workforceSelector.AddCertificationButton().click();
-    workforceSelector.submitButton().click()
+    cy.get(workforceSelector.documentPage).click();
+    cy.get(workforceSelector.addCertificationButton).click()
+    cy.get(workforceSelector.submitButton).click()
 
     cy.get('[type="error"]')
       .contains("A document name is required.")
       .should("be.visible");
-    cy.get(".sc-hzhJZQ.ejnGHX").should("have.attr", "disabled");
+      cy.contains('label', 'Expires In')
+      .parent()
+      .within(() => {
+        cy.get('input').should('be.disabled');
+      });
 
     cy.get('[placeholder="Issued Date"]').click();
     cy.get(".rmdp-today").first().click();
 
     cy.get('[name="expiresInPeriods"]').click();
-    cy.get(".sc-kdBSHD > :nth-child(2)").click();
+    cy.get('.select_item_container [role="button"]').eq(0).click()
 
     const daysToAdd = 3;
     cy.get('input[type="number"]').clear().type(daysToAdd.toString());
@@ -100,13 +104,13 @@ describe("Worker Module - Documents Page", () => {
 
   it("Verify that the 1st field (No. of Period) of 'Expires In' should not accept the decimal number.", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
 
     cy.get('[placeholder="Issued Date"]').click();
     cy.get(".rmdp-today").first().click();
     cy.get('[name="expiresInPeriods"]').click();
-    cy.get(".sc-kdBSHD > :nth-child(2)").click();
+    cy.get('.select_item_container [role="button"]').eq(0).click();
     cy.get('input[type="number"]').type("abcd");
     cy.get('input[type="number"]').should('have.value', '');
 
@@ -116,31 +120,31 @@ describe("Worker Module - Documents Page", () => {
 
   it("Verify that clicking on the 'X' on the 'Expires In' 2nd Field should remove the selected period.", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
 
     cy.get('[placeholder="Issued Date"]').click();
     cy.get(".rmdp-today").first().click();
     cy.get('[name="expiresInPeriods"]').click();
-    cy.get(".sc-kdBSHD > :nth-child(2)").click();
+    cy.get('.select_item_container [role="button"]').eq(0).click();
     cy.get('input[type="number"]').type("3");
     cy.get('input[type="number"]').should('have.value', '3');
     cy.get('[placeholder="Period(s)"]').click()
     cy.get('[placeholder="Period(s)"]').should('have.attr', 'value', 'Day(s)');
-    cy.get('.sc-hzhJZQ button').click()
+    cy.get('[placeholder="Period(s)"]').parent().find('button').click()
     cy.get('[placeholder="Period(s)"]').should('have.attr', 'value', '');
   });
 
   it('Verify that updating the worker details and adding the documents and then refreshing the page should redirect to the worker list page without saving.', () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
 
     cy.get('[placeholder="Issued Date"]').click();
     cy.get(".rmdp-today").first().click();
 
     cy.get('[name="expiresInPeriods"]').click();
-    cy.get(".sc-kdBSHD > :nth-child(2)").click();
+    cy.get('.select_item_container [role="button"]').eq(0).click();
 
     cy.get('input[type="number"]').type("3");
     cy.get('input[type="number"]').should('have.value', '3');
@@ -156,14 +160,14 @@ describe("Worker Module - Documents Page", () => {
 
   it("Verify that removing the 'Issued Date' should disable the 'Issued Date' but should not remove the populated 'Expiry Date'.", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
 
     cy.get('[placeholder="Issued Date"]').click();
     cy.get(".rmdp-today").first().click();
 
     cy.get('[name="expiresInPeriods"]').click();
-    cy.get(".sc-kdBSHD > :nth-child(2)").click();
+    cy.get('.select_item_container [role="button"]').eq(0).click();
 
     cy.get('input[type="number"]').type("3");
     cy.get('input[type="number"]').should('have.value', '3');
@@ -192,44 +196,46 @@ describe("Worker Module - Documents Page", () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
+
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.tableRow).contains(fullName).should('be.visible')
+      cy.get(workforceSelector.tableRow).eq(0).click({force:true})
+
+      cy.get(workforceSelector.documentPage).click();
 
       workforceSelector.AddCertificationButton().click();
-      cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType')
+      cy.selectRandomOption('[name="documentType"]', '.select_item_container [role="button"]', 'documentType')
       cy.get('[name="credentialId"]').type(credID);
 
       cy.get('[placeholder="Issued Date"]').click();
       cy.get(".rmdp-today").first().click();
       cy.get('[name="expiresInPeriods"]').click();
-      cy.get(".sc-kdBSHD > :nth-child(2)").click();
+      cy.get('.select_item_container [role="button"]').eq(0).click();
       cy.get('input[type="number"]').type("3");
 
       cy.get('[placeholder="Expiry Date"]')
         .invoke("val")
         .then((expiryDate) => {
           cy.fixture("file.pdf", "base64").then((fileContent) => {
-            cy.get(".sc-gObJpS").attachFile(
+            cy.get(workforceSelector.dragAndDrop).attachFile(
               { fileContent, fileName: "file.pdf", mimeType: "application/pdf" },
               { subjectType: "drag-n-drop" }
             );
           });
-          cy.get('iframe[src^="blob:https://uat.kwant.ai"]').should('be.visible')
+          cy.get('iframe[src^="blob:https://uat.kwant.ai"]').should('exist')
           cy.wait(1000)
 
-          cy.get("button > p").contains("Submit").click();
+          cy.get(workforceSelector.submitButton).click();
           cy.get(".cell-content")
             .contains(credID)
-            .closest(".sc-cRmqLi")
+            .closest(workforceSelector.documentTableRow)
             .within(() => {
               cy.contains(expiryDate).find('svg[fill="#DF4242"]').should("exist");
               cy.contains("p", "Expiry Date ends soon. Please upload new certificate.");
             });
         });
 
-      cy.get(".sc-jXbUNg.gDlPVv")
-        .eq(4)
+cy.get(workforceSelector.documentPage)
         .find('svg path[fill="#DF4242"]')
         .should("exist");
     });
@@ -245,41 +251,40 @@ describe("Worker Module - Documents Page", () => {
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.documentPage).click();
 
       workforceSelector.AddCertificationButton().click();
-      cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType')
+      cy.selectRandomOption('[name="documentType"]', '.select_item_container [role="button"]', 'documentType')
       cy.get('[placeholder="Issued Date"]').clear().type('11/12/2024')
       cy.get('[name="credentialId"]').type(credID);
 
       cy.get('[name="expiresInPeriods"]').click();
-      cy.get(".sc-kdBSHD > :nth-child(2)").click();
+      cy.get('.select_item_container [role="button"]').eq(0).click();
       cy.get('input[type="number"]').type("0");
 
       cy.get('[placeholder="Expiry Date"]')
         .invoke("val")
         .then((expiryDate) => {
           cy.fixture("file.pdf", "base64").then((fileContent) => {
-            cy.get(".sc-gObJpS").attachFile(
+            cy.get(workforceSelector.dragAndDrop).attachFile(
               { fileContent, fileName: "file.pdf", mimeType: "application/pdf" },
               { subjectType: "drag-n-drop" }
             );
           });
-          cy.get('iframe[src^="blob:https://uat.kwant.ai"]').should('be.visible')
+          cy.get('iframe[src^="blob:https://uat.kwant.ai"]').should('exist')
           cy.wait(1000)
 
-          cy.get("button > p").contains("Submit").click({ force: true });
+          cy.get(workforceSelector.submitButton).click();
           cy.get(".cell-content")
             .contains(credID)
-            .closest(".sc-cRmqLi")
+            .closest(workforceSelector.documentTableRow)
             .within(() => {
               cy.contains(expiryDate).find('svg[fill="#DF4242"]').should("exist");
               cy.contains("p", "Expiry Date has ended. Please upload new certificate.");
             });
         });
 
-      cy.get(".sc-jXbUNg.gDlPVv")
-        .eq(4)
+      cy.get(workforceSelector.documentPage)
         .find('svg path[fill="#DF4242"]')
         .should("exist");
     });
@@ -292,9 +297,9 @@ describe("Worker Module - Documents Page", () => {
 
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.documentPage).click();
 
-      cy.get(".sc-cRmqLi.bpifwg")
+      cy.get(workforceSelector.documentTableRow)
         .eq(0)
         .find(".cell-content")
         .eq(2)
@@ -303,13 +308,11 @@ describe("Worker Module - Documents Page", () => {
           const origCred = originalCred.trim();
           cy.log(`Original Credential ID: ${origCred}`);
 
-          cy.get(".sc-cRmqLi.bpifwg").eq(0).click();
+          cy.get(workforceSelector.documentTableRow).eq(0).click();
 
           cy.get('.hover-hoc-container__input__display-value')
             .eq(3)
-            .realHover()
             .find('svg')
-            .should('be.visible')
             .click({ force: true });
 
           cy.get('[placeholder="Select Expiry date"]')
@@ -326,13 +329,13 @@ describe("Worker Module - Documents Page", () => {
               cy.log(`Updated Expiry Date: ${updatedDate}`);
 
               cy.contains('button p', 'Update').click({});
-              workforceSelector.toastMessage().contains('Document updated successfully');
+              cy.get(workforceSelector.toastMessage).contains('Document updated successfully');
 
               cy.wait(2000);
 
               cy.get(".cell-content")
                 .contains(origCred)
-                .closest(".sc-cRmqLi")
+                .closest(workforceSelector.documentTableRow)
                 .within(() => {
                   cy.contains(updatedDate).find('svg[fill="#DF4242"]').should("not.exist");
                 });
@@ -348,9 +351,9 @@ describe("Worker Module - Documents Page", () => {
 
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.documentPage).click();
 
-      cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
+      cy.get(workforceSelector.documentTableRow)
         .eq(0)
         .find(".cell-content")
         .eq(2)
@@ -359,13 +362,11 @@ describe("Worker Module - Documents Page", () => {
           const origCred = originalCred.trim();
           cy.log(`Original Credential ID: ${origCred}`);
 
-          cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg").eq(0).click();
+          cy.get(workforceSelector.documentTableRow).eq(0).click();
 
           cy.get('.hover-hoc-container__input__display-value')
             .eq(3)
-            .realHover()
             .find('svg')
-            .should('be.visible')
             .click({ force: true });
 
           cy.get('[placeholder="Select Expiry date"]')
@@ -382,11 +383,11 @@ describe("Worker Module - Documents Page", () => {
               cy.log(`Updated Expiry Date: ${updatedDate}`);
 
               cy.contains('button p', 'Update').click({});
-              workforceSelector.toastMessage().contains('Document updated successfully');
+              cy.get(workforceSelector.toastMessage).contains('Document updated successfully');
 
               cy.wait(1000);
 
-              cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg").then($allRows => {
+              cy.get(workforceSelector.documentTableRow).then($allRows => {
                 let matchingIndex = -1;
                 $allRows.each((index, row) => {
                   const credId = Cypress.$(row).find('.cell-content').eq(2).text().trim();
@@ -398,12 +399,12 @@ describe("Worker Module - Documents Page", () => {
 
                 cy.log(`Found matching row at index: ${matchingIndex}`);
 
-                cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
+                cy.get(workforceSelector.documentTableRow)
                   .eq(matchingIndex)
                   .scrollIntoView()
                   .should('be.visible');
 
-                cy.get(".sc-cRmqLi.dEhqLz, .sc-cRmqLi.bpifwg")
+                cy.get(workforceSelector.documentTableRow)
                   .eq(matchingIndex)
                   .find('.cell-content')
                   .eq(1)
@@ -423,9 +424,9 @@ describe("Worker Module - Documents Page", () => {
 
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.documentPage).click();
 
-      cy.get(".sc-cRmqLi.dEhqLz")
+      cy.get(workforceSelector.documentTableRow)
         .eq(0)
         .find(".cell-content")
         .invoke("text")
@@ -433,34 +434,32 @@ describe("Worker Module - Documents Page", () => {
           const docText = documentName.trim();
           cy.log(`Deleting document: ${docText}`);
 
-          cy.get(".sc-cRmqLi.dEhqLz")
+          cy.get(workforceSelector.documentTableRow)
             .eq(0)
-            .find(".sc-jXbUNg.jnXMtv")
-            .eq(1)
-            .click();
+            .find('.table_td') 
+        .eq(4) 
+         .find('svg').eq(1).click(); 
 
           cy.contains("button p", "Delete").click({ force: true });
-          workforceSelector
-            .toastMessage()
+          cy.get(workforceSelector.toastMessage)
             .contains("Successfully deleted document.")
             .should("be.visible");
 
           cy.wait(2000)
           cy.get("body").then(($body) => {
-            const rows = $body.find(".sc-cRmqLi.bpifwg, .sc-cRmqLi.dEhqLz");
+            const rows = $body.find(workforceSelector.documentTableRow);
 
             if (rows.length > 0) {
               cy.log("🟡 Rows still exist — verifying document is deleted");
 
-              cy.get(".sc-cRmqLi.bpifwg .cell-content, .sc-cRmqLi.dEhqLz .cell-content")
+              cy.get( `${workforceSelector.documentTableRow} .cell-content`)
                 .should("not.contain.text", docText)
                 .then(() => {
                   const hasRedSvg = $body.find('.cell-content svg[fill="#DF4242"]').length > 0;
 
                   if (hasRedSvg) {
                     cy.log("🔴 Red SVG found — verifying lower icon exists");
-                    cy.get(".sc-jXbUNg.gDlPVv")
-                      .eq(4)
+                   cy.get(workforceSelector.documentPage)
                       .find('svg path[fill="#DF4242"]')
                       .should("exist");
                   } else {
@@ -469,8 +468,7 @@ describe("Worker Module - Documents Page", () => {
                 });
             } else {
               cy.log("✅ No rows exist — document list is empty (deletion confirmed)");
-              cy.get(".sc-jXbUNg.gDlPVv")
-                .eq(4)
+             cy.get(workforceSelector.documentPage)
                 .find('svg path[fill="#DF4242"]')
                 .should("not.exist");
             }
@@ -489,9 +487,9 @@ describe("Worker Module - Documents Page", () => {
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.documentPage).click();
 
-      cy.get(".sc-YysOf").contains("Licences").click();
+      cy.get(workforceSelector.licencesTab).click();
       workforceSelector.AddLicenceButton().click({ force: true });
       cy.get('[name="documentType"]').click();
       cy.get('[role="button"]').contains("Training").click();
@@ -505,24 +503,23 @@ describe("Worker Module - Documents Page", () => {
         .invoke("val")
         .then((expiryDate) => {
           cy.fixture("file.pdf", "base64").then((fileContent) => {
-            cy.get(".sc-gObJpS").attachFile(
+            cy.get(workforceSelector.dragAndDrop).attachFile(
               { fileContent, fileName: "file.pdf", mimeType: "application/pdf" },
               { subjectType: "drag-n-drop" }
             );
           });
 
-          cy.get("button > p").contains("Submit").click({ force: true });
+          cy.get(workforceSelector.submitButton).click();
 
           cy.get(".cell-content")
             .contains(credID)
-            .closest(".sc-cRmqLi.bpifwg, .sc-cRmqLi.dEhqLz")
+            .closest(workforceSelector.documentTableRow)
             .within(() => {
               cy.contains(expiryDate).find('svg[fill="#DF4242"]').should("exist");
             });
         });
       
-      cy.get(".sc-jXbUNg.gDlPVv")
-        .eq(4)
+      cy.get(workforceSelector.documentPage)
         .find('svg path[fill="#DF4242"]')
         .should("exist");
     });
@@ -535,11 +532,11 @@ describe("Worker Module - Documents Page", () => {
 
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.documentPage).click();
 
-      cy.get(".sc-YysOf").contains("Licences").click();
+      cy.get(workforceSelector.licencesTab).click();
 
-      cy.get(".sc-cRmqLi.bpifwg,.sc-cRmqLi.dEhqLz")
+      cy.get(workforceSelector.documentTableRow)
         .eq(0)
         .find(".cell-content")
         .invoke("text")
@@ -547,14 +544,13 @@ describe("Worker Module - Documents Page", () => {
           const docText = documentName.trim();
           cy.log(`document name: ${docText}`);
 
-          cy.get(".sc-cRmqLi.bpifwg, .sc-cRmqLi.dEhqLz")
-            .eq(0)
-            .find(".sc-jXbUNg.jnXMtv")
-            .eq(0)
-            .click();
+          cy.get(workforceSelector.documentTableRow) 
+          .eq(0)
+         .find('.table_td') 
+          .eq(4) //
+           .find('svg').eq(0).click(); 
 
-          workforceSelector
-            .toastMessage()
+           cy.get(workforceSelector.toastMessage)
             .contains("Renewal request sent successfully")
             .should("be.visible");
 
@@ -599,15 +595,14 @@ describe("Worker Module - Documents Page", () => {
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.documentPage).click();
 
-      cy.get(".sc-jXbUNg.gDlPVv")
-        .eq(4)
+      cy.get(workforceSelector.documentPage)
         .find('svg path[fill="#DF4242"]')
         .should("exist");
-      cy.get(".sc-YysOf").contains("Licences").click();
+      cy.get(workforceSelector.licencesTab).click();
 
-      cy.get(".sc-cRmqLi.bpifwg, .sc-cRmqLi.dEhqLz")
+      cy.get(workforceSelector.documentTableRow)
         .eq(0)
         .find(".cell-content")
         .invoke("text")
@@ -615,24 +610,23 @@ describe("Worker Module - Documents Page", () => {
           const docText = documentName.trim();
           cy.log(`Deleting document: ${docText}`);
 
-          cy.get(".sc-cRmqLi.bpifwg, .sc-cRmqLi.dEhqLz")
-            .eq(0)
-            .find(".sc-jXbUNg.jnXMtv")
-            .eq(1)
-            .click();
+          cy.get(workforceSelector.documentTableRow) 
+          .eq(0)
+         .find('.table_td') 
+          .eq(4)
+           .find('svg').eq(1).click(); 
 
           cy.contains("button p", "Delete").click({ force: true });
-          workforceSelector
-            .toastMessage()
+          cy.get(workforceSelector.toastMessage)
             .contains("Successfully deleted document.")
             .should("be.visible");
 
           cy.wait(2000);
 
           cy.get("body").then(($body) => {
-            const rows = $body.find(".sc-cRmqLi.bpifwg");
+            const rows = $body.find(workforceSelector.documentTableRow);
             if (rows.length > 0) {
-              cy.get(".sc-cRmqLi.bpifwg .cell-content").should(
+              cy.get(`${workforceSelector.documentTableRow} .cell-content`).should(
                 "not.contain.text",
                 docText
               );
@@ -644,13 +638,11 @@ describe("Worker Module - Documents Page", () => {
                   cy.log(
                     "🔴 Red SVG found in .cell-content — verifying lower one exists"
                   );
-                  cy.get(".sc-jXbUNg.gDlPVv")
-                    .eq(4)
+                 cy.get(workforceSelector.documentPage)
                     .find('svg path[fill="#DF4242"]')
                     .should("exist");
                 } else {
-                  cy.get(".sc-jXbUNg.gDlPVv")
-                    .eq(4)
+                  cy.get(workforceSelector.documentPage)
                     .find('svg path[fill="#DF4242"]')
                     .should("not.exist");
                 }
@@ -674,31 +666,29 @@ describe("Worker Module - Documents Page", () => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
       cy.get(workforceSelector.searchInput).clear().type(fullName);
-      cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.DocumentsPage().click();
+      cy.get(workforceSelector.tableRow).contains(fullName).should('be.visible')
+      cy.get(workforceSelector.tableRow).click({ force: true });
+      cy.get(workforceSelector.documentPage).click();
 
       workforceSelector.AddCertificationButton().click();
-      cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType')
       cy.get('[name="credentialId"]').type(credID);
 
       cy.get('[placeholder="Issued Date"]').click();
       cy.get(".rmdp-today").first().click();
       cy.get('[name="expiresInPeriods"]').click();
-      cy.get(".sc-kdBSHD > :nth-child(2)").click();
+      cy.get('.select_item_container [role="button"]').eq(0).click();
       cy.get('input[type="number"]').type("3");
 
       cy.get('[placeholder="Expiry Date"]')
         .invoke("val")
         .then((expiryDate) => {
           cy.fixture("backup.csv", "base64").then((fileContent) => {
-            cy.get(".sc-gObJpS").attachFile(
+            cy.get(workforceSelector.dragAndDrop).attachFile(
               { fileContent, fileName: "backup.csv", mimeType: "text/csv" },
               { subjectType: "drag-n-drop" }
             );
           });
-
-          cy.get("button > p").contains("Submit").click({ force: true });
-          workforceSelector.toastMessage().should("contain", "File type unsupported");
+          cy.get(workforceSelector.toastMessage).should("contain", "File type unsupported");
         });
     });
   });
@@ -706,7 +696,7 @@ describe("Worker Module - Documents Page", () => {
   it("Should not allow adding document which expire date is already done", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
 
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
 
     cy.get('[placeholder="Expiry Date"]').click();
@@ -726,7 +716,7 @@ describe("Worker Module - Documents Page", () => {
   it("Should not allow adding document which expire date is older than issued date", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
 
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
 
     workforceSelector.AddCertificationButton().click();
 
@@ -749,17 +739,17 @@ describe("Worker Module - Documents Page", () => {
 
   it("Should auto-calculate expiry date when Expires In is set", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
 
-    cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType');
+    cy.selectRandomOption('[name="documentType"]', '.select_item_container [role="button"]', 'documentType')
     cy.get('[name="credentialId"]').type("TEST123456");
 
     cy.get('[placeholder="Issued Date"]').click();
     cy.get(".rmdp-today").first().click();
 
     cy.get('[name="expiresInPeriods"]').click();
-    cy.get(".sc-kdBSHD").contains("Day(s)").click();
+    cy.get('.select_item_container [role="button"]').contains("Day(s)").click();
     cy.get('input[type="number"]').clear({ force: true }).type("90");
 
     cy.get('[placeholder="Issued Date"]').invoke("val").then((issued) => {
@@ -785,11 +775,11 @@ describe("Worker Module - Documents Page", () => {
     ).join("");
 
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
+    cy.get(workforceSelector.documentPage).click();
 
     cy.get("body").then(($body) => {
       workforceSelector.AddCertificationButton().click();
-      cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType');
+      cy.selectRandomOption('[name="documentType"]', '.select_item_container [role="button"]', 'documentType')
       cy.get('[name="credentialId"]').type(credID);
       cy.get('[placeholder="Issued Date"]').click();
       cy.get(".rmdp-today").first().click();
@@ -802,18 +792,20 @@ describe("Worker Module - Documents Page", () => {
 
   
   it("Download uploaded document - validate downloaded file name", () => {
-    cy.get(workforceSelector.tableRow)
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.get(workforceSelector.tableRow).contains(fullName).should('be.visible')
+      cy.get(workforceSelector.tableRow).click({ force: true });
+  
+    cy.get(workforceSelector.documentPage).click();
+  
+    cy.get(workforceSelector.documentTableRow)
       .eq(0)
       .click({ force: true });
   
-    workforceSelector.DocumentsPage().click();
-  
-    cy.get('.sc-cRmqLi.bpifwg')
-      .eq(0)
-      .click({ force: true });
-  
-    // Find img inside .sc-fvtFIe container
-    cy.get('.sc-fvtFIe iframe', { timeout: 30000 })
+      cy.get('iframe', { timeout: 30000 })
       .filter('[src*="s3"], [src*="cloudfront"]')
       .should('have.length.greaterThan', 0)
       .first()
@@ -821,14 +813,11 @@ describe("Worker Module - Documents Page", () => {
       .then((src) => {
         const fileName = decodeURIComponent(src.split('/').pop());
         cy.log(`Expected filename from URL: ${fileName}`);
-  
-        cy.get('.sc-aXZVg.liAmio button')
-          .eq(0)
-          .click({ force: true });
-  
-        cy.contains('p', 'Download')
-          .should('be.visible')
-          .click();
+		cy.get('.sc-aXZVg.cjAzbF button')
+  .eq(0)
+  .scrollIntoView()  // scrolls vertically to bring it into view
+  .click();  
+  cy.get('p').contains('Download').click()
   
         const downloadsFolder = Cypress.config('downloadsFolder');
         const filePath = path.join(downloadsFolder, fileName);
@@ -836,27 +825,30 @@ describe("Worker Module - Documents Page", () => {
         cy.readFile(filePath, { timeout: 20000 }).should('exist');
       });
   });
+})
 
   it("Editing the existing document and add a jpeg document", () => {
-
-    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.DocumentsPage().click();
-    cy.get('.sc-cRmqLi.bpifwg').eq(0).click();
-    cy.get('.sc-aXZVg.liAmio button svg').eq(0).click();
-    cy.get('button p').contains('Remove').click()
+    cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
+      const { firstName, lastName } = workerData;
+      const fullName = `${firstName} ${lastName}`;
+      cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.get(workforceSelector.tableRow).contains(fullName).should('be.visible')
+      cy.get(workforceSelector.tableRow).click({ force: true });
+    cy.get(workforceSelector.documentPage).click();
+    cy.get(workforceSelector.documentTableRow).eq(0).click();
+    cy.get(workforceSelector.removeButton).click()
     cy.fixture("document.jpg", "base64").then((fileContent) => {
-      cy.get(".sc-gObJpS").attachFile(
+      cy.get(workforceSelector.dragAndDrop).attachFile(
         { fileContent, fileName: "document.jpg", mimeType: "image/jpeg" },
         { subjectType: "drag-n-drop" }
       );
     });
     cy.get('img[src^="blob:https://uat.kwant.ai"]')
-    .scrollIntoView()
-    .should('be.visible')
-  
+      .scrollIntoView()
 
 
 
   });
+})
 
 });

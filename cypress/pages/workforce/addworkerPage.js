@@ -29,7 +29,7 @@ class addworkerPage {
     return workerData; 
   }
 
-  fillPersonalDetails({ phone = '9779868757376', email = 'paras+45@kwant.ai', address = 'Kathmandu', zipcode = '44600', dob = '01/01/2001' } = {}) {
+  fillPersonalDetails({ phone = '9876543210', email = 'paras+45@kwant.ai', address = 'Kathmandu', zipcode = '44600', dob = '01/01/2001' } = {}) {
     addWorkerSelector.addMoreDetail().click();
     addWorkerSelector.phoneInput().type(phone);
     addWorkerSelector.emailInput().type(email);
@@ -39,9 +39,7 @@ class addworkerPage {
   }
 
   assertToastMessage(expectedText) {
-    addWorkerSelector.toastMessage()
-      .should('be.visible')
-      .and('contain.text', expectedText);
+    cy.get(workforceSelector.toastMessage).contains(expectedText).should('be.visible');
   }
 
   fillWorkerName(workerData) {
@@ -67,11 +65,14 @@ class addworkerPage {
 
   submitWorker() {
     addWorkerSelector.submitWorkerButton().click();
-    addWorkerSelector.toastMessage()
-    .should('be.visible')
-    .and('contain.text', ' Successfully added employee.').should('be.visible'); 
+    cy.get(workforceSelector.toastMessage).contains('Successfully added worker').should('be.visible'); 
   }
 
+
+
+captureSaveWorkerRequest(){
+  
+}
 }
 
 

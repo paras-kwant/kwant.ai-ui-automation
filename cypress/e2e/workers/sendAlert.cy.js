@@ -26,13 +26,12 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
 
       cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
       cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.contains("button p", "Send Alert").click();
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.contains("General Communication").click();
       cy.get("textarea").type(Math.random().toString(36).substring(2, 12));
-      workforceSelector.sendAlert().click();
-      workforceSelector
-        .toastMessage()
+      cy.get(workforceSelector.sendAlertButton).click()
+      cy.get(workforceSelector.toastMessage)
         .should(
           "contain.text",
           "None of the selected worker(s) have phone number added or no SMS consent provided."
@@ -51,40 +50,40 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.wait(2000);
   
       cy.get(workforceSelector.tableRow).first().click({ force: true });
-      workforceSelector.personalDetails().click();
+      cy.get(workforceSelector.personalDetailsPage).click();
       cy.getWorkerField("Phone").click();
 
       cy.get('[name="phone"]').clear().type(Cypress.env("TWILIO_NUMBER"));
 
       
       cy.get("button p").contains("Update").click();
-      cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated employee.");
+      cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated worker");
       cy.get("button p").contains("Cancel").click();
   
           cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-          cy.get(workforceSelector.overflowMenu).click();
-          cy.contains(".dropdown-option", "Send Alert").click();
+          cy.contains("button p", "Send Alert").click();
           
           cy.get('[label="Message Type"] [placeholder="Select"]').click();
           cy.contains("General Communication").click();
           cy.get("textarea").type(randomText);
-          cy.get("footer .sc-dhKdcB")
+          cy.get("footer p").contains('/')
           .should("exist")
           .invoke("text")
           .then((text) => {
             const match = text.match(/Remaining Alerts:\s*(\d+)\/\d+/);
             if (!match) throw new Error(`Could not parse Remaining Alerts from text: "${text}"`);
             const remainingBefore = parseInt(match[1], 10);
-          workforceSelector.sendAlert().click();
-          workforceSelector.toastMessage().should("contain.text", "Alert sent to 1 worker(s).");
+            cy.get(workforceSelector.sendAlertButton).click()
+          cy.get(workforceSelector.toastMessage).should("contain.text", "Alert sent to 1 worker(s).");
           cy.get('button p').contains('Done').click();
 
 
           cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-          cy.get(workforceSelector.overflowMenu).click();
-          cy.contains(".dropdown-option", "Send Alert").click();
+          cy.get('button p').contains('Send Alert').click()
+          cy.wait(1000)
 
-          cy.get("footer .sc-dhKdcB")
+
+          cy.get("footer p").contains('/')
             .invoke("text")
             .then((updatedText) => {
               const updatedMatch = updatedText.match(/Remaining Alerts:\s*(\d+)\/\d+/);
@@ -150,14 +149,14 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.get(workforceSelector.tableRow).first().should("be.visible");
 
       cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-      cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.contains("button p", "Send Alert").click();
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.get('[role="button"]').contains("Alert").click();
       const specialCharMessage = "!@#$%^&*()_+{}|:\"<>?-=[]\\;',./`~";
       cy.get("textarea").type(specialCharMessage);
-      workforceSelector.sendAlert().click();
-      workforceSelector.toastMessage().should("contain.text", "Alert sent to 1 worker(s).");
+      cy.get(workforceSelector.sendAlertButton).click()
+
+     cy.get(workforceSelector.toastMessage).should("contain.text", "Alert sent to 1 worker(s).");
     });
   });
 
@@ -169,15 +168,15 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.get(workforceSelector.tableRow).first().should("be.visible");
 
       cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-      cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.contains("button p", "Send Alert").click();
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.get('[role="button"]').contains("Alert").click();
       cy.get('[placeholder="Select Template"]').click();
-      cy.get(".sc-kdBSHD > :nth-child(2)").click();
+      cy.get('body').should('be.visible')
+      cy.get('[role="button"]').contains('Hello everyone').click();
       cy.get("textarea").invoke("val").should("have.length.greaterThan", 0);
-      workforceSelector.sendAlert().click();
-      workforceSelector.toastMessage().should("contain.text", "Alert sent to 1 worker(s).");
+      cy.get(workforceSelector.sendAlertButton).click()
+     cy.get(workforceSelector.toastMessage).should("contain.text", "Alert sent to 1 worker(s).");
     });
   });
 
@@ -189,12 +188,11 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.get(workforceSelector.tableRow).first().should("be.visible");
 
       cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-      cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.contains("button p", "Send Alert").click();
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.get('[role="button"]').contains("Alert").click();
       cy.get('[placeholder="Select Template"]').click();
-      cy.get(".sc-kdBSHD > :nth-child(2)").click();
+      cy.get('[role="button"]').contains("Hello everyone").click();
       cy.get('[placeholder="Select Template"]')
         .invoke("val")
         .then((text) => {
@@ -216,8 +214,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.wait(2000);
 
       cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-      cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.contains("button p", "Send Alert").click();
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.get('[role="button"]').contains("Alert").click();
       cy.get("textarea").type(Math.random().toString(36).substring(2, 12));
@@ -238,16 +235,15 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.wait(2000);
 
       cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-      cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.contains("button p", "Send Alert").click();
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.contains("General Communication").click();
       cy.get("textarea").type(alertMessage);
-      workforceSelector.sendAlert().click();
-      workforceSelector.toastMessage().should("contain.text", "Alert sent to 1 worker(s).");
+      cy.get(workforceSelector.sendAlertButton).click()
+     cy.get(workforceSelector.toastMessage).should("contain.text", "Alert sent to 1 worker(s).");
 
       cy.get("button p").contains("View Alerts History").click();
-      workforceSelector.toastMessage().contains("Alert report downloaded successfully.").should("be.visible");
+     cy.get(workforceSelector.toastMessage).contains("Alert report downloaded successfully.").should("be.visible");
       cy.wait(3000);
 
       cy.task("getLatestDownloadedFile", {
@@ -271,8 +267,10 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
   it("Sending Alert to Onsite Worker and Verifying Inbound SMS via Twilio", () => {
     const randomText = Math.random().toString(36).substring(2, 12);
   
-    cy.contains(".sc-fremEr", "Site Status").scrollIntoView().find("svg").click();
-    cy.get(".sc-eldPxv.bVwlNE").contains("On-site").click();
+    cy.contains(workforceSelector.tableColumn, "Site Status").scrollIntoView().find(".table-header-filter-btn").click();
+    cy.get('body').should('be.visible')
+    cy.get('[type="onDropdown"]').contains("On-site").click();
+
     cy.get('.default__label').contains("Site Status: 1").should('be.visible')
     cy.wait(5000)
   
@@ -281,21 +279,21 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
         cy.log("No onsite workers available for testing.");
       } else {
         cy.get(workforceSelector.tableRow).first().click({ force: true });
-        workforceSelector.personalDetails().click();
+        cy.get(workforceSelector.personalDetailsPage).click();
         cy.getWorkerField("Phone").click();
         cy.get('[name="phone"]').clear().type(Cypress.env("TWILIO_NUMBER"));
         cy.get("button p").contains("Update").click();
-        cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated employee.");
+        cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated worker");
         cy.get("button p").contains("Cancel").click();
-        cy.get(workforceSelector.overflowMenu).click();
-        cy.contains(".dropdown-option", "Send Alert").click();
+        cy.contains("button p", "Send Alert").click();
 
 
         cy.get('[label="Message Type"] [placeholder="Select"]').click();
         cy.contains("General Communication").click();
         cy.get("textarea").type(randomText);
         
-        workforceSelector.sendAlert().click();
+        cy.get(workforceSelector.sendAlertButton).click()
+
         cy.get(workforceSelector.toastMessage).contains("Alert sent to").should("be.visible");
   
         const twilioNumber = Cypress.env("TWILIO_NUMBER");
@@ -360,8 +358,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
         .eq(0)
         .check({ force: true });
   
-      cy.get(workforceSelector.overflowMenu).click();
-      cy.contains(".dropdown-option", "Send Alert").click();
+      cy.contains("button p", "Send Alert").click();
   
       cy.get('[label="Message Type"] [placeholder="Select"]').click();
       cy.contains("General Communication").click();
@@ -391,27 +388,33 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
             .first()
             .check({ force: true });
   
-          cy.get(workforceSelector.overflowMenu).click();
-          cy.contains(".dropdown-option", "Send Alert").click();
+          cy.contains("button p", "Send Alert").click();
   
           cy.get('[label="Message Type"] [placeholder="Select"]').click();
           cy.contains("General Communication").click();
   
-          cy.get(".sc-dhKdcB.fOBBgu.sc-ijanKN.edANdR")
-            .invoke("text")
-            .then((text) => {
-              const maxLength = Number(text.split("/")[1]);
-  
-              cy.log(`Max allowed characters: ${maxLength}`);
-  
-              const overLimitMessage = "A".repeat(maxLength + 10);
-  
-              cy.get("textarea")
-                .clear()
-                .type(overLimitMessage)
-                .invoke("val")
-                .should("have.length", maxLength);
-            });
+          cy.get("section p")
+  .contains("/").eq(0)
+  .invoke("text")
+  .then((text) => {
+    cy.log(`Raw counter text: "${text}"`);
+
+    const match = text.match(/\/\s*(\d+)/);
+
+    expect(match, "Character limit should exist").to.not.be.null;
+
+    const maxLength = Number(match[1]);
+    cy.log(`Max allowed characters: ${maxLength}`);
+
+    const overLimitMessage = "A".repeat(maxLength + 10);
+
+    cy.get("textarea")
+      .clear()
+      .type(overLimitMessage, { delay: 0 })
+      .invoke("val")
+      .should("have.length", maxLength);
+  });
+
         }
       );
     }

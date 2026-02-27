@@ -22,7 +22,7 @@ describe("Worker Module - Personal Details Page", () => {
 
   it("Verify the UI of the Job Details drawer", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.jobDetails().click();
+       cy.get(workforceSelector.jobDetailsPage).click();
 
     cy.get("p").contains("Job Details").should("be.visible");
 
@@ -65,7 +65,7 @@ indicesToHover.forEach((i) => {
   });
   it("should allow editing and saving of all editable Job Details fields", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.jobDetails().click();
+       cy.get(workforceSelector.jobDetailsPage).click();
     cy.wait(1000);
   
     // Step 2: Edit Job Title
@@ -90,7 +90,7 @@ indicesToHover.forEach((i) => {
   
     cy.get('[placeholder="Select Worker Role"]').first().click();
   
-    cy.get('.sc-tagGq[role="button"]').then(($buttons) => {
+    cy.get('.select_item_container [role="button"]').then(($buttons) => {
       const randomIndex = Cypress._.random(0, $buttons.length - 1);
       const $randomButton = $buttons.eq(randomIndex);
       const workerRole = $randomButton.text().trim();
@@ -118,17 +118,15 @@ indicesToHover.forEach((i) => {
   
         // Step 6: Save updates
         cy.contains('button p', 'Update').click();
-        workforceSelector.toastMessage().should('contain', 'Successfully updated employee.');
+        cy.get(workforceSelector.toastMessage).contains('Successfully updated worker.');
   
         cy.wait(1500);
   
-        // Step 7: Reopen Job Details drawer to verify update persisted
         cy.contains('button p', 'Cancel').click();
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-        workforceSelector.jobDetails().click();
+           cy.get(workforceSelector.jobDetailsPage).click();
         cy.wait(1000);
   
-        // Step 8: Assert the value was correctly saved
         cy.get('.hover-hoc-container__input__display-value')
           .eq(0)
           .invoke('text')
@@ -146,7 +144,6 @@ indicesToHover.forEach((i) => {
     cy.get(workforceSelector.tableRow)
       .eq(0)
       .within(() => {
-        // Step 1: get worker name text
         cy.get('.personal-info-content__title')
           .invoke('text')
           .then((text) => {
@@ -157,14 +154,13 @@ indicesToHover.forEach((i) => {
         cy.get('.personal-info-content__title').click({ force: true });
       });
   
-    workforceSelector.jobDetails().click({ force: true });
+    cy.get(workforceSelector.jobDetailsPage).click({ force: true });
   
-    // Step 4: click info icon
-    cy.get('.sc-kSRfVL.htHbwd button').click({ force: true });
+    cy.get("header button").eq(0).click({ force: true });
   
 
     cy.get('@workerName').then((name) => {
-      cy.get('.sc-dhKdcB.iJWWrH')
+      cy.get('p')
         .contains(name)
         .should('be.visible');
     });

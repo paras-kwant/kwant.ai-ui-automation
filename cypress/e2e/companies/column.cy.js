@@ -24,17 +24,14 @@ describe("Companies Module - column", () => {
           cy.contains('button p', 'Save').click();
         } else {
           cy.log('Email column already OFF');
-          cy.get('.sc-krNlru svg').click();
+          cy.get('header button').click();
         }
       });
   });
-  beforeEach(()=>{
-    cy.get('body').then($body => {
-        if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
-          cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
-        }
-  })
-})
+  beforeEach(() => {
+
+    cy.cleanUI()
+  });
 beforeEach(() => {
   cy.get('.sc-kOPcWz').should('not.exist');
 
@@ -52,14 +49,13 @@ beforeEach(() => {
   
     cy.contains('button p', 'Save').click();
   
-    cy.get('.sc-kOPcWz')
+    cy.get(workforceSelector.toastMessage)
       .should('be.visible')
       .and('contain.text', 'Column settings updated successfully');  
     cy.get(workforceSelector.tableColumn)
       .contains('E Mail')
       .should('exist');
 
-    //disabling the email once again
 
     cy.get('.icon-button button').eq(0).click();
     cy.get('[data-rbd-draggable-id="email"] input[type="checkbox"]')
@@ -73,7 +69,7 @@ beforeEach(() => {
     cy.get('button p').contains('Add New Column').click()
     cy.get('[placeholder="Add Field Name"]').should('be.visible')
     cy.get('[placeholder="Select"]').click()
-    cy.get('div[role="button"].sc-tagGq')
+    cy.get('.select_item_container [role="button"]')
   .should('have.length', 5)
   .each(($el) => {
     expect($el.text().trim()).to.be.oneOf([
@@ -233,7 +229,7 @@ it('Validate drag and drop column feature', () => {
       cy.wait(1000);
       cy.get(workforceSelector.saveButton).click()
 
-      cy.get('.sc-gwZKzw').eq(6).invoke('text').then((text) => {
+      cy.get(workforceSelector.tableColumn).eq(7).invoke('text').then((text) => {
         expect(text.trim()).to.eq(draggableColumn.trim());
       })
   });
@@ -283,5 +279,6 @@ it('Verify horizontal scroll availability based on number of table columns',
     });
   }
 );
+
 
 })

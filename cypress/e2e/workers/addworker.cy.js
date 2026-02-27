@@ -32,7 +32,7 @@ describe("Worker Module - Add Worker Tests", () => {
     const workerData = generateWorkerData();
     addworkerPage.uploadProfileImage('profile.png');
     addWorkerSelector.lastNameInput().type(workerData.lastName);
-    cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
+    cy.selectRandomOption('input[name="company"]', '.select_item_container [role="button"]', 'company');
     addworkerPage.verifyMandatoryButtonsAreDisabled();
   });
 
@@ -40,7 +40,7 @@ describe("Worker Module - Add Worker Tests", () => {
     const workerData = generateWorkerData();
     addworkerPage.uploadProfileImage('profile.png');
     workforceSelector.firstNameInput().type(workerData.firstName);
-    cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
+    cy.selectRandomOption('input[name="company"]', '.select_item_container [role="button"]', 'company');
     addworkerPage.verifyMandatoryButtonsAreDisabled();
   });
 
@@ -52,10 +52,29 @@ describe("Worker Module - Add Worker Tests", () => {
     addworkerPage.verifyMandatoryButtonsAreDisabled();
   });
 
+  it('Should Validate Retake Picture Functionlity', ()=>{
+    addWorkerSelector.profileImageUploadButton().click();
+    addWorkerSelector.takeAPictureButton().click();
+    cy.get('video.video_viewer').should('be.visible')
+    cy.get(workforceSelector.captureButton).click()
+    cy.wait(3000)
+    cy.get('video.video_viewer').should('not.exist')
+    cy.get('.retake_container p').contains('Retake Picture').should('be.visible').click()
+    cy.get('video.video_viewer').should('be.visible')
+  })
+
+  it('Validate the Back button functionlity while clicking picture', ()=>{
+    addWorkerSelector.profileImageUploadButton().click();
+    addWorkerSelector.takeAPictureButton().click();
+    cy.get('video.video_viewer').should('be.visible')
+    cy.get(workforceSelector.backButton).click()
+    cy.get('video.video_viewer').should('not.exist')
+  })
+
   it('Should validate email format', () => {
     const workerData = generateWorkerData(); 
     addworkerPage.fillWorkerName(workerData);
-    cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
+    cy.selectRandomOption('input[name="company"]', '.select_item_container [role="button"]', 'company');
     addWorkerSelector.addMoreDetail().click();
     addWorkerSelector.emailInput().type('paras@asdasdsa');
     addWorkerSelector.addMoreDetail().click();
@@ -82,9 +101,12 @@ describe("Worker Module - Add Worker Tests", () => {
   it('Should add worker with only mandatory fields', () => {
 
     let workerId;
+    let requestPayload;
     let authHeaders = {};
   
     cy.intercept('POST', '/api/worker/save', (req) => {
+      requestPayload = req.body;
+
       authHeaders = {
         'x-auth-token': req.headers['x-auth-token'],
         'x-auth-project': req.headers['x-auth-project'],
@@ -96,156 +118,293 @@ describe("Worker Module - Add Worker Tests", () => {
   
     cy.selectRandomOption(
       'input[name="company"]',
-      '.sc-tagGq[role="button"]',
+      '.select_item_container [role="button"]',
       'company'
     );
   
     addworkerPage.submitWorker();
+
+    cy.wait('@addedworker').then(({ response }) => {
+      expect(response.statusCode).to.eq(200);
+    
+      workerId = response.body.id || response.body.data?.id;
+      expect(workerId).to.exist;
+    
+      const savedWorker = response.body.data || response.body;
+      const responseString = JSON.stringify(savedWorker);
+    
+      cy.log('**Validating Request Payload**');
+      cy.log(JSON.stringify(requestPayload, null, 2));
+    
+      const validationResults = [];
+    
+      Object.entries(requestPayload).forEach(([key, value]) => {
+        if (
+          value !== null &&
+          value !== undefined &&
+          value !== '' &&
+          typeof value !== 'object'
+        ) {
+          const valueStr = String(value).trim();
+          const exists = responseString.includes(valueStr);
+          
+          validationResults.push({
+            key,
+            value: valueStr,
+            exists
+          });
+    
+          if (exists) {
+            cy.log(`✅ ${key}: "${valueStr}" - FOUND`);
+          } else {
+            cy.log(`❌ ${key}: "${valueStr}" - NOT FOUND`);
+          }
+    
+          expect(exists, `Payload field "${key}" with value "${valueStr}" should exist in response`).to.be.true;
+        }
+      });
+    
+      const passed = validationResults.filter(r => r.exists).length;
+      const failed = validationResults.filter(r => !r.exists).length;
+      cy.log(`**Validation Summary: ${passed} passed, ${failed} failed**`);
+    });
+
+    cy.contains(workerData.firstName).should('be.visible');
+    cy.contains(workerData.lastName).should('be.visible');
   
     cy.writeFile('cypress/fixtures/noEmailWorker.json', workerData);
   
-    // cy.wait('@addedworker').then(({ response }) => {
-    //   workerId = response.body.id; // ✅ THIS
-    //   expect(workerId, 'worker id').to.exist;
-    //   expect(authHeaders['x-auth-token']).to.exist;
-    // });
-
-    // cy.then(() => {
-    //   cy.request({
-    //     method: 'POST',
-    //     url: '/api/worker/bulkdelete',
-    //     headers: authHeaders,
-    //     body: {
-    //       workersId: [workerId],
-    //     },
-    //   }).then((res) => {
-    //     expect(res.status).to.be.oneOf([200, 204]);
-    //   });
-    // });
   
   });
   
   
 
   it('Should add worker with profile picture', () => {
+
+    let workerId;
+    let requestPayload;
+    let authHeaders = {};
+  
+    cy.intercept('POST', '/api/worker/save', (req) => {
+      requestPayload = req.body;
+
+      authHeaders = {
+        'x-auth-token': req.headers['x-auth-token'],
+        'x-auth-project': req.headers['x-auth-project'],
+      };
+    }).as('addedworker');
+
     const workerData = generateWorkerData();
     addworkerPage.uploadProfileImage('profile.png');
     addWorkerSelector.firstNameInput().type(workerData.firstName);
     addWorkerSelector.lastNameInput().type(workerData.lastName);
-    cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
+    cy.selectRandomOption('input[name="company"]', '.select_item_container [role="button"]', 'company');
     addWorkerSelector.addMoreDetail().click();
     cy.get('p').contains('Personal Details').scrollIntoView().should('be.visible');
     addWorkerSelector.emailInput().type('paras+45@kwant.ai');
-    workforceSelector.AccessControl().click()
-    cy.selectRandomOption('[name="projectBeaconSerialNumber"]', '.sc-tagGq[role="button"]', 'device');
+    cy.get(workforceSelector.accessControlPage).click()
+    cy.selectRandomOption('[name="projectBeaconSerialNumber"]', '.select_item_container [role="button"]', 'device');
     addworkerPage.submitWorker();
+
+    cy.wait('@addedworker').then(({ response }) => {
+      expect(response.statusCode).to.eq(200);
+    
+      workerId = response.body.id || response.body.data?.id;
+      expect(workerId).to.exist;
+    
+      const savedWorker = response.body.data || response.body;
+      const responseString = JSON.stringify(savedWorker);
+    
+      cy.log('**Validating Request Payload**');
+      cy.log(JSON.stringify(requestPayload, null, 2));
+    
+      const validationResults = [];
+    
+      Object.entries(requestPayload).forEach(([key, value]) => {
+        if (
+          value !== null &&
+          value !== undefined &&
+          value !== '' &&
+          typeof value !== 'object'
+        ) {
+          const valueStr = String(value).trim();
+          const exists = responseString.includes(valueStr);
+          
+          validationResults.push({
+            key,
+            value: valueStr,
+            exists
+          });
+    
+          if (exists) {
+            cy.log(`✅ ${key}: "${valueStr}" - FOUND`);
+          } else {
+            cy.log(`❌ ${key}: "${valueStr}" - NOT FOUND`);
+          }
+    
+          expect(exists, `Payload field "${key}" with value "${valueStr}" should exist in response`).to.be.true;
+        }
+      });
+    
+      const passed = validationResults.filter(r => r.exists).length;
+      const failed = validationResults.filter(r => !r.exists).length;
+      cy.log(`**Validation Summary: ${passed} passed, ${failed} failed**`);
+    });
+
+    cy.contains(workerData.firstName).should('be.visible');
+    cy.contains(workerData.lastName).should('be.visible');
   });
 
   it('Should capture worker photo via camera', () => {   
     addWorkerSelector.profileImageUploadButton().click();
     addWorkerSelector.takeAPictureButton().click();
     cy.get('.video_viewer').should('be.visible')
-    cy.wait(1000)
-    addWorkerSelector.clickPictureButton().click();
-    addWorkerSelector.submitPhotoButton().click();
+    cy.wait(2000)
+    cy.get(workforceSelector.captureButton).click()
+    cy.get(workforceSelector.submitPhotoButton).click()
     cy.get('.upload-avatar img')
     .should('have.attr', 'src')
     .and('match', /^blob:/); 
   });
 
   it('Should add worker with all fields filled', () => {
+
     const workerData = generateWorkerData();
-
+  
+    let workerId;
+    let requestPayload;
+    let authHeaders = {};
+  
+    cy.intercept('POST', '/api/worker/save', (req) => {
+      requestPayload = req.body;
+  
+      authHeaders = {
+        'x-auth-token': req.headers['x-auth-token'],
+        'x-auth-project': req.headers['x-auth-project'],
+      };
+    }).as('addedworker');
+  
+  
+  
     addworkerPage.uploadProfileImage('profile.png');
-
     addworkerPage.fillWorkerName(workerData);
-    cy.selectRandomOption('input[name="company"]', '.sc-tagGq[role="button"]', 'company');
-
+  
+    cy.selectRandomOption(
+      'input[name="company"]',
+      '.select_item_container [role="button"]',
+      'company'
+    );
+  
     addWorkerSelector.addMoreDetail().click();
-    cy.get('p').contains('Personal Details').scrollIntoView().should('be.visible');
-    addWorkerSelector.phoneInput().type('9779868757376');
+    cy.contains('Personal Details').scrollIntoView().should('be.visible');
+  
     addWorkerSelector.emailInput().type('paras+45@kwant.ai');
     workforceSelector.addressInput().type('Kathmandu');
     addWorkerSelector.zipcodeInput().type('44600');
     addWorkerSelector.dobInput().first().clear({ force: true }).type('01/01/2001', { force: true });
-    cy.selectRandomOption('[name="raceName"]', '.sc-tagGq[role="button"]', 'raceName');
-    cy.selectRandomOption('[name="sex"]', '.sc-tagGq[role="button"]', 'sex');
-    cy.selectRandomOption('[name="mwbe"]', '.sc-tagGq[role="button"]', 'mwbe');
-    cy.selectRandomOption('[name="ethnicity"]', '.sc-tagGq[role="button"]', 'ethnicity');
-
+  
+    cy.selectRandomOption('[name="raceName"]', '.select_item_container [role="button"]');
+    cy.selectRandomOption('[name="sex"]', '.select_item_container [role="button"]');
+    cy.selectRandomOption('[name="mwbe"]', '.select_item_container [role="button"]');
+    cy.selectRandomOption('[name="ethnicity"]', '.select_item_container [role="button"]');
+  
     addWorkerSelector.emergencyContactNameInput().type('Emergency Contact Name');
     addWorkerSelector.emergencyContactPhoneInput().type('9876543210');
     addWorkerSelector.emergencyContactAddressInput().type('Kathmandu');
-
+  
     addWorkerSelector.addMoreDetail().click();
+  
     addWorkerSelector.jobTitleInput().type('worker');
-    cy.selectRandomOption('[name="professionName"]', '.sc-tagGq[role="button"]', 'professionName');
+    cy.selectRandomOption('[name="professionName"]', '.select_item_container [role="button"]');
     addWorkerSelector.employeeIdInput().type('123456');
-    cy.selectRandomOption('[name="crewName"]', '.sc-tagGq[role="button"]', 'crewname');
+    cy.selectRandomOption('[name="crewName"]', '.select_item_container [role="button"]');
     addWorkerSelector.dollarPerManHour().type('30');
-    cy.selectRandomOption('[name="payGroup"]', '.sc-tagGq[role="button"]', 'payGroup');
-    cy.selectRandomOption('[name="alliance"]', '.sc-tagGq[role="button"]', 'alliance');
-    cy.selectRandomOption('[name="projectTaskCategoryName"]', '.sc-tagGq[role="button"]', 'projectTaskCategoryName');
-
+    cy.selectRandomOption('[name="payGroup"]', '.select_item_container [role="button"]');
+    cy.selectRandomOption('[name="alliance"]', '.select_item_container [role="button"]');
+    cy.selectRandomOption('[name="projectTaskCategoryName"]', '.select_item_container [role="button"]');
+  
     addWorkerSelector.addMoreDetail().click();
     addWorkerSelector.addCertificationButton().click();
-    cy.selectRandomOption('[name="documentType"]', '.sc-tagGq[role="button"]', 'documentType');
+    cy.selectRandomOption('[name="documentType"]', '.select_item_container [role="button"]');
     addWorkerSelector.credentialIdInput().type('74774747477477474');
+  
     cy.get('[placeholder="Issued Date"]').click();
     cy.get('[name="expiresInPeriods"]').click();
-    cy.get('[role="button"]').contains('Day(s)').click();
+    cy.contains('Day(s)').click();
+  
     cy.fixture('image.png', 'base64').then(fileContent => {
-      cy.get('.sc-gObJpS').attachFile(
+      cy.get(workforceSelector.dragAndDrop).attachFile(
         { fileContent, fileName: 'file.pdf', mimeType: 'application/pdf' },
         { subjectType: 'drag-n-drop' }
       );
     });
-    addWorkerSelector.submitButton().should('be.visible').click({});
+  
+    addWorkerSelector.submitButton().should('be.visible').click();
     addWorkerSelector.addMoreDetail().click();
-
     addWorkerSelector.addMoreDetail().click();
-    cy.selectRandomOption('[name="projectBeaconSerialNumber"]', '.sc-tagGq[role="button"]', 'device');
+  
+    cy.selectRandomOption(
+      '[name="projectBeaconSerialNumber"]',
+      '.select_item_container [role="button"]'
+    );
+  
     addworkerPage.submitWorker();
+  
+  
+    cy.wait('@addedworker').then(({ response }) => {
+      expect(response.statusCode).to.eq(200);
+    
+      workerId = response.body.id || response.body.data?.id;
+      expect(workerId).to.exist;
+    
+      const savedWorker = response.body.data || response.body;
+      const responseString = JSON.stringify(savedWorker);
+    
+      cy.log('**Validating Request Payload**');
+      cy.log(JSON.stringify(requestPayload, null, 2));
+    
+      const validationResults = [];
+    
+      Object.entries(requestPayload).forEach(([key, value]) => {
+        if (
+          value !== null &&
+          value !== undefined &&
+          value !== '' &&
+          typeof value !== 'object'
+        ) {
+          const valueStr = String(value).trim();
+          const exists = responseString.includes(valueStr);
+          
+          validationResults.push({
+            key,
+            value: valueStr,
+            exists
+          });
+    
+          if (exists) {
+            cy.log(`✅ ${key}: "${valueStr}" - FOUND`);
+          } else {
+            cy.log(`❌ ${key}: "${valueStr}" - NOT FOUND`);
+          }
+    
+          // Assert with better error message
+          expect(exists, `Payload field "${key}" with value "${valueStr}" should exist in response`).to.be.true;
+        }
+      });
+    
+      const passed = validationResults.filter(r => r.exists).length;
+      const failed = validationResults.filter(r => !r.exists).length;
+      cy.log(`**Validation Summary: ${passed} passed, ${failed} failed**`);
+    });
+  
+    cy.contains(workerData.firstName).should('be.visible');
+    cy.contains(workerData.lastName).should('be.visible');
+  
     cy.writeFile('cypress/fixtures/createdWorker.json', {
       firstName: workerData.firstName,
       lastName: workerData.lastName
     });
   });
-  // it("Should merge companies successfully by selecting a primary company", () => {
-
-  //   let authHeaders = {};
   
-  //   cy.intercept('GET', '**/api/projectTaskTradesForTracking', (req) => {
-  //     authHeaders = {
-  //       'x-auth-token': req.headers['x-auth-token'],
-  //       'x-auth-project': req.headers['x-auth-project'],
-  //     };
-  //   }).as('getConfig');
-  
-  //   cy.reload();
-  
-  //   cy.wait('@getConfig').then(() => {
-  //     expect(authHeaders['x-auth-token']).to.exist;
-  //   });
-  
-  //   cy.then(() => {
-  //     const payload = {
-  //       firstName: "paras test111",
-  //       lastName: "worker",
-  //       projectId: "500526306",
-  //       projectTaskTradeId:"1228",
-  //       projectTaskTradeName: "ACI",
-  //     };
-  
-  //     cy.request({
-  //       method: "POST",
-  //       url: "/api/worker/save",
-  //       headers: authHeaders,
-  //       body: payload,
-  //     }).then((res) => {
-  //       expect(res.status).to.be.oneOf([200, 201]);
-  //     });
-  //   });
-  // });
   
 })

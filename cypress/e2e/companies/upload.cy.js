@@ -19,11 +19,8 @@ describe("Company Module - File Upload", () => {
   });
   
   beforeEach(() => {
-    cy.get('body').then(($body) => {
-      if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
-        cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
-      }
-    });
+
+    cy.cleanUI()
   });
   
 
@@ -32,7 +29,7 @@ describe("Company Module - File Upload", () => {
    workerHelper.openUploadModal()
 
    cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
-    cy.get('button.sc-erUUZj').attachFile(
+    cy.get(workforceSelector.dragAndDrop).attachFile(
       {
         fileContent,
         fileName: 'CompanyUpload.csv',
@@ -43,7 +40,7 @@ describe("Company Module - File Upload", () => {
     );
   });
   cy.wait(2000)
-    cy.get('.sc-kOPcWz').should('contain.text', '1 new company(s) will be imported.');
+    cy.get('span').should('contain.text', '1 new company(s) will be imported.');
     cy.get('button p').contains('Submit').click({force:true})
     cy.searchAndDeleteWorker('Test', 'Company');
 
@@ -53,7 +50,7 @@ describe("Company Module - File Upload", () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-empty.csv', 'base64').then(fileContent => {
-      cy.get('button.sc-erUUZj').attachFile(
+      cy.get(workforceSelector.dragAndDrop).attachFile(
       {
         fileContent,
         fileName: 'Valid.csv',
@@ -64,7 +61,7 @@ describe("Company Module - File Upload", () => {
       );
     });
 
-    cy.get('.sc-kOPcWz').should('contain.text', 'No Content to upload');
+    cy.get('span').should('contain.text', 'No Content to upload');
 
    })
 
@@ -73,7 +70,7 @@ describe("Company Module - File Upload", () => {
  
     cy.fixture('testdata/companies/Company-upload-template (1).xls', 'base64')
   .then(fileContent => {
-    cy.get('button.sc-erUUZj').attachFile(
+    cy.get(workforceSelector.dragAndDrop).attachFile(
       {
         fileContent,
         fileName: 'CompanyUpload.xls',
@@ -84,7 +81,7 @@ describe("Company Module - File Upload", () => {
     );
   });
 
-     cy.get('.sc-kOPcWz').should('contain.text', '1 new company(s) will be imported.');
+     cy.get('span').should('contain.text', '1 new company(s) will be imported.');
      cy.get('button p').contains('Submit').click({force:true})
      cy.searchAndDeleteWorker('Test', 'Company');
  
@@ -112,7 +109,7 @@ describe("Company Module - File Upload", () => {
     workerHelper.openUploadModal()
  
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
-        cy.get('button.sc-erUUZj').attachFile(
+        cy.get(workforceSelector.dragAndDrop).attachFile(
           {
             fileContent,
             fileName: 'CompanyUpload.csv',
@@ -123,7 +120,7 @@ describe("Company Module - File Upload", () => {
         );
       });
 
-     cy.get('.sc-kOPcWz').should('contain.text', '1 new company(s) will be imported.');
+     cy.get('span').should('contain.text', '1 new company(s) will be imported.');
      cy.wait(1000)
      cy.get('button p').contains('Submit').click({force:true})
      cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
@@ -133,21 +130,20 @@ describe("Company Module - File Upload", () => {
     cy.getWorkerField('Company Name').contains('Test Company');
     cy.getWorkerField('Phone Number').contains('+9779868757379')
     cy.getWorkerField('E Mail').contains('paras@kwant.ai')
-    cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
+    cy.get('body').click(0,0)
     cy.searchAndDeleteWorker('Test', 'Company');
    });
 
 
 
-it(
-  'Verify the delete icon is shown on the input box once the file is selected for upload',
+it('Verify the delete icon is shown on the input box once the file is selected for upload',
   () => {
 
 
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
-      cy.get('button.sc-erUUZj').attachFile(
+      cy.get(workforceSelector.dragAndDrop).attachFile(
         {
           fileContent,
           fileName: 'CompanyUpload.csv',
@@ -164,7 +160,7 @@ cy.get('section span')
 .as('fileName')
 .should('be.visible');
 
-cy.get('button.sc-cAkrUM')
+cy.get('section button svg[fill="none"]')
 .as('cancelButton')
 .should('be.visible');
 
@@ -180,7 +176,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-invalidEmail.csv', 'base64').then(fileContent => {
-      cy.get('button.sc-erUUZj').attachFile(
+      cy.get(workforceSelector.dragAndDrop).attachFile(
       {
         fileContent,
         fileName: 'CompanyUploadInvalidEmail.csv',
@@ -193,7 +189,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
 
 
 
-    cy.get('.sc-kOPcWz').should('contain.text', 'No new company(s) will be imported.');
+    cy.get('span').should('contain.text', 'No new company(s) will be imported.');
 
   })
 
@@ -202,7 +198,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
     cy.wait(1000)
    
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
-        cy.get('button.sc-erUUZj').attachFile(
+        cy.get(workforceSelector.dragAndDrop).attachFile(
           {
             fileContent,
             fileName: 'CompanyUpload.csv',
@@ -213,13 +209,15 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
         );
       });
   
-     cy.get('.sc-kOPcWz').should('contain.text', '1 new company(s) will be imported.');
+     cy.get('span').should('contain.text', '1 new company(s) will be imported.');
      cy.wait(1000)
      cy.get('button p').contains('Submit').click({force:true})
+     cy.get(workforceSelector.toastMessage).contains('All companies added successfully').should('be.visible')
+     cy.get('body').click()
   
     workerHelper.openUploadModal()
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
-        cy.get('button.sc-erUUZj').attachFile(
+        cy.get(workforceSelector.dragAndDrop).attachFile(
           {
             fileContent,
             fileName: 'CompanyUpload.csv',
@@ -229,7 +227,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
           { subjectType: 'drag-n-drop', force: true }
         );
       });
-     cy.get('.sc-kOPcWz').should('contain.text', 'No new company(s) will be imported.');
+     cy.get('span').should('contain.text', 'No new company(s) will be imported.');
      cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
      cy.searchAndDeleteWorker('Test', 'Company');
   })
@@ -239,7 +237,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-invalidNumber.csv', 'base64').then(fileContent => {
-      cy.get('button.sc-erUUZj').attachFile(
+      cy.get(workforceSelector.dragAndDrop).attachFile(
       {
         fileContent,
         fileName: 'CompanyUploadInvalidEmail.csv',
@@ -252,13 +250,13 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
 
 
 
-    cy.get('.sc-kOPcWz').should('contain.text', 'No new company(s) will be imported.');
+    cy.get('span').should('contain.text', 'No new company(s) will be imported.');
   })
 
   it('Uploading file with duplicate companies in the file only one of them should get added', ()=>{
     workerHelper.openUploadModal()
     cy.fixture('testdata/companies/Company-upload-duplicateInFile.csv', 'base64').then(fileContent => {
-        cy.get('button.sc-erUUZj').attachFile(
+        cy.get(workforceSelector.dragAndDrop).attachFile(
           {
             fileContent,
             fileName: 'CompanyUpload-duplicateInFile.csv',
@@ -268,8 +266,8 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
           { subjectType: 'drag-n-drop', force: true }
         );
       })
-      cy.get('.sc-kOPcWz').should('contain.text', '1 new company(s) will be imported.').should('be.visible')
-      cy.get('.sc-erUUZj').should('not.contain.text', '1 duplicate company(s) found and will not be imported.').should('be.visible')
+      cy.get('span').should('contain.text', '1 new company(s) will be imported.').should('be.visible')
+      cy.get('span').should('contain.text', '1 duplicate company(s) found and will not be imported.').should('be.visible')
   })
 
 
@@ -277,7 +275,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
 
     workerHelper.openUploadModal()
     cy.fixture('testdata/companies/Company-upload-multipleCompany.csv', 'base64').then(fileContent => {
-        cy.get('button.sc-erUUZj').attachFile(
+        cy.get(workforceSelector.dragAndDrop).attachFile(
           {
             fileContent,
             fileName: 'CompanyUpload-multipleValidRows.csv',
@@ -287,7 +285,7 @@ cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
           { subjectType: 'drag-n-drop', force: true }
         );
       })
-      cy.get('.sc-kOPcWz').should('contain.text', '2 new company(s) will be imported.').should('be.visible')
+      cy.get('span').should('contain.text', '2 new company(s) will be imported.').should('be.visible')
       cy.wait(1000)
       cy.get('button p').contains('Submit').click({force:true})
       cy.searchAndDeleteWorker('Test', 'Company1');
@@ -298,7 +296,7 @@ it('Should display an error message when trying to upload an invalid file', () =
   workerHelper.openUploadModal();
 
   cy.fixture('testdata/companies/invalid.pdf', 'base64').then(fileContent => {
-    cy.get('button.sc-erUUZj').attachFile(
+    cy.get(workforceSelector.dragAndDrop).attachFile(
       {
         fileContent,
         fileName: 'invalid.pdf', // Correct file name to match the invalid file
@@ -309,8 +307,7 @@ it('Should display an error message when trying to upload an invalid file', () =
     );
   });
 
-  cy.get('.sc-kOPcWz')
-    .should('contain.text', 'File type unsupported')
+  cy.get(workforceSelector.toastMessage).contains('File type unsupported')
     .should('be.visible');
 });
 

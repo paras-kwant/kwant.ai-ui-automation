@@ -75,9 +75,9 @@ it('Verify ellipsis (…) appears when total pages exceed threshold', ()=>{
   cy.getTotalWorkers().then((totalValue) => {
     cy.log('Total workers: ' + totalValue);
     if (totalValue > 300) {
-      cy.get('.sc-fiCwlc.koUUBe svg path').should('be.visible');
+      cy.get('.sc-kbhJrz.fOvnLJ svg').should('be.visible');
     } else {
-      cy.get('.sc-fiCwlc.koUUBe svg path').should('not.exist');
+      cy.get('.sc-kbhJrz.fOvnLJ svg').should('not.exist');
     }
   });
 })
@@ -102,6 +102,7 @@ it('Verify FIRST page disables previous button', () => {
     const totalPages = Math.ceil(totalValue / 100);
     if (totalPages > 1) {
       cy.log(`Total workers: ${totalValue}, Total pages: ${totalPages}`);
+      workforceSelector.pageOne().should('be.visible').click();
       workforceSelector.previousButton().should('be.disabled');
     }
   });
@@ -115,19 +116,19 @@ it('Verify clicking page numbers navigates to correct page', () => {
     if (totalPages > 5) {
       cy.log(`Total workers: ${totalValue}, Total pages: ${totalPages}`);
 
-      cy.get('button.sc-ktJbId.dbOXEy').contains('2').click();
+      cy.get('button').contains('2').click();
       workforceSelector.pageTwo().invoke('attr', 'class') 
       .then((classValue) => {
         const classCount = classValue.split(' ').length; 
         expect(classCount).to.eq(6); 
       });
-      cy.get('button.sc-ktJbId.dbOXEy').contains('3').click();
+      cy.get('button').contains('3').click();
       workforceSelector.pageThree().invoke('attr', 'class') 
       .then((classValue) => {
         const classCount = classValue.split(' ').length; 
         expect(classCount).to.eq(6); 
       });
-      cy.get('button.sc-ktJbId.dbOXEy').contains('4').click();
+      cy.get('button').contains('4').click();
       workforceSelector.pageFour().invoke('attr', 'class') 
       .then((classValue) => {
         const classCount = classValue.split(' ').length; 

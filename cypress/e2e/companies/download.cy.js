@@ -19,13 +19,9 @@ describe("Companu Module -  Download", () => {
 	companiesHelper.visitCompaniesPage();
   });
   beforeEach(() => {
-	cy.get('body').then(($body) => {
-		if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
-		  cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
-		}
-	  });
 
-  })
+    cy.cleanUI()
+  });
   describe('Download company CSV', () => {
 
     it('Should download the worker CSV template successfully', () => {
@@ -39,7 +35,7 @@ describe("Companu Module -  Download", () => {
 	  });
 
       workerHelper.openUploadModal();
-      cy.get('.sc-jaXxmE p').contains('Companies Upload Template').click();
+      cy.get('p').contains('Companies Upload Template').click();
 
       cy.readFile(`${DOWNLOADS_FOLDER}/${fileName}`, { timeout: 15000 })
         .should('exist')
@@ -68,7 +64,7 @@ describe("Companu Module -  Download", () => {
 			pattern: "Company",
 			extension: ".csv"
 		  });
-		  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+		  cy.get(workforceSelector.overflowMenu).click();
 		  cy.get('.dropdown-option').contains('Download').click();
 	  
 		  cy.wrap(null).then(() => {
@@ -137,7 +133,7 @@ describe("Companu Module -  Download", () => {
 			extension: ".csv"
 		  });
 		  cy.get('.checkboxCheckmark').eq(0).click({ force: true });
-		  cy.get('.sc-gFAWRd>.sc-aXZVg>button').click();
+		  cy.get(workforceSelector.overflowMenu).click();
 		  cy.get('.dropdown-option').contains('Download').click();
 	  
 		  cy.wrap(null).then(() => {

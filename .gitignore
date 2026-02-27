@@ -16,6 +16,7 @@ Thumbs.db
 # Cypress screenshots and videos
 cypress/screenshots/
 cypress/videos/
+allure-results/
 
 # Optional: coverage reports (if using testing coverage tools)
 coverage/

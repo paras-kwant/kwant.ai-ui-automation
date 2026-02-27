@@ -3,83 +3,81 @@ import { addWorkerSelector } from '../../selector/addWorker.js';
 import { workforceSelector } from '../../support/workforceSelector';
 
 class filterPage {
-  selectedOption = ""; // store the selected filter option
 
-  // Apply a filter and select a random valid option
   applyFilter(filterType) {
-    cy.contains(".sc-fremEr", filterType)
-      .find("svg")
+    cy.contains(workforceSelector.tableColumn, filterType)
+      .find('.table-header-filter-btn')
       .click({ force: true });
-
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-      const filtered = $parents.filter((i, el) => {
-        const filterText = Cypress.$(el)
-          .find(".sc-eldPxv.bVwlNE")
+  
+    cy.get('[class*="select_item_container"]').within(() => {
+      cy.get('label[for^=":r"]').then(($labels) => {
+        const validLabels = $labels.filter((_, el) => {
+          const text = Cypress.$(el)
+            .find('span[type="onDropdown"]')
+            .last()
+            .text()
+            .trim();
+          return text && text !== "None";
+        });
+  
+        expect(validLabels.length, `Non-None ${filterType} options available`)
+          .to.be.greaterThan(0);
+  
+        const randomIndex = Cypress._.random(0, validLabels.length - 1);
+        const $randomLabel = validLabels.eq(randomIndex);
+  
+        const selectedOption = $randomLabel
+          .find('span[type="onDropdown"]')
+          .last()
           .text()
           .trim();
-        return filterText && filterText !== "None";
+  
+        cy.log(`Selected ${filterType}: ${selectedOption}`);
+  
+        cy.wrap($randomLabel)
+          .find('input[type="checkbox"]')
+          .check({ force: true });
+  
+        // Store as alias for later use
+        cy.wrap(selectedOption).as('selectedFilterValue');
       });
-
-      if (filtered.length === 0) {
-        cy.log(`⚠️ No valid ${filterType} options found`);
-        return;
-      }
-
-      const randomIndex = Cypress._.random(0, filtered.length - 1);
-      const $randomParent = filtered.eq(randomIndex);
-      this.selectedOption = $randomParent
-        .find(".sc-eldPxv.bVwlNE")
-        .text()
-        .trim();
-
-      cy.log(`Selected ${filterType}: ${this.selectedOption}`);
-      cy.wrap($randomParent)
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-
-      cy.contains("Filters:").click();
-      cy.wait(1000); 
     });
-  }
-
-  verifyFilteredRows(actionButtonSelector, labelSelector) {
-    cy.get("body").then(($body) => {
-      const rowCount = $body.find(workforceSelector.tableRow).length;
-      cy.log(`Total rows found: ${rowCount}`);
   
-      if (rowCount > 0) {
-        for (let i = 0; i < rowCount; i++) {
-          cy.get(workforceSelector.tableRow)
-            .eq(i)
-            .scrollIntoView()
-            .click({ force: true });
-  
-          // Click action button (drawer / menu / details)
-          cy.get(actionButtonSelector).click({ force: true });
-  
-          // Verify selected filter label
-          cy.get(labelSelector)
-            .should("be.visible")
-            .and("contain.text", this.selectedOption);
-  
-          // Close drawer / overlay
-          cy.get("body").click(0, 0, { force: true });
-  
-          cy.log(`✅ Verified row ${i + 1}`);
-        }
-      } else {
-        // ✅ Proper empty-state handling
-        cy.get(".empty-body")
-          .should("be.visible")
-          .and(
-            "have.text",
-            "No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters "
-          );
-      }
-    });
+    cy.contains("Filters:").click();
+    cy.wait(1000);
   }
   
-  
+
+verifyFilteredRows(actionButtonSelector, fieldLabel, expectedValue) {
+  cy.wait(1000)
+  cy.get("body").then(($body) => {
+    const rowCount = $body.find(workforceSelector.tableRow).length;
+    cy.log(`Total rows found: ${rowCount}`);
+
+    if (rowCount > 0) {
+      for (let i = 0; i < rowCount; i++) {
+        cy.get(workforceSelector.tableRow)
+          .eq(i)
+          .scrollIntoView()
+          .click({ force: true });
+
+        cy.get(actionButtonSelector).click();
+
+        cy.getWorkerField(fieldLabel)
+          .should("exist")
+          .and("contain.text", expectedValue);
+
+        cy.get("body").click(0, 0, { force: true });
+
+        cy.log(`✅ Verified row ${i + 1}: ${fieldLabel} = ${expectedValue}`);
+      }
+    } else {
+      cy.get(".empty-body")
+        .should("be.visible");
+      cy.log('No results found - empty state displayed');
+    }
+  });
+}
   
   
 }

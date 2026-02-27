@@ -2,42 +2,44 @@
 import { workforceSelector } from "../../support/workforceSelector";
 
 class GeneralDetailsPage {
-  // Selectors
   get firstRow() { 
-    return cy.get(workforceSelector.tableRow).first(); 
+    return cy.get(workforceSelector.tableRow).eq(0); 
   }
-  
   get tableHeaders() { 
     return cy.get(workforceSelector.tableColumn); 
   }
-  
-  get overflowMenuButton() { 
+  get threeDotMenu() { 
     return cy.get('header button'); 
   }
-  
   get cancelButton() { 
-    return cy.get('button').contains('Cancel'); 
+    return cy.get(workforceSelector.cancelButton); 
   }
-  
   get updateButton() { 
     return cy.get(workforceSelector.updateButton); 
   }
-  
   get generalDetailsTitle() { 
     return cy.get('p').contains('General Details'); 
   }
-  
   get successMessage() { 
     return cy.get(workforceSelector.toastMessage); 
   }
+  
 
 
+
+
+
+  resetPageState() {
+    cy.get('body').click(0,0);
+    cy.get(workforceSelector.searchInput).clear();
+
+}
   openFirstCompany() {
     this.firstRow.click({ force: true });
   }
 
-  clickOverflowMenu() {
-    this.overflowMenuButton.click();
+  clickThreeDotMenu() {
+    this.threeDotMenu.click();
   }
 
   clickCancel() {
@@ -48,47 +50,21 @@ class GeneralDetailsPage {
     this.updateButton.click();
   }
 
-  resetPageState() {
-    cy.get('body').then($body => {
-      if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
-        cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
-      }
-
-      if ($body.find('.sc-ktJbId.sc-gmgFlS').length > 0) {
-        cy.get('.sc-ktJbId.sc-gmgFlS').eq(0).click({ force: true });
-      }
-
-      if ($body.find('.tag.default.grey:contains("Clear")').length > 0) {
-        cy.contains('.tag.default.grey', 'Clear').click({ force: true });
-      }
-
-      if ($body.find('.filters-header-container svg').length > 0) {
-        cy.get('.filters-header-container svg').eq(0).click();
-      }
-
-      if($body.find(workforceSelector.searchInput).length > 0){
-        cy.get(workforceSelector.searchInput).clear();
-      }
-    });
-  }
 
   updateEmail(email) {
     cy.getWorkerField('E Mail')
-    .scrollIntoView()
-      .realHover()
       .find('svg')
-      .should('be.visible')
-      .click();
+      .should('exist')
+      .click({force:true});
     workforceSelector.emailInput().click().clear().type(email);
   }
 
   updateAddress(address) {
     cy.getWorkerField('Address')
     .scrollIntoView()
-      .realHover()
       .find('svg')
-      .should('be.visible')
-      .click();
+      .should('exist')
+      .click({force:true});
     workforceSelector.addressInput().click().clear().type(address);
   }
 
@@ -140,23 +116,24 @@ class GeneralDetailsPage {
       $headers.each((i, el) => {
         const headerText = el.innerText.trim();
         if (fieldsToCheck.includes(headerText)) {
-          columnMap[headerText] = i;
+          columnMap[headerText] = i-1;
         }
       });
 
-      cy.get(workforceSelector.tableRow).first().within(() => {
+      cy.get(workforceSelector.tableRow).eq(0).within(() => {
         Object.entries(columnMap).forEach(([field, index]) => {
           cy.get('.table_td').eq(index).invoke('text').then(text => {
             tableRowData[field] = text.trim();
           });
         });
       }).then(() => {
+        
         this.openFirstCompany();
 
         Object.entries(tableRowData).forEach(([field, tableValue]) => {
           const expectedValue = tableValue === '' ? '-' : tableValue;
           this.verifyFieldValue(field, expectedValue);
-          cy.log(`✅ Field "${field}" validated: ${expectedValue}`);
+          cy.log(` Field "${field}" validated: ${expectedValue}`);
         });
       });
     });

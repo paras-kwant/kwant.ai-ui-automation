@@ -9,6 +9,8 @@ const twilio = require("twilio");
 
 module.exports = defineConfig({
   e2e: {
+    viewportWidth: 1440,
+    viewportHeight: 900,
     projectId: "qqtmqa",
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
@@ -24,8 +26,7 @@ module.exports = defineConfig({
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}", 
 
     setupNodeEvents(on, config) {
-      // Only clean allure-results in local development, not in CI
-      // This prevents conflicts when running parallel jobs in GitHub Actions
+  
       if (!process.env.CI) {
         on("before:run", () => {
           const allureResultsPath = path.join(__dirname, "allure-results");

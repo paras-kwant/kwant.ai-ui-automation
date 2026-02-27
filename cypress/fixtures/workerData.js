@@ -51,3 +51,8 @@ export function generateTemplateName() {
   return `Template${Math.floor(Math.random() * 1000000)}`;
 }
 
+export function generateCredentialID(length = 16) {
+  return Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
+}
+
+

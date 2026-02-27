@@ -3,6 +3,7 @@ import { workforceSelector } from './workforceSelector';
 import workerHelper from './helper/workerHelper';
 
 
+
 Cypress.Commands.add('login', () => {
   cy.session([Cypress.env('EMAIL'), Cypress.env('PASSWORD')], () => {
     cy.visit('/') 
@@ -28,12 +29,11 @@ Cypress.Commands.add('login', () => {
       .eq(0)
       .check({ force: true });
     
-    cy.get(".sc-gFAWRd>.sc-aXZVg>button").click();
+    cy.get(workforceSelector.overflowMenu).click();
     cy.get(".delete-btn").click();
-    cy.get("button>p").contains("Delete").click();
+    cy.get("button p").contains("Delete").click();
   
-    cy.get(".sc-kOPcWz")
-      .contains("successfully deleted")
+    cy.get(workforceSelector.toastMessage).contains("successfully deleted")
       .should("be.visible");
   });
 
@@ -66,10 +66,7 @@ Cypress.Commands.add('login', () => {
           });
   
         } else {
-          cy.get('.empty-body').should(
-            'have.text',
-            'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-          );
+          cy.get('.empty-body').contains('No Results Found').should('be.visible')
         }
       });
     }
@@ -79,7 +76,7 @@ Cypress.Commands.add('login', () => {
 
 
 Cypress.Commands.add('getTotalWorkers', () => {
-  return cy.get('.sc-kMkxaj.eTAOVM')
+  return cy.get('.workforce-footer, .workers-footer')
     .invoke('text')
     .then((text) => {
       const match = text.match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/);
@@ -89,14 +86,28 @@ Cypress.Commands.add('getTotalWorkers', () => {
 
 
 Cypress.Commands.add('selectRandomOption', (inputSelector, optionSelector, name = 'option') => {
-  cy.get(inputSelector).click(); 
+  cy.get(inputSelector).click();
+  cy.get('body').should('be.visible');
+
   cy.get(optionSelector).should('be.visible').then(($options) => {
     if ($options.length === 0) {
       cy.log(`No ${name} found for selector: ${optionSelector}`);
       return;
     }
-    const randomIndex = Cypress._.random(0, $options.length - 1);
-    const $randomOption = $options.eq(randomIndex);
+
+    // Filter out options that are '-' or 'None'
+    const validOptions = [...$options].filter(el => {
+      const text = el.innerText.trim();
+      return text && text !== '-' && text.toLowerCase() !== 'none';
+    });
+
+    if (validOptions.length === 0) {
+      cy.log(`No valid ${name} found (all were '-' or 'None')`);
+      return;
+    }
+
+    const randomIndex = Cypress._.random(0, validOptions.length - 1);
+    const $randomOption = Cypress.$(validOptions[randomIndex]);
     const optionText = $randomOption.text().trim();
     cy.log(`Selecting random ${name}: ${optionText}`);
     cy.wrap($randomOption).click({ force: true });
@@ -112,5 +123,58 @@ Cypress.Commands.add('getWorkerField', (label) => {
 
 
 Cypress.Commands.add("cleanUI", () => {
-  workerHelper.closeSidebarIfOpen();
+  cy.wait(1000);
+
+
+  // cy.get('body').then($body => {
+  //   if ($body.find('header button.sc-jaXxmE svg').length > 0) {
+  //     cy.get('header button.sc-jaXxmE svg').first().click({force:true});
+  //   }
+  // });
+  
+  // cy.get('body').then($body => {
+  //   if ($body.find('header button').length > 0) {
+  //     cy.get('header button').should('be.visible').click({force:true});
+  //   }
+  // });
+
+  // Aside button
+
+
+cy.get('body').then($body => {
+  const $btn = $body.find('header button svg:visible');
+  if ($btn.length) {
+    cy.wrap($btn).last().click({ force: true });
+  }
+});
+
+cy.get('body').then($body => {
+  const $btn = $body.find('aside button svg:visible');
+  if ($btn.length) {
+    cy.wrap($btn).click({ force: true });
+  }
+});
+cy.get('body').then($body => {
+    if ($body.find('section button svg').length > 0) {
+      cy.get('section button svg').eq(0).should('be.visible').click({force:true});
+    }
+  });
+
+
+  cy.get('body').then($body => {
+    if ($body.find(".default__label:contains('Clear All')").length > 0) {
+      cy.get(".default__label:contains('Clear All')").should('be.visible').click({force:true});
+    }
+  });
+  cy.get('body').then($body => {
+    if ($body.find(".action-container").length > 0) {
+      cy.get(".action-container").should('be.visible').click({force:true});
+    }
+  });
+  cy.get('body').then($body => {
+    if ($body.find(workforceSelector.searchInput).length > 0) {
+      cy.get(workforceSelector.searchInput).first().clear()
+    }
+  });
 })
+ 

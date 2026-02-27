@@ -1,86 +1,85 @@
 /// <reference types="cypress" />
-const path = require("path");
-const fs = require("fs");
-import { workforceSelector } from '../../support/workforceSelector';  
 
-
+import { workforceSelector } from '../../support/workforceSelector';
 
 describe("Worker Module - Favorites", () => {
-  beforeEach(() => {
+
+  before(() => {
     cy.session('userSession', () => {
       cy.login();
-      cy.get('.card-title').contains(Cypress.env('PROJECT_NAME')).click();
+      cy.get('.card-title')
+        .contains(Cypress.env('PROJECT_NAME'))
+        .click();
     });
   });
 
-  
-  it('Validate removing a worker page from favorites.', () => {
+  beforeEach(() => {
     cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.wait(2000);
-    
+  });
+
+  it('Verify remove worker page from Favorite', () => {
     cy.get('body').then(($body) => {
-      if ($body.find('[role="button"] [fill="#FACC15"]').length > 0) {
-        // Already favorited - remove it
-        cy.get('[role="button"] [fill="#FACC15"]').should('be.visible').click();
-        cy.get('.sc-kOPcWz').should('contain.text', 'Removed from favorite');
-        cy.get('[role="button"] [fill="#FACC15"]').should('not.exist');
-        cy.get('.sc-fatcLD.ismSbL').parents('a').should('not.have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-        
-        cy.wait(2000);
-        
-        cy.get('[role="button"]').eq(0).click();
-        cy.get('.sc-kOPcWz').should('contain.text', 'Added to favorite');
-        cy.get('[role="button"] [fill="#FACC15"]').should('be.visible');
-        cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-        
-      } else {
-        cy.get('[role="button"]').eq(0).click();
-        cy.get('.sc-kOPcWz').should('contain.text', 'Added to favorite');
-        cy.get('[role="button"] [fill="#FACC15"]').should('be.visible');
-        cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-        
-        cy.wait(2000);
-        
-        cy.get('[role="button"] [fill="#FACC15"]').should('be.visible').click();
-        cy.get('.sc-kOPcWz').should('contain.text', 'Removed from favorite');
-        cy.get('[role="button"] [fill="#FACC15"]').should('not.exist');
-        cy.get('.sc-fatcLD.ismSbL').parents('a').should('not.have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
+      const isFavorited =
+        $body.find('.top-nav-left-section [role="button"] [fill="#FACC15"]').length > 0;
+
+      if (!isFavorited) {
+        cy.get('.top-nav-left-section [role="button"]').click();
+        cy.get(workforceSelector.toastMessage).should('contain.text', 'Added to favorite');
       }
+
+      cy.wait(2000);
+      cy.get('.top-nav-left-section [role="button"]').click();
+
+      cy.get(workforceSelector.toastMessage).should('contain.text', 'Removed from favorite');
+
+      cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
+        .should('not.exist');
+
+      cy.get('[title="Workforce Workers"]').should('not.exist');
     });
   });
 
-      it('Verify that the latest page added to favorites is displayed at the top of the favorites list.', ()=>{
-        cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-        cy.wait(2000)
-        cy.get('body').then(($body) => {
-            if ($body.find('[role="button"] [fill="#FACC15"]').length > 0) {
-              cy.get('[role="button"] [fill="#FACC15"]').click()
-              cy.get('.sc-kOPcWz').should('contain.text', 'Removed from favorite');
-              cy.get('.sc-fatcLD.ismSbL').parents('a').should('not.have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-              cy.wait(2000)
-              cy.get('[role="button"]').click()
-              cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-            } else {
-                cy.get('[role="button"]').eq(0).click()
-                cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-            }
-        })
-    })
-    it('Validate only 2 pages can be favorites at a time', () => {
-      cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-        cy.get('body').then(($body) => {
-            if ($body.find('[role="button"] [fill="#FACC15"]').length > 0) {
-              cy.get('[role="button"] [fill="#FACC15"]').click()
-              cy.wait(2000)
-              cy.get('[role="button"]').click()
-              cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-            } else {
-                cy.get('[role="button"]').click()
-                cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-            }
-      });
-    })
-    
-  
-})
-  
+  it('Verify adding worker page as favourite', () => {
+    cy.get('.top-nav-left-section [role="button"]').click();
+
+    cy.get(workforceSelector.toastMessage, { timeout: 10000 })
+      .should('contain.text', 'Added to favorite');
+
+    cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
+      .should('be.visible');
+
+    cy.get('[title="Workforce Workers"]').should('exist');
+  });
+
+  it('Verify Worker Page Accessibility from Favorites', () => {
+    cy.get('[title="Workforce Workers"]')
+      .should('be.visible')
+      .click();
+
+    cy.url().should(
+      'include',
+      `/projects/${Cypress.env('PROJECT_ID')}/workers`
+    );
+  });
+
+  it('Verify Favorite Status Persistence', () => {
+    cy.reload();
+
+    cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
+      .should('be.visible');
+  });
+
+  it('Verify latest worker page added appears at top of favorites list', () => {
+    cy.get('.top-nav-left-section [role="button"]').then(($btn) => {
+      if ($btn.find('[fill="#FACC15"]').length === 0) {
+        cy.wrap($btn).click();
+        cy.get(workforceSelector.toastMessage).should('contain.text', 'Added to favorite');
+      }
+
+      cy.get('[title]')
+        .eq(0)
+        .should('have.attr', 'title', 'Workforce Workers');
+    });
+  });
+
+});

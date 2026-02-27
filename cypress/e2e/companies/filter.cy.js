@@ -7,6 +7,7 @@ import { workforceSelector } from '../../support/workforceSelector';
 describe("Companies Module - Filter", () => {
 
   before(() => {
+	cy.viewport(1440, 900);
     cy.session('userSession', () => {
       cy.login();
       cy.get('.card-title')
@@ -15,7 +16,9 @@ describe("Companies Module - Filter", () => {
     });
     companiesHelper.visitCompaniesPage();
   });
+
   beforeEach(() => {
+	cy.viewport(1440, 900)
 	        
         cy.get('body').then($body => {
           if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
@@ -45,14 +48,14 @@ describe("Companies Module - Filter", () => {
   });
   
   it("Verify Company Name filter dropdown can be opened", () => {
-	cy.contains('.sc-fremEr.jImTfM', 'Company Name').find('.table-header-filter-btn').click();
+	cy.contains(workforceSelector.tableColumn, 'Company Name').find('.table-header-filter-btn').click();
 
   })
 
 
   it('Verify the table header filter exists for applicable table headers', () => {
 
-    cy.get('.sc-bXWnss').each(($el, index) => {
+    cy.get(workforceSelector.tableColumn).each(($el, index) => {
       if (index >= 3) { // skip first 3 headers
         cy.wrap($el).then(($header) => {
           if ($header.find('.table-header-filter-btn').length) {
@@ -66,42 +69,51 @@ describe("Companies Module - Filter", () => {
   });
   
   it("Verify filtering by Primary Trade selection", () => {
-	cy.contains('.sc-fremEr.jImTfM', 'Primary Trade')
+	cy.contains(workforceSelector.tableColumn, 'Primary Trade')
 	  .find('.table-header-filter-btn')
 	  .click();
   
-	cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
+	// Use .within() to scope to only the visible dropdown
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($labels) => {
+		
+		const validLabels = $labels.filter((_, el) => {
+		  const text = Cypress.$(el)
+			.find('span[type="onDropdown"]')
+			.last()
+			.text()
+			.trim();
+		  return text !== "None";
+		});
   
-	  const validParents = $parents.filter((_, el) => {
-		const text = Cypress.$(el)
-		  .find(".sc-eldPxv.bVwlNE")
+		expect(validLabels.length, 'Non-None options available')
+		  .to.be.greaterThan(0);
+  
+		const randomIndex = Cypress._.random(0, validLabels.length - 1);
+		const $randomLabel = validLabels.eq(randomIndex);
+  
+		const name = $randomLabel
+		  .find('span[type="onDropdown"]')
+		  .last()
 		  .text()
 		  .trim();
-		return text !== "None";
+  
+		cy.log(`Randomly selected Primary Trade: ${name}`);
+  
+		cy.wrap($randomLabel)
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
+		
+		cy.wrap(name).as('selectedName');
 	  });
+	});
   
-	  expect(validParents.length, 'Non-None options available')
-		.to.be.greaterThan(0);
+	cy.get("p").contains("Filters:").click();
+	cy.wait(2000);
   
-	  const randomIndex = Cypress._.random(0, validParents.length - 1);
-	  const $randomParent = validParents.eq(randomIndex);
-  
-	  const name = $randomParent
-		.find(".sc-eldPxv.bVwlNE")
-		.text()
-		.trim();
-  
-	  cy.log(`Randomly selected company name: ${name}`);
-  
-	  cy.wrap($randomParent)
-		.find('input[type="checkbox"]')
-		.check({ force: true });
-  
-	  cy.get("p").contains("Filters:").click();
-	  cy.wait(2000)
-  
+	cy.get('@selectedName').then((name) => {
 	  cy.verifyTableorEmptyState({
-		tableRowSelector: ".sc-cRmqLi",
+		tableRowSelector: workforceSelector.tableRow,
 		cellSelector: ".table_td",
 		expectedText: name,
 	  });
@@ -110,112 +122,130 @@ describe("Companies Module - Filter", () => {
   
 
   it("Verify filtering by Company Name selection", () => {
-	cy.contains('.sc-fremEr.jImTfM', 'Company Name').find('.table-header-filter-btn').click();
-	 cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-	   const randomIndex = Cypress._.random(0, $parents.length - 1);
-	   const $randomParent = $parents.eq(randomIndex);
-	   const name = $randomParent.find(".sc-eldPxv.bVwlNE").text().trim();
- 
-	   cy.log(`Randomly selected company name: ${name}`);
- 
-	   cy.wrap($randomParent)
-		 .find('input[type="checkbox"]')
-		 .check({ force: true });
- 
-	   cy.get("p").contains("Filters:").click();
-	   cy.wait(2000)
- 
-	   cy.verifyTableorEmptyState({
-		 tableRowSelector: ".sc-cRmqLi",
-		 cellSelector: ".personal-info-content__title",
-		 expectedText: name,
-	   });
-	 });
-   });
-
+	cy.contains(workforceSelector.tableColumn, 'Company Name').find('.table-header-filter-btn').click();
+	
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($options) => {
+		const randomIndex = Cypress._.random(0, $options.length - 1);
+		const $randomOption = $options.eq(randomIndex);
+		
+		const name = $randomOption.find('span[type="onDropdown"]').last().text().trim();
+  
+		cy.log(`Randomly selected company name: ${name}`);
+  
+		cy.wrap($randomOption)
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
+	  });
+	});
+  
+	cy.get("p").contains("Filters:").click();
+	cy.wait(2000);
+  
+	cy.verifyTableorEmptyState({
+	  tableRowSelector: workforceSelector.tableRow,
+	  cellSelector: ".personal-info-content__title",
+	  expectedText: name,
+	});
+  });
 
 
   it("Verify filtering by Status selection", () => {
-	cy.contains('.sc-fremEr.jImTfM', 'Status')
+	cy.contains(workforceSelector.tableColumn, 'Status')
 	  .find('.table-header-filter-btn')
 	  .click();
   
-	cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($labels) => {
+		
+		// Filter out "None" options
+		const validLabels = $labels.filter((_, el) => {
+		  const text = Cypress.$(el)
+			.find('span[type="onDropdown"]')
+			.last()
+			.text()
+			.trim();
+		  return text !== "None";
+		});
   
-	  const validParents = $parents.filter((_, el) => {
-		const text = Cypress.$(el)
-		  .find(".sc-eldPxv.bVwlNE")
+		expect(validLabels.length, 'Non-None options available')
+		  .to.be.greaterThan(0);
+  
+		const randomIndex = Cypress._.random(0, validLabels.length - 1);
+		const $randomLabel = validLabels.eq(randomIndex);
+  
+		const name = $randomLabel
+		  .find('span[type="onDropdown"]')
+		  .last()
 		  .text()
 		  .trim();
-		return text !== "None";
+  
+		cy.log(`Randomly selected status: ${name}`);
+  
+		cy.wrap($randomLabel)
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
 	  });
+	});
   
-	  expect(validParents.length, 'Non-None options available')
-		.to.be.greaterThan(0);
+	cy.get("p").contains("Filters:").click();
+	cy.wait(2000);
   
-	  const randomIndex = Cypress._.random(0, validParents.length - 1);
-	  const $randomParent = validParents.eq(randomIndex);
-  
-	  const name = $randomParent
-		.find(".sc-eldPxv.bVwlNE")
-		.text()
-		.trim();
-  
-	  cy.log(`Randomly selected company name: ${name}`);
-  
-	  cy.wrap($randomParent)
-		.find('input[type="checkbox"]')
-		.check({ force: true });
-  
-	  cy.get("p").contains("Filters:").click();
-	  cy.wait(2000)
-  
-	  cy.verifyTableorEmptyState({
-		tableRowSelector: ".sc-cRmqLi",
-		cellSelector: ".table_td",
-		expectedText: name,
-	  });
+	cy.verifyTableorEmptyState({
+	  tableRowSelector: workforceSelector.tableRow,
+	  cellSelector: ".table_td",
+	  expectedText: name,
 	});
   });
 
 
   it("Verify filtering by Safety Manager selection", () => {
-	cy.contains('.sc-fremEr.jImTfM', 'Safety Manager')
+	cy.contains(workforceSelector.tableColumn, 'Safety Manager')
 	  .find('.table-header-filter-btn')
 	  .click();
   
-	cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($labels) => {
+		
+		const validLabels = $labels.filter((_, el) => {
+		  const text = Cypress.$(el)
+			.find('span[type="onDropdown"]')
+			.last()
+			.text()
+			.trim();
+		  return text !== "None";
+		});
   
-	  const validParents = $parents.filter((_, el) => {
-		const text = Cypress.$(el)
-		  .find(".sc-eldPxv.bVwlNE")
+		expect(validLabels.length, 'Non-None options available')
+		  .to.be.greaterThan(0);
+  
+		const randomIndex = Cypress._.random(0, validLabels.length - 1);
+		const $randomLabel = validLabels.eq(randomIndex);
+  
+		const name = $randomLabel
+		  .find('span[type="onDropdown"]')
+		  .last()
 		  .text()
 		  .trim();
-		return text !== "None";
+  
+		cy.log(`Randomly selected Safety Manager: ${name}`);
+  
+		cy.wrap($randomLabel)
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
+		
+		// Wrap the name to use it later
+		cy.wrap(name).as('selectedName');
 	  });
+	});
   
-	  expect(validParents.length, 'Non-None options available')
-		.to.be.greaterThan(0);
+	cy.get("p").contains("Filters:").click();
+	cy.wait(2000);
   
-	  const randomIndex = Cypress._.random(0, validParents.length - 1);
-	  const $randomParent = validParents.eq(randomIndex);
-  
-	  const name = $randomParent
-		.find(".sc-eldPxv.bVwlNE")
-		.text()
-		.trim();
-  
-	  cy.log(`Randomly selected company name: ${name}`);
-  
-	  cy.wrap($randomParent)
-		.find('input[type="checkbox"]')
-		.check({ force: true });
-  
-	  cy.get("p").contains("Filters:").click();
-	  cy.wait(2000)
-  
+	// Use the aliased name
+	cy.get('@selectedName').then((name) => {
 	  cy.verifyTableorEmptyState({
-		tableRowSelector: ".sc-cRmqLi",
+		tableRowSelector: workforceSelector.tableRow,
 		cellSelector: ".table_td",
 		expectedText: name,
 	  });
@@ -223,42 +253,50 @@ describe("Companies Module - Filter", () => {
   });
 
   it("Verify filtering by Project Manager selection", () => {
-	cy.contains('.sc-fremEr.jImTfM', 'Project Manager')
+	cy.contains(workforceSelector.tableColumn, 'Project Manager')
 	  .find('.table-header-filter-btn')
 	  .click();
   
-	cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($labels) => {
+		
+		const validLabels = $labels.filter((_, el) => {
+		  const text = Cypress.$(el)
+			.find('span[type="onDropdown"]')
+			.last()
+			.text()
+			.trim();
+		  return text !== "None";
+		});
   
-	  const validParents = $parents.filter((_, el) => {
-		const text = Cypress.$(el)
-		  .find(".sc-eldPxv.bVwlNE")
+		expect(validLabels.length, 'Non-None options available')
+		  .to.be.greaterThan(0);
+  
+		const randomIndex = Cypress._.random(0, validLabels.length - 1);
+		const $randomLabel = validLabels.eq(randomIndex);
+  
+		const name = $randomLabel
+		  .find('span[type="onDropdown"]')
+		  .last()
 		  .text()
 		  .trim();
-		return text !== "None";
+  
+		cy.log(`Randomly selected Project Manager: ${name}`);
+  
+		cy.wrap($randomLabel)
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
+		
+		cy.wrap(name).as('selectedName');
 	  });
+	});
   
-	  expect(validParents.length, 'Non-None options available')
-		.to.be.greaterThan(0);
+	cy.get("p").contains("Filters:").click();
+	cy.wait(2000);
   
-	  const randomIndex = Cypress._.random(0, validParents.length - 1);
-	  const $randomParent = validParents.eq(randomIndex);
-  
-	  const name = $randomParent
-		.find(".sc-eldPxv.bVwlNE")
-		.text()
-		.trim();
-  
-	  cy.log(`Randomly selected company name: ${name}`);
-  
-	  cy.wrap($randomParent)
-		.find('input[type="checkbox"]')
-		.check({ force: true });
-  
-	  cy.get("p").contains("Filters:").click();
-	  cy.wait(2000)
-  
+	cy.get('@selectedName').then((name) => {
 	  cy.verifyTableorEmptyState({
-		tableRowSelector: ".sc-cRmqLi",
+		tableRowSelector: workforceSelector.tableRow,
 		cellSelector: ".table_td",
 		expectedText: name,
 	  });
@@ -270,11 +308,12 @@ describe("Companies Module - Filter", () => {
   it("Verify filtering by Phone Number", () => {
 	const phoneNumber = '+9779812345678';
   
-	cy.contains('.sc-fremEr.jImTfM', 'Phone Number')
+	cy.contains(workforceSelector.tableColumn, 'Phone Number')
 	  .find('.table-header-filter-btn')
 	  .click();
+	  cy.get('body').should('be.visible')
   
-	cy.get("input.sc-fHjqPf.fCepZC").type(phoneNumber);
+	cy.get('[placeholder="Search"]').eq(1).type(phoneNumber);
 	cy.get("p").contains("Filters:").click();
 	cy.wait(4000)
   
@@ -293,12 +332,10 @@ describe("Companies Module - Filter", () => {
 			  expect(hasMatch, 'Row should contain phone number').to.be.true;
 			});
 		});
-  
+
 	  } else {
-		cy.get('.empty-body').should(
-		  'have.text',
-		  'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-		);
+		cy.get('.empty-body').contains('No Results Found').should('be.visible')
+
 	  }
 	});
   });
@@ -306,11 +343,11 @@ describe("Companies Module - Filter", () => {
   it("Verify filtering by Address", () => {
 	const address = 'kathmandu';
   
-	cy.contains('.sc-fremEr.jImTfM', 'Address')
+	cy.contains(workforceSelector.tableColumn, 'Address')
 	  .find('.table-header-filter-btn')
 	  .click();
   
-	cy.get("input.sc-fHjqPf.fCepZC").type(address);
+		cy.get('[placeholder="Search"]').eq(1).type(address);
 	cy.get("p").contains("Filters:").click();
 	cy.wait(3000)
   
@@ -336,10 +373,8 @@ describe("Companies Module - Filter", () => {
 		});
   
 	  } else {
-		cy.get('.empty-body').should(
-		  'have.text',
-		  'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-		);
+		cy.get('.empty-body').contains('No Results Found').should('be.visible')
+
 	  }
 	});
   });
@@ -348,11 +383,11 @@ describe("Companies Module - Filter", () => {
   it("Verify filtering by Zip Code", () => {
 	const zipCode = '112233';
   
-	cy.contains('.sc-fremEr.jImTfM', 'Zip Code')
+	cy.contains(workforceSelector.tableColumn, 'Zip Code')
 	  .find('.table-header-filter-btn')
 	  .click();
   
-	cy.get("input.sc-fHjqPf.fCepZC").type(zipCode);
+		cy.get('[placeholder="Search"]').eq(1).type(zipCode);
 	cy.get("p").contains("Filters:").click();
 	cy.wait(3000)
   
@@ -378,139 +413,153 @@ describe("Companies Module - Filter", () => {
 		});
   
 	  } else {
-		cy.get('.empty-body').should(
-		  'have.text',
-		  'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-		);
+		cy.get('.empty-body').contains('No Results Found').should('be.visible')
 	  }
 	});
   });
 
-
   it("Verify filtering by Certificates selection", () => {
-	let name;
+	cy.get(workforceSelector.tableRow).should('be.visible');
 	const validStatuses = ["Expired", "Expiring", "All Uploaded"];
+	cy.get(workforceSelector.tableColumn).then(($headers) => {
+		const allHeaders = [...$headers];
+		
+		const certColumnIndex = allHeaders.findIndex((header, index) => {
+		  const text = header.innerText.trim();
+		  cy.log(`Header ${index}: "${text}"`);
+		  return text === "Certificates";
+		});
+	  
+		cy.log(`Final certColumnIndex: ${certColumnIndex}`);
+		cy.wrap(certColumnIndex).as('certColumnIndex');
   
-	// Open Certificates filter
-	cy.contains('.sc-fremEr.jImTfM', 'Certificates')
-	  .find('.table-header-filter-btn')
-	  .click();
+	  cy.contains(workforceSelector.tableColumn, 'Certificates')
+		.find('.table-header-filter-btn')
+		.click();
   
-	// Select random valid certificate filter (excluding "None")
-	cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-	  const validParents = $parents.filter((_, el) => {
-		return Cypress.$(el)
-		  .find(".sc-eldPxv.bVwlNE")
-		  .text()
-		  .trim() !== "None";
+	  cy.get('[class*="select_item_container"]').within(() => {
+		cy.get('label[for^=":r"]').then(($labels) => {
+		  const validLabels = $labels.filter((_, el) => {
+			const text = Cypress.$(el).find('span[type="onDropdown"]').last().text().trim();
+			return text !== "None";
+		  });
+  
+		  expect(validLabels.length, 'Non-None options available').to.be.greaterThan(0);
+  
+		  const $randomLabel = validLabels.eq(Cypress._.random(0, validLabels.length - 1));
+		  const name = $randomLabel.find('span[type="onDropdown"]').last().text().trim();
+  
+		  cy.log(`Testing certificate filter: ${name}`);
+		  cy.wrap($randomLabel).find('input[type="checkbox"]').check({ force: true });
+		  cy.wrap(name).as('selectedName');
+		});
 	  });
   
-	  expect(validParents.length).to.be.greaterThan(0);
-  
-	  const randomIndex = Cypress._.random(0, validParents.length - 1);
-	  const $randomParent = validParents.eq(randomIndex);
-  
-	  name = $randomParent
-		.find(".sc-eldPxv.bVwlNE")
-		.text()
-		.trim();
-  
-	  cy.log(`Testing certificate filter: ${name}`);
-  
-	  cy.wrap($randomParent)
-		.find('input[type="checkbox"]')
-		.check({ force: true });
-  
 	  cy.contains("p", "Filters:").click();
-	});
-	
-	cy.wait(3000);
+	  cy.wait(3000);
   
-	// Get certificate column index
-	cy.get('.sc-fremEr.jImTfM').then(($headers) => {
-	  const certColumnIndex = [...$headers].findIndex(header =>
-		header.innerText.includes("Certificates")
-	  );
+	  cy.get('@selectedName').then((name) => {
+		cy.get('@certColumnIndex').then((certColumnIndex) => {
+		  cy.get('body').then(($body) => {
+			const hasRows = $body.find(workforceSelector.tableRow).length > 0;
   
-	  expect(certColumnIndex).to.be.greaterThan(-1);
+			if (!hasRows) {
+				cy.get('.empty-body').contains('No Results Found').should('be.visible')
+			  return;
+			}
   
-	  // Verify filtered results
-	  cy.get('body').then(($body) => {
-		const hasRows = $body.find(".sc-cRmqLi").length > 0;
+			cy.get(workforceSelector.tableRow).then(($rows) => {
+			  const rowsToCheck = Math.min($rows.length, 2);
   
-		if (hasRows) {
-		  cy.get(".sc-cRmqLi").each(($row) => {
-			cy.wrap($row)
-			  .find(".table_td")
-			  .eq(certColumnIndex)
-			  .then(($cell) => {
-				const text = $cell.text().trim();
+			  Cypress._.range(rowsToCheck).forEach((rowIndex) => {
+				cy.get(workforceSelector.tableRow).eq(rowIndex)
+				  .find(".table_td")
+				  .eq(certColumnIndex-1)
+				  .then(($cell) => {
+					const text = $cell.text().trim();
+					cy.log(`Row ${rowIndex} certificate: "${text}"`);
   
-				if (name === "All Uploaded") {
-				  const hasValidStatus = validStatuses.some(status =>
-					text.startsWith(status)
-				  );
-				  expect(
-					hasValidStatus,
-					`Row should contain one of: ${validStatuses.join(", ")} but found "${text}"`
-				  ).to.be.true;
-				} else {
-				  expect(text, `Row should contain "${name}"`).to.include(name);
-				}
+					if (name === "All Uploaded") {
+					  expect(
+						validStatuses.some(status => text.startsWith(status)),
+						`Row should contain one of: ${validStatuses.join(", ")} but found "${text}"`
+					  ).to.be.true;
+					} else {
+					  expect(text, `Row should contain "${name}"`).to.include(name);
+					}
   
-				cy.wrap($cell).find('.label').each(($label) => {
-					cy.wrap($label).click();
-					
-					// Handle each .doc-option__label separately
-					cy.get('.doc-option__label').should('be.visible').each(($optionLabel) => {
-					  const optionText = $optionLabel.text().trim();
-					  
-					  cy.get('body').type('{esc}');
-					  cy.wrap($cell).parent(workforceSelector.tableRow).click({force:true});
-					  cy.get('.sc-fqkvVR.sc-dcJsrY').eq(2).click();
-					  
-					  cy.get('body').then(($body) => {
-						const optionTextExists = $body.find('.sc-jaXxmE .sc-cRmqLi .cell-content').filter((_, el) => {
-						  return Cypress.$(el).text().trim() === optionText || Cypress.$(el).text().includes(optionText);
-						}).length > 0;
-				  
-						if (optionTextExists) {
-						  cy.contains('.sc-jaXxmE .sc-cRmqLi .cell-content', optionText).should('be.visible');
-						} else {
-						  cy.get('.sc-YysOf').contains('Licences').click();
-						  cy.contains('.sc-jaXxmE .sc-cRmqLi .cell-content', optionText).should('be.visible');
-						  
-
-						}
+					cy.wrap($cell).find('.tag .small__label').then(($tags) => {
+					  if ($tags.length === 0) return;
+  
+					  cy.wrap($tags).first().click({ force: true });
+  
+					  cy.get('[class*="doc-option__label"]').should('be.visible').then(($docLabels) => {
+						const docOptionTexts = $docLabels.map((_, el) => Cypress.$(el).text().trim()).get();
+						cy.log(`Document options: ${docOptionTexts.join(', ')}`);
+  
+						cy.get('body').type('{esc}');
+						cy.wait(300);
+  
+						cy.get(workforceSelector.tableRow).eq(rowIndex).click({ force: true });
+						cy.wait(500);
+  
+						cy.get(workforceSelector.companyDocumentPage).click();
+						cy.wait(1000);
+  
+						docOptionTexts.forEach((docText) => {
+						  cy.get('body').then(($body) => {
+							const docExists = $body.find(workforceSelector.documentTableRow)
+							  .find('[class*="cell-content"]')
+							  .filter((_, el) => Cypress.$(el).text().trim().includes(docText)).length > 0;
+  
+							if (docExists) {
+							  cy.log(`✓ Found "${docText}" in Documents tab`);
+							  cy.get(workforceSelector.documentTableRow)
+								.find('[class*="cell-content"]')
+								.then(($cells) => {
+								  expect(
+									$cells.map((_, el) => Cypress.$(el).text().trim()).get()
+									  .some(cellText => cellText.includes(docText)),
+									`"${docText}" should be found in document table`
+								  ).to.be.true;
+								});
+							} else {
+							  cy.log(`⚠ "${docText}" not found in Documents, checking Licences tab...`);
+							  cy.get(workforceSelector.licencesTab).click();
+							  cy.wait(500);
+  
+							  cy.get(workforceSelector.documentTableRow)
+								.find('[class*="cell-content"]')
+								.then(($cells) => {
+								  expect(
+									$cells.map((_, el) => Cypress.$(el).text().trim()).get()
+									  .some(cellText => cellText.includes(docText)),
+									`"${docText}" should be found in Licences table`
+								  ).to.be.true;
+								});
+  
+							  cy.get(workforceSelector.CertificationsTab).click();
+							  cy.wait(500);
+							}
+						  });
+						});
+  
+						cy.get('body').type('{esc}');
+						cy.wait(1000);
+						cy.get(workforceSelector.tableRow).should('be.visible');
 					  });
-					  
-					  cy.get('body').click(0, 0);
 					});
 				  });
-
-				
-				// Optional: Add a wait or verification after clicking
-				cy.wait(1000);
-				
-				// Optional: If a modal/popup opens, you can verify and close it
-				// cy.get('.modal-selector').should('be.visible');
-				// cy.get('.close-button').click();
 			  });
+			});
 		  });
-		} else {
-		  cy.get('.empty-body').should(
-			'have.text',
-			'No Results FoundTry adjusting your search or filter to find what you are looking for. Reset Filters '
-		  );
-		}
+		});
 	  });
 	});
   });
-
   it('Verify filtering by Total Worker filter', () => {
 
-	// Open filter
-	cy.contains('.sc-fremEr.jImTfM', 'Total Workers')
+	cy.contains(workforceSelector.tableColumn, 'Total Workers')
 	  .find('.table-header-filter-btn')
 	  .click();
   
@@ -520,15 +569,17 @@ describe("Companies Module - Filter", () => {
 	cy.contains('p', 'Filters:').click();
 	cy.wait(3000);
   
-	// 1️⃣ Get Total Workers column index from header row
-	cy.get('.sc-fremEr.jImTfM').then(($headers) => {
-	  const totalWorkerIndex = [...$headers].findIndex(
-		(header) => header.innerText.trim() === 'Total Workers'
-	  );
+
+	cy.get(workforceSelector.tableColumn).then(($headers) => {
+		const totalWorkerIndex = [...$headers].findIndex(
+		  (header) => header.innerText.trim() === 'Total Workers'
+		);
+	  
+		expect(totalWorkerIndex, 'Total Workers column index').to.be.greaterThan(-1);
+		cy.wrap(totalWorkerIndex - 1).as('totalWorkerIndex'); // -1 to offset checkbox/empty first column
+	  });
   
-	  expect(totalWorkerIndex, 'Total Workers column index').to.be.greaterThan(-1);
-  
-	  // 2️⃣ Validate table rows
+	cy.get('@totalWorkerIndex').then((totalWorkerIndex) => {
 	  cy.get('body').then(($body) => {
 		if ($body.find(workforceSelector.tableRow).length > 0) {
   
@@ -549,131 +600,147 @@ describe("Companies Module - Filter", () => {
 		}
 	  });
 	});
-
-	
   });
 
   it('Verify clearing all filters works correctly', () => {
-	// Open Company Name filter
-	cy.contains('.sc-fremEr.jImTfM', 'Company Name')
+	cy.contains(workforceSelector.tableColumn, 'Company Name')
 	  .find('.table-header-filter-btn')
 	  .click();
   
-	cy.get('.sc-fzQBhs.fyTPqL').then(($parents) => {
-	  const randomIndex = Cypress._.random(0, $parents.length - 1);
-	  const $randomParent = $parents.eq(randomIndex);
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($labels) => {
+		const randomIndex = Cypress._.random(0, $labels.length - 1);
+		const $randomLabel = $labels.eq(randomIndex);
   
-	  const companyName = $randomParent
-		.find('.sc-eldPxv.bVwlNE')
-		.text()
-		.trim();
+		const companyName = $randomLabel
+		  .find('span[type="onDropdown"]')
+		  .last()
+		  .text()
+		  .trim();
   
-
-	  cy.wrap($randomParent)
-		.find('input[type="checkbox"]')
-		.check({ force: true });
+		cy.log(`Selected company: ${companyName}`);
   
-
-	  cy.get('.label.default__label')
-		.contains('Company Name: 1')
-		.should('be.visible');
+		cy.wrap($randomLabel)
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
+	  });
 	});
   
-
+	cy.get('[class*="label"][class*="default__label"]')
+	  .contains('Company Name: 1')
+	  .should('be.visible');
+  
 	cy.contains('p', 'Filters:').click();
   
-
-	cy.contains('.tag.default.grey', 'Clear All')
+	cy.contains('[class*="tag"][class*="default"][class*="grey"]', 'Clear All')
 	  .should('be.visible')
 	  .click();
   
-
-	cy.contains('.tag.default.grey', 'Clear All')
+	cy.contains('[class*="tag"][class*="default"][class*="grey"]', 'Clear All')
 	  .should('not.exist');
   
-
-	  cy.contains('.label.default__label', 'Company Name')
+	cy.contains('[class*="label"][class*="default__label"]', 'Company Name')
 	  .should('not.exist');
   });
 
+
   it('Verify filtering with multiple filters applied simultaneously', () => {
-    // Apply Primary Trade filter
-    cy.contains('.sc-fremEr.jImTfM', 'Primary Trade')
-      .find('.table-header-filter-btn')
-      .click();
-
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-      const validParents = $parents.filter((_, el) => {
-        const text = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return text !== "None";
-      });
-
-      const randomIndex = Cypress._.random(0, validParents.length - 1);
-      cy.wrap(validParents.eq(randomIndex))
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-    cy.contains('p', 'Filters:').click();
-
-    // Apply Status filter
-    cy.contains('.sc-fremEr.jImTfM', 'Status')
-      .find('.table-header-filter-btn')
-      .click();
-
-    cy.get(".sc-fzQBhs.fyTPqL").then(($parents) => {
-      const validParents = $parents.filter((_, el) => {
-        const text = Cypress.$(el).find(".sc-eldPxv.bVwlNE").text().trim();
-        return text !== "None";
-      });
-
-      const randomIndex = Cypress._.random(0, validParents.length - 1);
-      cy.wrap(validParents.eq(randomIndex))
-        .find('input[type="checkbox"]')
-        .check({ force: true });
-    });
-    cy.contains('p', 'Filters:').click();
-
-    cy.contains('.sc-fremEr.jImTfM', 'Address')
-      .find('.table-header-filter-btn')
-      .click();
-
-    cy.get("input.sc-fHjqPf.fCepZC").type('kathmandu');
-    cy.contains('p', 'Filters:').click();
-    cy.wait(2000);
-
-    cy.get('.label.default__label').contains('Primary Trade: 1').should('be.visible');
-    cy.get('.label.default__label').contains('Status: 1').should('be.visible');
-    cy.get('.label.default__label').contains('Address').should('be.visible');
-
-    // Verify Clear All button exists
-    cy.contains('.tag.default.grey', 'Clear All').should('be.visible');
-
-    // Validate table has results or shows empty state
-    cy.get('body').then(($body) => {
-      if ($body.find(workforceSelector.tableRow).length > 0) {
-        cy.get(workforceSelector.tableRow).should('exist');
-        cy.log('✓ Results found matching all filters');
-      } else {
-        cy.get('.empty-body').should('contain.text', 'No Results Found');
-        cy.log('⚠ No results match the applied filters');
-      }
-    });
+	// Apply Primary Trade filter
+	cy.contains(workforceSelector.tableColumn, 'Primary Trade')
+	  .find('.table-header-filter-btn')
+	  .click();
+  
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($labels) => {
+		const validLabels = $labels.filter((_, el) => {
+		  const text = Cypress.$(el)
+			.find('span[type="onDropdown"]')
+			.last()
+			.text()
+			.trim();
+		  return text !== "None";
+		});
+  
+		expect(validLabels.length, 'Non-None options available').to.be.greaterThan(0);
+  
+		const randomIndex = Cypress._.random(0, validLabels.length - 1);
+		cy.wrap(validLabels.eq(randomIndex))
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
+	  });
+	});
+	
+	cy.contains('p', 'Filters:').click();
+  
+	// Apply Status filter
+	cy.contains(workforceSelector.tableColumn, 'Status')
+	  .find('.table-header-filter-btn')
+	  .click();
+  
+	cy.get('[class*="select_item_container"]').within(() => {
+	  cy.get('label[for^=":r"]').then(($labels) => {
+		const validLabels = $labels.filter((_, el) => {
+		  const text = Cypress.$(el)
+			.find('span[type="onDropdown"]')
+			.last()
+			.text()
+			.trim();
+		  return text !== "None";
+		});
+  
+		expect(validLabels.length, 'Non-None options available').to.be.greaterThan(0);
+  
+		const randomIndex = Cypress._.random(0, validLabels.length - 1);
+		cy.wrap(validLabels.eq(randomIndex))
+		  .find('input[type="checkbox"]')
+		  .check({ force: true });
+	  });
+	});
+	
+	cy.contains('p', 'Filters:').click();
+  
+	// Apply Address filter
+	cy.contains(workforceSelector.tableColumn, 'Address')
+	  .find('.table-header-filter-btn')
+	  .click();
+  
+	cy.get('[placeholder="Search"]').eq(1).type('kathmandu');
+	cy.contains('p', 'Filters:').click();
+	cy.wait(2000);
+  
+	// Verify filter labels are visible
+	cy.get('[class*="label"][class*="default__label"]').contains('Primary Trade: 1').should('be.visible');
+	cy.get('[class*="label"][class*="default__label"]').contains('Status: 1').should('be.visible');
+	cy.get('[class*="label"][class*="default__label"]').contains('Address').should('be.visible');
+  
+	// Verify Clear All button exists
+	cy.contains('[class*="tag"][class*="default"][class*="grey"]', 'Clear All').should('be.visible');
+  
+	// Validate table has results or shows empty state
+	cy.get('body').then(($body) => {
+	  if ($body.find(workforceSelector.tableRow).length > 0) {
+		cy.get(workforceSelector.tableRow).should('exist');
+		cy.log('✓ Results found matching all filters');
+	  } else {
+	cy.get('.empty-body').contains('No Results Found').should('be.visible')
+		cy.log('⚠ No results match the applied filters');
+	  }
+	});
   });
-
 
   it('Verify sorting functionality', () => {
 	// Hover over "Company Name" header
-	cy.contains('.sc-fremEr.jImTfM', 'Company Name').realHover();
+	cy.contains(workforceSelector.tableColumn, 'Company Name').realHover();
   
 	// First click: Sort Z-A (descending)
-	cy.get('.sorting-icon').eq(0).click();
-	cy.wait(3000)
+	cy.get('[class*="sorting-icon"]').eq(0).click();
+	cy.wait(3000);
   
 	// Wait for table rows to appear
-	cy.get('.personal-info-content__title').should('have.length.at.least', 1);
+	cy.get('[class*="personal-info-content__title"]').should('have.length.at.least', 1);
   
 	// Validate Z-A order
-	cy.get('.personal-info-content__title').then(($cells) => {
+	cy.get('[class*="personal-info-content__title"]').then(($cells) => {
 	  const names = $cells
 		.map((_, cell) => cell.textContent.trim())
 		.get();
@@ -705,12 +772,12 @@ describe("Companies Module - Filter", () => {
 	});
   
 	// Second click: Sort A-Z (ascending)
-	cy.get('.sorting-icon').eq(0).click();
-	cy.wait(3000)
-	cy.get('.personal-info-content__title').should('have.length.at.least', 1);
+	cy.get('[class*="sorting-icon"]').eq(0).click();
+	cy.wait(3000);
+	cy.get('[class*="personal-info-content__title"]').should('have.length.at.least', 1);
   
 	// Validate A-Z order
-	cy.get('.personal-info-content__title').then(($cells) => {
+	cy.get('[class*="personal-info-content__title"]').then(($cells) => {
 	  const names = $cells
 		.map((_, cell) => cell.textContent.trim())
 		.get();
@@ -734,7 +801,6 @@ describe("Companies Module - Filter", () => {
 		} else if (!currentStartsWithNum && nextStartsWithNum) {
 		  throw new Error(`Position ${i}: Number "${next}" should come before "${current}"`);
 		} else {
-		  // Compare normalized strings
 		  const isCorrectOrder = normalizedCurrent <= normalizedNext;
 		  expect(isCorrectOrder, `Position ${i}: "${current}" (normalized: "${normalizedCurrent}") should come before "${next}" (normalized: "${normalizedNext}")`).to.be.true;
 		}

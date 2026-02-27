@@ -8,11 +8,11 @@ import "../../support/commands";
 
 describe("Worker Module - Personal Details Page", () => {
   before(() => {
+    cy.viewport(1440, 900);
     cy.session('userSession', () => {
       cy.login();
       cy.get('.card-title')
         .contains(Cypress.env('PROJECT_NAME'))
-        .click();
     });
     workerHelper.visitWorkersPage();
   });
@@ -22,7 +22,7 @@ describe("Worker Module - Personal Details Page", () => {
 
   it("should verify all UI elements and labels in the Personal Details drawer", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.personalDetails().click();
+    cy.get(workforceSelector.personalDetailsPage).click();
 
     // Verify the drawer header
     cy.get("p").contains("Personal Details").should("be.visible");
@@ -64,7 +64,7 @@ describe("Worker Module - Personal Details Page", () => {
 
   it("should allow editing and saving all editable fields in the Personal Details section", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.personalDetails().click();
+    cy.get(workforceSelector.personalDetailsPage).click();
 
     cy.get(".hover-hoc-container__input__display-value")
       .eq(0)
@@ -103,7 +103,7 @@ describe("Worker Module - Personal Details Page", () => {
       .click({ force: true });
 
     cy.get('[placeholder="Select Sex"]').click({ force: true }).clear();
-    cy.get(".sc-tagGq[role='button']").then(($buttons) => {
+    cy.get('.select_item_container [role="button"]').then(($buttons) => {
       const randomIndex = Cypress._.random(0, $buttons.length - 1);
       const $randomButton = $buttons.eq(randomIndex);
       const randomCrew = $randomButton.text().trim();
@@ -119,7 +119,7 @@ describe("Worker Module - Personal Details Page", () => {
       .should("be.visible")
       .click({ force: true });
     cy.get('[placeholder="Select MWBE"]').click({ force: true }).clear();
-    cy.get(".sc-tagGq[role='button']").then(($buttons) => {
+    cy.get('.select_item_container [role="button"]').then(($buttons) => {
       const randomIndex = Cypress._.random(0, $buttons.length - 1);
       const $randomButton = $buttons.eq(randomIndex);
       const randomCrew = $randomButton.text().trim();
@@ -135,7 +135,7 @@ describe("Worker Module - Personal Details Page", () => {
       .should("be.visible")
       .click({ force: true });
     cy.get('[placeholder="Select Ethnicity"]').click({ force: true }).clear();
-    cy.get(".sc-tagGq[role='button']").then(($buttons) => {
+    cy.get('.select_item_container [role="button"]').then(($buttons) => {
       const randomIndex = Cypress._.random(0, $buttons.length - 1);
       const $randomButton = $buttons.eq(randomIndex);
       cy.wrap($randomButton).click({ force: true });
@@ -143,7 +143,7 @@ describe("Worker Module - Personal Details Page", () => {
 
 
     cy.contains('button p', 'Update').click();
-    workforceSelector.toastMessage().should("contain", "Successfully updated employee.");
+    cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated worker");
     cy.wait(1000);
 
     cy.get(".hover-hoc-container__input__display-value").invoke("text").then((filledInfo) => {
@@ -151,7 +151,7 @@ describe("Worker Module - Personal Details Page", () => {
 
       cy.get("button p").contains("Cancel").click();
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-      workforceSelector.personalDetails().click();
+      cy.get(workforceSelector.personalDetailsPage).click();
       cy.wait(1000);
 
       cy.get(".hover-hoc-container__input__display-value").should("have.text", filledInfo);
@@ -173,23 +173,21 @@ describe("Worker Module - Personal Details Page", () => {
       });
 
     // Step 3: open Personal Details
-    workforceSelector.personalDetails().click({ force: true });
+    cy.get(workforceSelector.personalDetailsPage).click({ force: true });
 
-    // Step 4: click info icon
-    cy.get(".sc-kSRfVL.htHbwd button").click({ force: true });
+    cy.get("header button").eq(0).click({ force: true });
 
     cy.get("@workerName").then((name) => {
-      cy.get(".sc-dhKdcB.iJWWrH")
+      cy.get("p")
         .contains(name)
         .should("be.visible");
     });
   });
 
-  it("should show appropriate toast messages for invalid email and phone number input", () => {
-    cy.visit("/projects/94049707/workers");
+  it("should show toast message for invalid phone number input", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
-    workforceSelector.personalDetails().click();
-
+    cy.get(workforceSelector.personalDetailsPage).click();
+  
     cy.get(".hover-hoc-container__input__display-value")
       .eq(0)
       .realHover()
@@ -197,11 +195,19 @@ describe("Worker Module - Personal Details Page", () => {
       .first()
       .should("be.visible")
       .click();
-    cy.get('[name="phone"]').click().clear().type("00000");
-
+  
+    cy.get('[name="phone"]').clear().type("00000");
     cy.get("button p").contains("Update").click();
-    workforceSelector.toastMessage().contains("Invalid Phone Number").should("be.visible");
 
+    cy.get(workforceSelector.toastMessage)
+      .contains("Invalid Phone Number")
+      .should("be.visible");
+  });
+
+  it("should show toast message for invalid email input", () => {
+    cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
+    cy.get(workforceSelector.personalDetailsPage).click();
+  
     cy.get(".hover-hoc-container__input__display-value")
       .eq(1)
       .realHover()
@@ -209,8 +215,14 @@ describe("Worker Module - Personal Details Page", () => {
       .first()
       .should("be.visible")
       .click();
-    cy.get('[name="email"]').click().clear().type("paras");
+  
+    cy.get('[name="email"]').clear().type("paras");
     cy.get("button p").contains("Update").click();
-    workforceSelector.toastMessage().contains("Invalid email").should("be.visible");
+    cy.get(workforceSelector.toastMessage)
+      .contains("Invalid email")
+      .should("be.visible");
   });
+  
+
+  
 });

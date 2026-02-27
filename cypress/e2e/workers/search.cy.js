@@ -215,7 +215,7 @@ describe("Worker Module - Search", () => {
         cy.get(workforceSelector.searchInput).clear().type(value);
         cy.wait(1500);
 
-        cy.get(".sc-cRmqLi .personal-info-content__title").each(($el) => {
+        cy.get(`${workforceSelector.tableRow} .personal-info-content__title`).each(($el) => {
           expect($el.text().toLowerCase()).to.include(name.toLowerCase());
         });
       };

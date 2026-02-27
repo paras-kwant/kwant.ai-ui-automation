@@ -24,8 +24,7 @@ describe("Workforce Company - Favourite page", () => {
 			  cy.get('.top-nav-left-section [role="button"]')
 				.should('be.visible')
 				.click({ force: true });
-			  cy.get('.sc-kOPcWz', { timeout: 10000 })
-				.should('contain.text', 'Added to favorite');
+			  cy.get(workforceSelector.toastMessage).contains('Added to favorite');
 			  cy.get('[title="Workforce Companies"]', { timeout: 10000 })
 				.should('exist');
 			}
@@ -39,8 +38,7 @@ describe("Workforce Company - Favourite page", () => {
     cy.get('.top-nav-left-section [role="button"]') //cjhange
       .should('be.visible')
       .click();
-    cy.get('.sc-kOPcWz')
-      .should('contain.text', 'Removed from favorite ');
+    cy.get(workforceSelector.toastMessage).contains('Removed from favorite').should('be.visible')
      cy.get('.top-nav-left-section [role="button"][fill="#FACC15"]').should('not.exist');
     cy.get('[title="Workforce Companies"]').should('not.exist');
   });
@@ -48,8 +46,7 @@ describe("Workforce Company - Favourite page", () => {
   it("Verify adding company as favourite", () => {
      cy.get('.top-nav-left-section [role="button"]').click();
 
-    cy.get('.sc-kOPcWz', { timeout: 10000 }) //change here
-      .should('contain.text', 'Added to favorite');
+    cy.get(workforceSelector.toastMessage).contains('Added to favorite');
 
      cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
       .should('be.visible');
@@ -78,9 +75,15 @@ describe("Workforce Company - Favourite page", () => {
 	  .then(($icon) => {
 		if ($icon.length === 0) {
 		  cy.get('.top-nav-left-section [role="button"]').click();
-		  cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/companies`);
+		  cy.get('[title]')
+  .eq(0)
+  .should('have.attr', 'title', 'Workforce Companies');
+
 		} else {
-			cy.get('.sc-fatcLD.ismSbL').eq(0).parents('a').should('have.attr', 'href', `/projects/${Cypress.env('PROJECT_ID')}/companies`);
+			cy.get('[title]')
+  .eq(0)
+  .should('have.attr', 'title', 'Workforce Companies');
+
 		}
 	  });
 	})

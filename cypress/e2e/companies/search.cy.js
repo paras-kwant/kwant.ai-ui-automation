@@ -195,8 +195,9 @@ describe("Companies Module - Search", () => {
       expect(names.length, "Available trade names").to.be.greaterThan(0);
       const randomNames = Cypress._.sampleSize(names, 1);
       randomNames.forEach((name) => {
-        cy.contains('.sc-fremEr.jImTfM', 'Status').find('.table-header-filter-btn').click();
-        cy.get('.sc-eldPxv').contains('Inactive').click();
+        cy.contains(workforceSelector.tableColumn, 'Status').find('.table-header-filter-btn').click();
+        cy.get('body').should('be.visible')
+        cy.get('.select_item_container label').contains('Inactive').click();
         cy.get('.label.default__label').contains('Status: 1').should('be.visible');
         cy.get(workforceSelector.searchInput).clear().type(name+" ",);
         const escapedName = Cypress._.escapeRegExp(name);
@@ -266,11 +267,11 @@ describe("Companies Module - Search", () => {
       cy.wait('@filterApi').its('response.statusCode').should('eq', 200);
 
 
-      cy.contains('.sc-fremEr.jImTfM', 'Status')
+      cy.contains(workforceSelector.tableColumn, 'Status')
         .find('.table-header-filter-btn')
         .click();
   
-      cy.get('.sc-eldPxv')
+      cy.get('.select_item_container label')
         .contains('Inactive')
         .click();
   

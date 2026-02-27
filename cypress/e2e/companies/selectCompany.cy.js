@@ -5,7 +5,7 @@ const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import companiesHelper from '../../support/helper/companiesHelper';
 
-describe("Worker Module - Selection Functionality", () => {
+describe("companies Module - Selection Functionality", () => {
 
   before(() => {
     cy.session('userSession', () => {
@@ -29,7 +29,7 @@ describe("Worker Module - Selection Functionality", () => {
   });
 
   it('should display correct total worker count when selecting all workers via header checkbox', () => {
-    cy.get('.sc-kMkxaj.eTAOVM')
+    cy.get('.workforce-footer')
       .invoke('text')
       .then((text) => {
         const totalWorker = text
@@ -76,7 +76,7 @@ describe("Worker Module - Selection Functionality", () => {
     cy.get(workforceSelector.tableRow)
       .should('be.visible');
 
-    cy.get('.sc-kMkxaj.eTAOVM')
+    cy.get('.workforce-footer')
       .invoke('text')
       .then((text) => {
         const match = text.match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/);
@@ -84,9 +84,8 @@ describe("Worker Module - Selection Functionality", () => {
 
         cy.log(`Total number of workers: ${totalWorker}`);
 
-        cy.get('.sc-bXWnss svg')
-          .eq(0)
-          .click();
+       cy.get(workforceSelector.tableColumn).eq(2).click()
+       cy.get('body').should('be.visible')
 
         cy.get('p')
           .contains('Select All')
@@ -98,9 +97,7 @@ describe("Worker Module - Selection Functionality", () => {
   });
 
   it('should select only workers on the current page when using Select On This Page option', () => {
-    cy.get('.sc-bXWnss svg')
-      .eq(0)
-      .click();
+    cy.get(workforceSelector.tableColumn).eq(2).click()
 
     cy.get('p')
       .contains('Select On This Page')

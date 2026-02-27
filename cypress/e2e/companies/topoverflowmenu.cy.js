@@ -16,7 +16,6 @@ describe("Companies - overflow menu", () => {
   });
 
   beforeEach(() => {
-    // Capture auth headers on each test
     cy.intercept('GET', '/api/projectConfigs', (req) => {
       authHeaders = {
         'x-auth-token': req.headers['x-auth-token'],
@@ -87,7 +86,7 @@ describe("Companies - overflow menu", () => {
       companyName = $row.text().trim();
       cy.log(companyName);
       
-      cy.get(".sc-cRmqLi").first().find('[type="checkbox"]').check({ force: true });
+      cy.get(workforceSelector.tableRow).first().find('[type="checkbox"]').check({ force: true });
       cy.get(workforceSelector.overflowMenu).click();
       cy.contains(".dropdown-option", "Delete").click();
       cy.get("button p").contains("Cancel").click();
@@ -98,8 +97,7 @@ describe("Companies - overflow menu", () => {
 
   it("Should not delete a company which has workers, then cleanup", () => {
     const companyName = `deleteTestWithWorkers_${Date.now()}`;
-    
-    // Create company with worker
+  
     createCompany({
       name: companyName,
       projectId: "500526306",
@@ -120,21 +118,18 @@ describe("Companies - overflow menu", () => {
     cy.get(workforceSelector.searchInput).clear().type(companyName);
     cy.get(workforceSelector.tableRow, { timeout: 10000 }).should('contain.text', companyName);
     
-    cy.get(".sc-cRmqLi").first().find('[type="checkbox"]').check({ force: true });
+    cy.get(workforceSelector.tableRow).first().find('[type="checkbox"]').check({ force: true });
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Delete").click();
     cy.get("button p").contains("Delete").click();
     
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "Companies with associated workers cannot be deleted.");
+    cy.get(workforceSelector.toastMessage).contains("Companies with associated workers cannot be deleted.");
     
-    // Cleanup: Delete workers first
     cy.contains(workforceSelector.tableRow, companyName)
       .should('be.visible')
       .click({ force: true });
     
-    cy.get('.sc-jXbUNg').eq(2).click();
+    cy.get(workforceSelector.companyWorkerPage).click();
     cy.get('.details p').contains('Total Workers').should('be.visible');
     cy.get('[label="view"]').eq(0).click();
     
@@ -150,7 +145,6 @@ describe("Companies - overflow menu", () => {
     cy.wait('@deleteWorkers', { timeout: 10000 });
     cy.wait(1000);
     
-    // Now delete the company
     cy.visit('https://uat.kwant.ai/projects/500526306/companies');
     cy.url().should("include", "/500526306/companies");
     cy.get(workforceSelector.searchInput).clear().type(companyName);
@@ -164,9 +158,7 @@ describe("Companies - overflow menu", () => {
     cy.get("button p").contains("Delete").click();
     cy.wait('@deleteCompany', { timeout: 10000 });
     
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "successfully deleted");
+    cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
   it("Should delete company successfully with no workers", () => {
@@ -191,7 +183,7 @@ describe("Companies - overflow menu", () => {
       .contains(companyName)
       .should('be.visible');
 
-    cy.get(".sc-cRmqLi").first().find('[type="checkbox"]').check({ force: true });
+    cy.get(workforceSelector.tableRow).first().find('[type="checkbox"]').check({ force: true });
     
     cy.intercept('POST', '/api/companies/delete').as('deleteCompany');
     cy.get(workforceSelector.overflowMenu).click();
@@ -199,9 +191,7 @@ describe("Companies - overflow menu", () => {
     cy.get("button p").contains("Delete").click();
     cy.wait('@deleteCompany', { timeout: 10000 });
     
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "successfully deleted");
+    cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
   it("Should delete multiple companies successfully without workers", () => {
@@ -271,9 +261,7 @@ describe("Companies - overflow menu", () => {
     cy.get("button p").contains("Delete").click();
     cy.wait('@deleteCompanies', { timeout: 10000 });
     
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "successfully deleted");
+    cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
   it("Should merge companies with no workers successfully", () => {
@@ -337,9 +325,7 @@ describe("Companies - overflow menu", () => {
     cy.get("button p").contains("Merge").click();
     cy.wait('@mergeCompanies', { timeout: 15000 });
 
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "Companies merged successfully!");
+    cy.get(workforceSelector.toastMessage).contains("Companies merged successfully!");
 
     // Verify merge
     cy.wait(1000);
@@ -356,9 +342,7 @@ describe("Companies - overflow menu", () => {
     cy.get("button p").contains("Delete").click();
     cy.wait('@deleteCompany', { timeout: 10000 });
     
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "successfully deleted");
+    cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
   it("Should merge 3 companies with workers and validate all workers are present", () => {
@@ -443,9 +427,7 @@ describe("Companies - overflow menu", () => {
     cy.get("button p").contains("Merge").click();
     cy.wait('@mergeCompanies', { timeout: 20000 });
 
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "Companies merged successfully!");
+    cy.get(workforceSelector.toastMessage).contains("Companies merged successfully!");
 
     // Verify merge
     cy.wait(2000);
@@ -458,7 +440,7 @@ describe("Companies - overflow menu", () => {
       .click({ force: true });
 
     // Verify worker count
-    cy.get('.sc-jXbUNg', { timeout: 10000 }).eq(2).click();
+    cy.get(workforceSelector.companyWorkerPage).click();
     cy.get('.details p').contains('Total Workers').should('be.visible');
     cy.get('.details p').contains('6').should('be.visible');
     cy.get('[label="view"]').eq(0).click();
@@ -497,9 +479,7 @@ describe("Companies - overflow menu", () => {
     cy.contains(".dropdown-option", "Delete").click();
     cy.get("button p").contains("Delete").click();
     cy.wait('@deleteCompany', { timeout: 10000 });
-    
-    cy.get(".sc-kOPcWz", { timeout: 10000 })
-      .should("be.visible")
-      .and("contain.text", "successfully deleted");
+
+    cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 });
