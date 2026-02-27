@@ -833,7 +833,7 @@ describe("Worker Module - Filter", () => {
     cy.get('@selectedFilterValue').then((selectedValue) => {
       filterPage.verifyFilteredRows(
         workforceSelector.accessControlPage,
-        'Last Seen Location',
+        'Last Seen On',
         selectedValue
       );
     });

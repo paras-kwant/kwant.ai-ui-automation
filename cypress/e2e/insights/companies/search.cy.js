@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { searchPage } from "../../../pages/insights/companies/search";
 
-describe("Worker Module - SearchNew Test", () => {
+describe("Insight Company - Search ", () => {
   let companyNames = [];
 
   before(() => {

@@ -23,10 +23,10 @@ module.exports = defineConfig({
     retries: { runMode: 1, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
     testIsolation: false,
-    specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}", 
+    specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
 
     setupNodeEvents(on, config) {
-  
+
       if (!process.env.CI) {
         on("before:run", () => {
           const allureResultsPath = path.join(__dirname, "allure-results");
@@ -117,7 +117,6 @@ module.exports = defineConfig({
             await connection.openBox("INBOX");
 
             const searchCriteria = [["SINCE", new Date(Date.now() - 30 * 60 * 1000)]];
-
             const fetchOptions = { bodies: ["HEADER", "TEXT", ""], markSeen: false };
 
             const messages = await connection.search(searchCriteria, fetchOptions);
@@ -196,6 +195,23 @@ module.exports = defineConfig({
               return null;
             });
         },
+
+        // ✅ NEW TASK: fetch recent Twilio messages via Node.js (avoids browser CORS issues)
+        getTwilioMessages({ accountSid, authToken, to }) {
+          const client = twilio(accountSid, authToken);
+
+          return client.messages
+            .list({ to, limit: 10 })
+            .then((messages) =>
+              messages.map((m) => ({
+                body: m.body,
+                from: m.from,
+                to: m.to,
+                direction: m.direction,
+                status: m.status,
+              }))
+            );
+        },
       });
 
       return config;
@@ -203,7 +219,7 @@ module.exports = defineConfig({
 
     env: {
       allure: true,
-      allureResultsPath: "allure-results", // single folder for both companies & workers
+      allureResultsPath: "allure-results",
       allureSkipCommands: "wrap",
       allureAddVideoOnPass: false,
       allureSkipAutomaticScreenshots: false,

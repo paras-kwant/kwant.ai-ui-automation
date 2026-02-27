@@ -56,9 +56,11 @@ describe("Worker Module - Add Worker Tests", () => {
     addWorkerSelector.profileImageUploadButton().click();
     addWorkerSelector.takeAPictureButton().click();
     cy.get('video.video_viewer').should('be.visible')
+    cy.wait(1000)
     cy.get(workforceSelector.captureButton).click()
     cy.wait(3000)
     cy.get('video.video_viewer').should('not.exist')
+
     cy.get('.retake_container p').contains('Retake Picture').should('be.visible').click()
     cy.get('video.video_viewer').should('be.visible')
   })

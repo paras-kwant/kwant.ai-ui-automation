@@ -52,38 +52,37 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
       cy.get(workforceSelector.tableRow).first().click({ force: true });
       cy.get(workforceSelector.personalDetailsPage).click();
       cy.getWorkerField("Phone").click();
-
+  
       cy.get('[name="phone"]').clear().type(Cypress.env("TWILIO_NUMBER"));
-
-      
+  
       cy.get("button p").contains("Update").click();
       cy.get(workforceSelector.toastMessage).should("contain", "Successfully updated worker");
       cy.get("button p").contains("Cancel").click();
   
-          cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-          cy.contains("button p", "Send Alert").click();
-          
-          cy.get('[label="Message Type"] [placeholder="Select"]').click();
-          cy.contains("General Communication").click();
-          cy.get("textarea").type(randomText);
-          cy.get("footer p").contains('/')
-          .should("exist")
-          .invoke("text")
-          .then((text) => {
-            const match = text.match(/Remaining Alerts:\s*(\d+)\/\d+/);
-            if (!match) throw new Error(`Could not parse Remaining Alerts from text: "${text}"`);
-            const remainingBefore = parseInt(match[1], 10);
-            cy.get(workforceSelector.sendAlertButton).click()
+      cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
+      cy.contains("button p", "Send Alert").click();
+  
+      cy.get('[label="Message Type"] [placeholder="Select"]').click();
+      cy.contains("General Communication").click();
+      cy.get("textarea").type(randomText);
+  
+      cy.get("footer p").contains("/")
+        .should("exist")
+        .invoke("text")
+        .then((text) => {
+          const match = text.match(/Remaining Alerts:\s*(\d+)\/\d+/);
+          if (!match) throw new Error(`Could not parse Remaining Alerts from text: "${text}"`);
+          const remainingBefore = parseInt(match[1], 10);
+  
+          cy.get(workforceSelector.sendAlertButton).click();
           cy.get(workforceSelector.toastMessage).should("contain.text", "Alert sent to 1 worker(s).");
-          cy.get('button p').contains('Done').click();
-
-
+          cy.get("button p").contains("Done").click();
+  
           cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
-          cy.get('button p').contains('Send Alert').click()
-          cy.wait(1000)
-
-
-          cy.get("footer p").contains('/')
+          cy.get("button p").contains("Send Alert").click();
+          cy.wait(1000);
+  
+          cy.get("footer p").contains("/")
             .invoke("text")
             .then((updatedText) => {
               const updatedMatch = updatedText.match(/Remaining Alerts:\s*(\d+)\/\d+/);
@@ -92,49 +91,29 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
               expect(remainingAfter).to.eq(remainingBefore - 1);
             });
   
+          // ✅ Wait for SMS to arrive then verify via cy.task() instead of cy.request()
+          // cy.task() runs in Node.js so it avoids browser CORS restrictions
+          cy.wait(5000);
+  
           const twilioNumber = Cypress.env("TWILIO_NUMBER");
           const accountSid = Cypress.env("TWILIO_ACCOUNT_SID");
           const authToken = Cypress.env("TWILIO_AUTH_TOKEN");
           const expectedFrom = Cypress.env("EXPECTED_FROM");
-          const expectedMessageSnippet = randomText;
   
-          const pollTwilio = (retries = 5) => {
-            return new Cypress.Promise((resolve, reject) => {
-              const check = (remaining) => {
-                cy.request({
-                  method: "GET",
-                  url: `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-                  auth: { user: accountSid, pass: authToken },
-                  qs: { To: twilioNumber, PageSize: 10 },
-                  failOnStatusCode: false,
-                }).then((res) => {
-                  if (res.status === 200 && res.body.messages.length > 0) {
-                    const msg = res.body.messages.find(
-                      (m) => m.from === expectedFrom && m.direction === "inbound"
-                    );
-                    if (msg) {
-                      resolve(msg);
-                      return;
-                    }
-                  }
-                  if (remaining === 0) {
-                    reject("Incoming SMS not found in Twilio logs after retries");
-                  } else {
-                    setTimeout(() => check(remaining - 1), 3000);
-                  }
-                });
-              };
-              check(retries);
-            });
-          };
-          cy.wait(5000)
+          cy.task("getTwilioMessages", {
+            accountSid,
+            authToken,
+            to: twilioNumber,
+          }).then((messages) => {
+            // Find the message that matches our random text
+            const msg = messages.find(
+              (m) => m.body && m.body.includes(randomText)
+            );
   
-          pollTwilio().then((latestSMS) => {
-            expect(latestSMS).to.exist;
-            expect(latestSMS.body).to.include(expectedMessageSnippet);
-            expect(latestSMS.from).to.eq(expectedFrom);
-            expect(latestSMS.to).to.eq(twilioNumber);
-            expect(latestSMS.direction).to.eq("inbound");
+            expect(msg, `Expected to find SMS containing "${randomText}" but none found`).to.exist;
+            expect(msg.body).to.include(randomText);
+            expect(msg.from).to.eq(expectedFrom);
+            expect(msg.to).to.eq(twilioNumber);
           });
         });
     });

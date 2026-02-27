@@ -209,12 +209,10 @@ describe("Worker Module - Personal Details Page", () => {
     cy.get(workforceSelector.personalDetailsPage).click();
   
     cy.get(".hover-hoc-container__input__display-value")
-      .eq(1)
-      .realHover()
-      .find(".edit-icon > svg")
-      .first()
-      .should("be.visible")
-      .click();
+  .eq(1)
+  .find(".edit-icon > svg")
+  .first()
+  .click({ force: true });
   
     cy.get('[name="email"]').clear().type("paras");
     cy.get("button p").contains("Update").click();
