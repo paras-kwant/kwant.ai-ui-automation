@@ -2,8 +2,6 @@ name: Run Cypress UI Tests (Parallel)
 
 on:
   workflow_dispatch:
-  # schedule:
-    # - cron: "05 04 * * *"
 
 jobs:
   companies-tests:
@@ -23,39 +21,24 @@ jobs:
       EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Debug Secrets
-        run: |
-          echo "TWILIO_ACCOUNT_SID is set: ${{ secrets.TWILIO_ACCOUNT_SID != '' }}"
-          echo "TWILIO_AUTH_TOKEN is set: ${{ secrets.TWILIO_AUTH_TOKEN != '' }}"
-          echo "TWILIO_NUMBER is set: ${{ secrets.TWILIO_NUMBER != '' }}"
-          echo "EXPECTED_FROM is set: ${{ secrets.EXPECTED_FROM != '' }}"
+      - run: npm ci
 
       - name: Run Companies Cypress Tests
         run: |
-          rm -rf allure-results && mkdir -p allure-results
+          mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/companies/**/*.cy.js" \
             --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
-      - name: Wait for Allure results to flush
-        if: always()
-        run: sleep 10
-
       - name: Upload Companies Allure Results
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: companies-allure-results
           path: allure-results
@@ -77,39 +60,22 @@ jobs:
       EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Debug Secrets
-        run: |
-          echo "TWILIO_ACCOUNT_SID is set: ${{ secrets.TWILIO_ACCOUNT_SID != '' }}"
-          echo "TWILIO_AUTH_TOKEN is set: ${{ secrets.TWILIO_AUTH_TOKEN != '' }}"
-          echo "TWILIO_NUMBER is set: ${{ secrets.TWILIO_NUMBER != '' }}"
-          echo "EXPECTED_FROM is set: ${{ secrets.EXPECTED_FROM != '' }}"
+      - run: npm ci
 
       - name: Run Workers Cypress Tests
         run: |
-          rm -rf allure-results && mkdir -p allure-results
+          mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/workers/**/*.cy.js" \
             --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
-      - name: Wait for Allure results to flush
-        if: always()
-        run: sleep 10
-
       - name: Upload Workers Allure Results
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: workers-allure-results
           path: allure-results
@@ -131,39 +97,22 @@ jobs:
       EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Debug Secrets
-        run: |
-          echo "TWILIO_ACCOUNT_SID is set: ${{ secrets.TWILIO_ACCOUNT_SID != '' }}"
-          echo "TWILIO_AUTH_TOKEN is set: ${{ secrets.TWILIO_AUTH_TOKEN != '' }}"
-          echo "TWILIO_NUMBER is set: ${{ secrets.TWILIO_NUMBER != '' }}"
-          echo "EXPECTED_FROM is set: ${{ secrets.EXPECTED_FROM != '' }}"
+      - run: npm ci
 
       - name: Run Insights/Companies Cypress Tests
         run: |
-          rm -rf allure-results && mkdir -p allure-results
+          mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/insights/companies/**/*.cy.js" \
             --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
-      - name: Wait for Allure results to flush
-        if: always()
-        run: sleep 10
-
       - name: Upload Insights/Companies Allure Results
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: insights-companies-allure-results
           path: allure-results
@@ -172,41 +121,30 @@ jobs:
     name: 📊 Merge Allure Reports & Deploy
     needs: [companies-tests, workers-tests, insights-companies-tests]
     runs-on: ubuntu-latest
-    if: always()
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install Allure CLI
-        run: |
-          npm install -g allure-commandline
+        run: npm install -g allure-commandline
 
-      - name: Download Companies Results
+      - name: Download Allure Results
         uses: actions/download-artifact@v4
         with:
           name: companies-allure-results
           path: merged-results/companies
 
-      - name: Download Workers Results
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: workers-allure-results
           path: merged-results/workers
 
-      - name: Download Insights/Companies Results
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: insights-companies-allure-results
           path: merged-results/insights-companies
@@ -214,9 +152,9 @@ jobs:
       - name: Merge Allure Results
         run: |
           mkdir -p merged-results/allure-results
-          cp -rv merged-results/companies/* merged-results/allure-results/ || true
-          cp -rv merged-results/workers/* merged-results/allure-results/ || true
-          cp -rv merged-results/insights-companies/* merged-results/allure-results/ || true
+          find merged-results/companies -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/workers -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/insights-companies -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
 
       - name: Generate Allure Report
         run: |
@@ -321,4 +259,4 @@ jobs:
               ]
             }')
 
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URLs"
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"

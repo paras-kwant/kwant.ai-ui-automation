@@ -308,11 +308,11 @@ cy.get(workforceSelector.documentPage)
             .click({ force: true });
 
             cy.get('[placeholder="Select Expiry date"]')
-            .scrollIntoView()                 // scrolls element into viewport
-            .should('not.be.disabled')        // wait until enabled
-            .clear({ force: true })           // force clearing if needed
-            .type('11/06/2026', { delay: 100 }); // type date
-
+            .scrollIntoView()
+            .should('not.be.disabled')        
+            .clear({ force: true })
+            .type('11/06/2026', { delay: 100 }); 
+            cy.wait(1000)
           cy.get('.hover-hoc-container__input__display-value')
             .eq(3)
             .should('contain.text', '11/06/2026')
@@ -363,10 +363,11 @@ cy.get(workforceSelector.documentPage)
             .click({ force: true });
 
             cy.get('[placeholder="Select Expiry date"]')
-            .scrollIntoView()                 // scrolls element into viewport
-            .should('not.be.disabled')        // wait until enabled
-            .clear({ force: true })           // force clearing if needed
-            .type('11/06/2026', { delay: 100 }); // type date           // click outside to close date picker
+            .scrollIntoView()
+            .should('not.be.disabled')        
+            .clear({ force: true })
+            .type('11/06/2026', { delay: 100 }); 
+            cy.wait(1000)  // click outside to close date picker
 
           cy.get('.hover-hoc-container__input__display-value')
             .eq(3)
