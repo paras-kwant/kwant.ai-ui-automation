@@ -5,26 +5,18 @@ on:
 
 jobs:
   single-test:
-    name: 🧪 Single Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
-      GMAIL_USER: ${{ secrets.GMAIL_USER }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
-      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 20
 
@@ -33,39 +25,9 @@ jobs:
 
       - name: Run Single Cypress Test
         run: |
-          rm -rf allure-results && mkdir -p allure-results
+          echo "Running single Cypress test suite..."
           npx cypress run \
             --spec "cypress/e2e/companies/document.cy.js" \
-            --env email="${EMAIL}",password="${PASSWORD}" \
-            --browser chrome --headless || truexws
-
-      - name: Wait for Allure results to flush
-        if: always()
-        run: sleep 10
-
-      - name: Upload Allure Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: single-test-allure-results
-          path: allure-results
-
-      - name: Install Allure CLI
-        if: always()
-        run: npm install -g allure-commandline
-
-      - name: Generate Allure Report
-        if: always()
-        run: |
-          allure generate allure-results --clean -o allure-report
-          echo "✅ Report generated with $(find allure-report -type f | wc -l) files"
-
-      - name: Deploy Allure Report to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-report
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+            --env email=$EMAIL,password=$PASSWORD \
+            --browser chrome \
+            --headless
