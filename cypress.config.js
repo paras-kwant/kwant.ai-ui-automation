@@ -15,8 +15,6 @@ module.exports = defineConfig({
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
-    // experimentalSessionAndOrigin: true,
-    cacheAcrossSpecs: true,
     defaultCommandTimeout: 30000,
     requestTimeout: 30000,
     responseTimeout: 30000,
@@ -53,7 +51,6 @@ module.exports = defineConfig({
       config.env.PROJECT_NAME = "LVL 10-11";
       config.env.PROJECT_ID = 500526306;
 
-      // File management & Gmail tasks
       on("task", {
         getLatestDownloadedFile({ downloadsFolder, prefix = "" }) {
           const files = fs
@@ -186,8 +183,13 @@ module.exports = defineConfig({
         },
 
         getTwilioOtp({ accountSid, authToken, to }) {
-          const client = twilio(accountSid, authToken);
+          // ✅ Guard against missing credentials — prevents config crash in CI
+          if (!accountSid || !authToken) {
+            console.error("❌ Twilio credentials missing for getTwilioOtp");
+            return null;
+          }
 
+          const client = twilio(accountSid, authToken);
           return client.messages
             .list({ to, limit: 5 })
             .then((messages) => {
@@ -197,10 +199,14 @@ module.exports = defineConfig({
             });
         },
 
-        // ✅ NEW TASK: fetch recent Twilio messages via Node.js (avoids browser CORS issues)
         getTwilioMessages({ accountSid, authToken, to }) {
-          const client = twilio(accountSid, authToken);
+          // ✅ Guard against missing credentials — prevents config crash in CI
+          if (!accountSid || !authToken) {
+            console.error("❌ Twilio credentials missing for getTwilioMessages");
+            return [];
+          }
 
+          const client = twilio(accountSid, authToken);
           return client.messages
             .list({ to, limit: 10 })
             .then((messages) =>
