@@ -74,7 +74,7 @@ Cypress.Commands.add(
 
 
 Cypress.Commands.add('getTotalWorkers', () => {
-  return cy.get('.workforce-footer')
+  return cy.get('[data-testid="table-pagination"]')
     .should('be.visible')
     .invoke('text')
     .then((text) => {
