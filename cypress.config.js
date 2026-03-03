@@ -25,9 +25,9 @@ module.exports = defineConfig({
     testIsolation: false,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
 
-    videosFolder: path.join(__dirname, "cypress", "videos"),
-    video: true,                 // enable video recording
-    videoUploadOnPasses: false,  // only save videos for failed tests
+    // videosFolder: path.join(__dirname, "cypress", "videos"),
+    // video: true,                 // enable video recording
+    // videoUploadOnPasses: false,  // only save videos for failed tests
 
     setupNodeEvents(on, config) {
 

@@ -288,6 +288,7 @@ cy.get(workforceSelector.documentPage)
       const fullName = `${firstName} ${lastName}`;
 
       cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.get(workforceSelector.tableRow).contains(fullName).should('be.visible')
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
       cy.get(workforceSelector.documentPage).click();
 
@@ -338,12 +339,13 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it.only('should update an existing certificate', () => {
+  it('should update an existing certificate', () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
 
       cy.get(workforceSelector.searchInput).clear().type(fullName);
+      cy.get(workforceSelector.tableRow).contains(fullName).should('be.visible')
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
       cy.get(workforceSelector.documentPage).click();
 

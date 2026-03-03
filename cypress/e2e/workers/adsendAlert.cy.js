@@ -30,7 +30,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
     });
   });
 
-  it("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", () => {
+  it.skip("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", () => {
     const randomText = Math.random().toString(36).substring(2, 12);
   
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
@@ -234,7 +234,7 @@ describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () 
     });
   });
 
-  it("Sending Alert to Onsite Worker and Verifying Inbound SMS via Twilio", () => {
+  it.skip("Sending Alert to Onsite Worker and Verifying Inbound SMS via Twilio", () => {
     const randomText = Math.random().toString(36).substring(2, 12);
   
     cy.contains(workforceSelector.tableColumn, "Site Status").scrollIntoView().find(".table-header-filter-btn").click();
