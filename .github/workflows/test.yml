@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "Running single Cypress test suite..."
           npx cypress run \
-            --spec "cypress/e2e/companies/documents.cy.js" \
+            --spec "cypress/e2e/workers/documents.cy.js" \
             --env email=$EMAIL,password=$PASSWORD \
             --browser chrome \
             --headless
