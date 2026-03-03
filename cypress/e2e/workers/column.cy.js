@@ -5,19 +5,10 @@ import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper.js';
 
 describe("Worker Module - Column", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-  });
-
   beforeEach(() => {
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
     cy.cleanUI();
-  });
+  })
 
   beforeEach(() => {
     cy.get('.icon-button button').eq(0).click();

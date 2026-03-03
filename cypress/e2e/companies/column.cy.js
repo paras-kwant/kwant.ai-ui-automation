@@ -6,37 +6,10 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 describe("WorkForce Companies Module - column", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
-  before(() => {
-    cy.get('.icon-button button').eq(0).click();
-    cy.get('[data-rbd-draggable-id="email"] input[type="checkbox"]')
-      .then(($checkbox) => {
-        if ($checkbox.prop('checked')) {
-          cy.wrap($checkbox).click();
-          cy.contains('button p', 'Save').click();
-        } else {
-          cy.log('Email column already OFF');
-          cy.get('header button').click();
-        }
-      });
-  });
   beforeEach(() => {
-
-    cy.cleanUI()
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.cleanUI();
   });
-beforeEach(() => {
-  cy.get('.sc-kOPcWz').should('not.exist');
-
-})
-  
   
   it('Validate adding and updating column settings', () => {
     cy.get('.icon-button button').eq(0).click();

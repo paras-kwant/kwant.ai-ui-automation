@@ -8,20 +8,10 @@ import { generateCredentialID } from '../../fixtures/workerData';
 
 describe("WorkForce Companies Module - Documents Page", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
   beforeEach(() => {
-
-    cy.cleanUI()
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.cleanUI();
   });
-  
 
 
 

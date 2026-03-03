@@ -5,15 +5,9 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 describe("WorkForce Companies Module- Favourite page", () => {
 
-	before(() => {
-		cy.session('userSession', () => {
-		  cy.login();
-		  cy.get('.card-title')
-			.contains(Cypress.env('PROJECT_NAME'))
-			.click();
-		});
-	  
-		companiesHelper.visitCompaniesPage();
+	beforeEach(() => {
+			cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+			cy.cleanUI();
 		cy.get(workforceSelector.tableRow).should('be.visible')
 		cy.get('body').then(($body) => {
 			const favoriteExists = $body.find('[title="Workforce Companies"]').length > 0;

@@ -1,23 +1,18 @@
 /// <reference types="cypress" />
 import { insightsFavouritePage } from "../../../pages/insights/companies/favourite";
+import companiesHelper from "../../../support/helper/companiesHelper";
+import { workforceSelector } from "../../../support/workforceSelector";
 
 describe("Insights Company - Favourite Page", () => {
 
-  before(() => {
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
-    });
-
-    insightsFavouritePage.visitInsightsCompaniesPage();
-    insightsFavouritePage.tableRow.should("be.visible");
-    insightsFavouritePage.ensurePageIsFavourited();
+  beforeEach(() => {
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
 
   it("Verify remove company from Favorite", () => {
-    insightsFavouritePage.visitInsightsCompaniesPage();
+    cy.get(workforceSelector.tableRow).should('be.visible')
     insightsFavouritePage.clickFavouriteButton();
 
     insightsFavouritePage.assertToastContains("Removed from favorite");
@@ -28,8 +23,9 @@ describe("Insights Company - Favourite Page", () => {
   // ─────────────────────────────────────────────────────────────────────────────
 
   it("Verify adding company as favourite", () => {
-    insightsFavouritePage.clickFavouriteButton();
+    cy.get(workforceSelector.tableRow).should('be.visible')
 
+    insightsFavouritePage.clickFavouriteButton();
     insightsFavouritePage.assertToastContains("Added to favorite");
     insightsFavouritePage.assertFavouriteIconVisible();
   });
@@ -37,6 +33,8 @@ describe("Insights Company - Favourite Page", () => {
   // ─────────────────────────────────────────────────────────────────────────────
 
   it("Verify Insights Company Page Accessibility from Favorites", () => {
+    cy.get(workforceSelector.tableRow).should('be.visible')
+
     insightsFavouritePage.assertFavouriteLinkVisible();
     insightsFavouritePage.insightsFavouriteLink.click();
     insightsFavouritePage.assertUrlIncludesInsightsCompanies();
@@ -45,6 +43,8 @@ describe("Insights Company - Favourite Page", () => {
   // ─────────────────────────────────────────────────────────────────────────────
 
   it("Verify Favorite Status Persistence", () => {
+    cy.get(workforceSelector.tableRow).should('be.visible')
+
     insightsFavouritePage.visitInsightsCompaniesPage();
     insightsFavouritePage.assertFavouriteIconVisible();
   });
@@ -52,6 +52,8 @@ describe("Insights Company - Favourite Page", () => {
   // ─────────────────────────────────────────────────────────────────────────────
 
   it("Verify that the latest company added to favorites is displayed at the top of the favorites list.", () => {
+    cy.get(workforceSelector.tableRow).should('be.visible')
+
     insightsFavouritePage.favouriteButton.find('[fill="#FACC15"]').then(($icon) => {
       if ($icon.length === 0) {
         insightsFavouritePage.clickFavouriteButton();

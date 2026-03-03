@@ -3,6 +3,8 @@ import workerHelper from './workerHelper';
 
 const WorkerHelper = {
   visitWorkersPage: () => cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`),
+  
+
 
   openAddWorkerModal: () => workforceSelector.addWorkerButton().click(),
 
@@ -10,6 +12,13 @@ const WorkerHelper = {
     workforceSelector.profileImageUploadButton().click();
     cy.get('#worker_image_uploader').selectFile(file, { force: true });
   },
+
+  visitWorkersPage: () => 
+    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`),
+
+  visitWorkersPageForProject: (projectId) => 
+    cy.visit(`/projects/${projectId}/workers`),
+
 
   fillMandatoryWorkerDetails: (workerData) => {
     workforceSelector.firstNameInput().type(workerData.firstName);

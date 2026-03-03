@@ -7,15 +7,9 @@ import { workforceSelector } from '../../support/workforceSelector';
 describe("Worker Module - Search", () => {
 
   before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    WorkerHelper.visitWorkersPage();
+    cy.loginAndVisit(() => WorkerHelper.visitWorkersPage());
   });
-
+  
   beforeEach(() => {
     cy.cleanUI();
   });

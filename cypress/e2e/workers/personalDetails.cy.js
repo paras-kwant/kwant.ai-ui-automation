@@ -7,18 +7,9 @@ import workerHelper from '../../support/helper/workerHelper.js';
 import "../../support/commands";
 
 describe("Worker Module - Personal Details Page", () => {
-  before(() => {
-    cy.viewport(1440, 900);
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-    });
-    workerHelper.visitWorkersPage();
-  });
   beforeEach(() => {
-    cy.cleanUI();
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it("should verify all UI elements and labels in the Personal Details drawer", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });

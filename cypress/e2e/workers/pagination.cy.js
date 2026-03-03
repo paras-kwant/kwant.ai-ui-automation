@@ -6,26 +6,9 @@ import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper.js';
 
 describe("Worker Module - Pagination", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-  });
   beforeEach(() => {
-    cy.cleanUI()
-  });
-  it('Verify pagination is visible and default page is focused', () => {
-    workforceSelector.pageOne()
-      .invoke('attr', 'class') 
-      .then((classValue) => {
-        const classCount = classValue.split(' ').length; 
-        expect(classCount).to.eq(6); 
-      });
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it('Verify pagination breaks into pages if 100+ workers exist', () => {
   

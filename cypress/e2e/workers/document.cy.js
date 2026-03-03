@@ -5,17 +5,9 @@ import { workforceSelector } from "../../support/workforceSelector";
 import workerHelper from '../../support/helper/workerHelper.js';
 
 describe("Worker Module - Documents Page", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-    });
-    workerHelper.visitWorkersPage();
-  })
-  
   beforeEach(() => {
-
-    cy.cleanUI()
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it("Verify the UI of the document", () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });

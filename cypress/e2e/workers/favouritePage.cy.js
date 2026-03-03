@@ -1,21 +1,13 @@
 /// <reference types="cypress" />
+import workerHelper from '../../support/helper/workerHelper.js';
+
 
 import { workforceSelector } from '../../support/workforceSelector';
 
 describe("Worker Module - Favorites", () => {
-
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-  });
-
   beforeEach(() => {
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it('Verify remove worker page from Favorite', () => {
     cy.get('body').then(($body) => {
@@ -40,6 +32,7 @@ describe("Worker Module - Favorites", () => {
   });
 
   it('Verify adding worker page as favourite', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible')
     cy.get('.top-nav-left-section [role="button"]').click();
 
     cy.get(workforceSelector.toastMessage, { timeout: 10000 })

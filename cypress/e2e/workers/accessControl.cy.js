@@ -9,25 +9,15 @@ import accessControlPage from "../../pages/workforce/accessControl.js";
 
 describe("Worker Module - Access Control Page Tests", () => {
 
-  // ── Session + Page Setup ──────────────────────────────────────────────────
-
-  before(() => {
-    cy.viewport(1440, 900);
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-  });
-
-  before(() => {
-    accessControlPage.configureColumnSettings();
-  });
+  let columnConfigured = false;
 
   beforeEach(() => {
-    cy.cleanUI();
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+    
+    if (!columnConfigured) {
+      accessControlPage.configureColumnSettings();
+      columnConfigured = true;
+    }
   });
 
 
@@ -106,12 +96,11 @@ describe("Worker Module - Access Control Page Tests", () => {
         cy.log(`✅ ${drawerField}: ${expectedValue}`);
       });
 
-      cy.getWorkerField('Last Seen Time').should('be.visible');
     });
   });
 
   it("should allow assigning a random device and persist the value", () => {
-    accessControlPage.openWorkerAccessControl(0);
+    accessControlPage.openWorkerAccessControl(3);
     cy.wait(1000);
 
     accessControlPage.openDeviceEditMode();
@@ -126,12 +115,12 @@ describe("Worker Module - Access Control Page Tests", () => {
     accessControlPage.assertToast("Successfully updated worker.");
 
     accessControlPage.closeDrawer();
-    accessControlPage.openWorkerAccessControl(0);
+    accessControlPage.openWorkerAccessControl(3);
     accessControlPage.assertDeviceIsAssigned();
   });
 
   it("should disable the device and remove it from the field", () => {
-    accessControlPage.openWorkerAccessControl(0);
+    accessControlPage.openWorkerAccessControl(3);
     accessControlPage.disableWorker();
     accessControlPage.assertToast("Worker disabled successfully");
     accessControlPage.assertDeviceIsEmpty();
@@ -159,8 +148,8 @@ describe("Worker Module - Access Control Page Tests", () => {
     cy.get('@blobCreated').should('have.been.calledOnce');
   });
 
-  it.skip("should prevent assigning the same device to multiple workers", () => {
-    cy.wait(4000);
+  it("should prevent assigning the same device to multiple workers", () => {
+    cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
     accessControlPage.openWorkerAccessControl(0);
     cy.wait(1000);

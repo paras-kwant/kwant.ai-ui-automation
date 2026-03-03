@@ -8,20 +8,8 @@ import { addWorkerSelector } from '../../selector/addWorker.js';
 import addworkerPage from '../../pages/workforce/addworkerPage.js';
 
 describe("Worker Module - Add Worker Tests", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-
-  });
   beforeEach(() => {
-    cy.cleanUI()
-  });
-  beforeEach(() => {
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
     addworkerPage.openAddWorkerForm();
   })
   it('Should disable buttons when mandatory fields are empty', () => {

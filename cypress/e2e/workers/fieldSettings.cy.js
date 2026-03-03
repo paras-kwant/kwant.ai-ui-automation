@@ -6,21 +6,9 @@ import workerHelper from '../../support/helper/workerHelper.js';
 
 describe("Worker Module - Field Settings", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-
-  });
-
   beforeEach(() => {
-
-    cy.cleanUI()
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it("Validates the UI of the Field Settings drawer", () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then(({ firstName, lastName }) => {

@@ -3,32 +3,18 @@
 const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
+import workerHelper from '../../support/helper/workerHelper.js';
+
 
 describe("Worker Module - Selection Functionality", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
-    cy.wait(3000);
-  });
-
   beforeEach(() => {
-    cy.get("body").then(($body) => {
-      if ($body.find(".secondary svg").length > 0) {
-        cy.get(".secondary svg")
-          .should("be.visible")
-          .click({ force: true });
-      }
-    });
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it('should display correct total worker count when selecting all workers via header checkbox', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
+
     cy.get('[data-testid="table-pagination"]')                          // was '.sc-kMkxaj.eTAOVM'
       .invoke('text')
       .then((text) => {
@@ -49,6 +35,7 @@ describe("Worker Module - Selection Functionality", () => {
   });
 
   it('should display correct count when a single worker is selected', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[type="checkbox"]')
       .eq(1)
       .check({ force: true });
@@ -58,6 +45,8 @@ describe("Worker Module - Selection Functionality", () => {
   });
 
   it('should clear selection when clear selection icon is clicked after selecting a worker', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
+
     cy.get('[type="checkbox"]')
       .eq(1)
       .check({ force: true });
@@ -97,6 +86,8 @@ describe("Worker Module - Selection Functionality", () => {
   });
 
   it('should select only workers on the current page when using Select On This Page option', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
+
     cy.get(workforceSelector.tableColumn).eq(2).click()  // was '.sc-heIBml svg'.eq(0).click()
 
     cy.get('p')

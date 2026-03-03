@@ -5,38 +5,32 @@ import SafetyAuditPage from "../../pages/workforce/safetyAudit";
 
 describe("Worker Module - Safety Audit", () => {
 
-  before(() => {
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title")
-        .contains(Cypress.env("PROJECT_NAME"))
-        .click();
-    });
-    cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+  let columnsConfigured = false;
+
+before(() => {
+  cy.loginAndVisit(() => cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`));
+  
+  // column config runs once after page loads
+  cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
+  cy.get(".icon-button button").first().click();
+  cy.contains('button p', "Reset to default").click();
+  cy.wait(5000);
+  cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]').scrollIntoView();
+  cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]').click({ force: true });
+  cy.wait(2000);
+  cy.contains("button p", "Save").should('be.visible').click();
+  SafetyAuditPage.applyAllSafetyAlertFilters();
+});
+
+// ✅ No visit in beforeEach — just clean up UI state between tests
+beforeEach(() => {
+  cy.wait(500);
+  cy.get("body").then(($body) => {
+    if ($body.find('section').length > 0) {
+      cy.get('body').click(0, 0);
+    }
   });
-
-  before(() => {
-    cy.get(workforceSelector.tableRow ).eq(0).should('be.visible');
-
-    cy.get(".icon-button button").first().click();
-    cy.contains('button p', "Reset to default").click();
-    cy.wait(5000);
-    cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]').scrollIntoView();
-    cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]').click({ force: true });
-    cy.wait(2000);
-    cy.contains("button p", "Save").should('be.visible').click();
-    SafetyAuditPage.applyAllSafetyAlertFilters();
-  });
-
-  beforeEach(() => {
-    cy.wait(500)
-    cy.get("body").then(($body) => {
-      if($body.find('section').length > 0){
-        cy.get('body').click(0,0);
-      }
-
-    })
-  });
+});
 
 
 

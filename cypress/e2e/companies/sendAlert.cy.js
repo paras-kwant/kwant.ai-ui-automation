@@ -4,15 +4,8 @@ import workerHelper from "../../support/helper/workerHelper.js";
 import companiesHelper from "../../support/helper/companiesHelper.js";
 
 describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twilio Integration)", () => {
-  before(() => {
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
-
   beforeEach(() => {
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
     cy.cleanUI();
   });
 

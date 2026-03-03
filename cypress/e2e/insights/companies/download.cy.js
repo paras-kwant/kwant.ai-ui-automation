@@ -1,23 +1,18 @@
 /// <reference types="cypress" />
 import { downloadPage } from "../../../pages/insights/companies/download";
+import companiesHelper from "../../../support/helper/companiesHelper";
+import { workforceSelector } from "../../../support/workforceSelector";
 
 describe("Insights Company Module - Download", () => {
 
-  before(() => {
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
+    beforeEach(() => {
+      cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
     });
-    downloadPage.visitCompaniesPage();
-  });
-
-  beforeEach(() => {
-    cy.cleanUI();
-  });
 
 
   it('Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', () => { // Add a wait to ensure the page has loaded before interacting with it
-	cy.wait(2000)
+    cy.get(workforceSelector.tableRow).should('be.visible');
+
 
     downloadPage.getDateRangeFromFilter().then(({ startDate, endDate }) => {
       downloadPage.openDownloadModal();
@@ -27,6 +22,7 @@ describe("Insights Company Module - Download", () => {
 
 
   it('Verify the downloaded quick report is in CSV format', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
     downloadPage.visitCompaniesPage();
 
     downloadPage.getDateRangeFromFilter().then(({ startDate, endDate }) => {
@@ -43,7 +39,7 @@ describe("Insights Company Module - Download", () => {
 
 
   it('Verify the fields on the report - Company Name, Date, Number of Workers, On-site Hours', () => {
-    downloadPage.visitCompaniesPage();
+    cy.get(workforceSelector.tableRow).should('be.visible');
     downloadPage.openDownloadModal();
     downloadPage.clickDownloadButton();
     cy.wait(4000)
@@ -59,7 +55,6 @@ describe("Insights Company Module - Download", () => {
 
   it('Verify the data on the downloaded CSV report matches with the application data', () => {
     downloadPage.interceptCompaniesApi();
-    downloadPage.visitCompaniesPage();
 
     downloadPage.waitForCompaniesApi().then((interception) => {
       const uiData = downloadPage.getCompanyNamesFromApi(interception);
@@ -79,7 +74,7 @@ describe("Insights Company Module - Download", () => {
 
 
   it('Verify selecting a company checkbox only downloads that company data in the report', () => {
-    downloadPage.visitCompaniesPage();
+    cy.get(workforceSelector.tableRow).should('be.visible');
 
     downloadPage.getRandomCompanyFromUI().then((selectedCompany) => {
       cy.log('Selected Company: ' + selectedCompany);
@@ -106,5 +101,4 @@ describe("Insights Company Module - Download", () => {
   it('download for Last 30 days',     () => { downloadPage.runDownloadTestForFilter('Last 30 days'); });
   it('download for This Month',       () => { downloadPage.runDownloadTestForFilter('This Month'); });
   it('download for Project Duration', () => { downloadPage.runDownloadTestForFilter('Project Duration'); });
-
-});
+})

@@ -16,6 +16,7 @@ module.exports = defineConfig({
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
     // experimentalSessionAndOrigin: true,
+    cacheAcrossSpecs: true,
     defaultCommandTimeout: 30000,
     requestTimeout: 30000,
     responseTimeout: 30000,

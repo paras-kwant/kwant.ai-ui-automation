@@ -8,19 +8,9 @@ import companiesHelper from '../../support/helper/companiesHelper.js';
 
 
 describe("WorkForce Companies Module - File Upload", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.contains('.card-title', Cypress.env('PROJECT_NAME'), { timeout: 40000 })
-        .should('be.visible')
-        .click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
-  
   beforeEach(() => {
-
-    cy.cleanUI()
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.cleanUI();
   });
   
 

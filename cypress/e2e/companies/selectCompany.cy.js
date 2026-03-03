@@ -7,25 +7,9 @@ import companiesHelper from '../../support/helper/companiesHelper';
 
 describe("WorkForce Companies Module - Selection Functionality", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-
-    companiesHelper.visitCompaniesPage();
-  });
-
   beforeEach(() => {
-    cy.get("body").then(($body) => {
-      if ($body.find(".secondary svg").length > 0) {
-        cy.get(".secondary svg")
-          .should("be.visible")
-          .click({ force: true });
-      }
-    });
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.cleanUI();
   });
 
   it('should display correct total worker count when selecting all workers via header checkbox', () => {

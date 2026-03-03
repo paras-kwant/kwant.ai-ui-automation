@@ -6,20 +6,9 @@ import { generateRandomEmail, generateRandomWorldAddress } from '../../fixtures/
 
 describe("WorkForce Companies Module - General Details", () => {
   
-  before(() => {
-    cy.viewport(1440, 900);
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
-
   beforeEach(() => {
-
-    cy.cleanUI()
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.cleanUI();
   });
   
 

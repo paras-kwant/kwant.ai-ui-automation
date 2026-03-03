@@ -8,33 +8,28 @@ import { generateWorkerData } from '../../fixtures/workerData.js';
 
 
 describe("Worker Onboarding Email Validation", () => {
-  let authHeaders={}
-
-  before(() => {
-    cy.intercept('GET', '/api/projectConfigs', (req) => {
-     authHeaders = {
-       'x-auth-token': req.headers['x-auth-token'],
-       'x-auth-project': req.headers['x-auth-project']
-     };
-   }).as('getConfig');
-   
-})
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-    cy.wait('@getConfig')
-  })
-
-  beforeEach(()=>{
-    workerHelper.visitWorkersPage();
-  })
+  let authHeaders = {};
+  let authCaptured = false;
+  
   beforeEach(() => {
-    cy.cleanUI()
+    if (!authCaptured) {
+      cy.intercept('GET', '/api/projectConfigs', (req) => {
+        authHeaders = {
+          'x-auth-token': req.headers['x-auth-token'],
+          'x-auth-project': req.headers['x-auth-project']
+        };
+      }).as('getConfig');
+    }
+  
+    cy.loginAndVisit(() => workerHelper.visitWorkersPage());
+  
+    if (!authCaptured) {
+      cy.wait('@getConfig').then(() => {
+        authCaptured = true;
+      });
+    }
+  
+    cy.cleanUI();
   });
   it("Send Onboarding Invite - No Worker Selected", () => {
     cy.get('.personal-info-content__title').should('be.visible');

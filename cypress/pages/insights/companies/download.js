@@ -153,7 +153,6 @@ class DownloadPage {
   // ─── Reusable Flow ───────────────────────────────────────────────────────────
 
   runDownloadTestForFilter(filterLabel) {
-    this.visitCompaniesPage();
     this.interceptSummaryApi();
     this.interceptDownloadApi();
     this.interceptCompaniesApi();

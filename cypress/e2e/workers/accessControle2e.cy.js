@@ -6,36 +6,12 @@ import { addWorkerSelector } from "../../selector/addWorker.js";
 import accessControle2e from "../../pages/workforce/accessControle2e.js";
 
 
-Cypress.Commands.add('closeUploadDownloadDrawerIfOpen', () => {
-  cy.wait(1000)
-  cy.get('body').then(($body) => {
-    const $icon = $body.find('.sc-krNlru svg, aside button');
-
-    if ($icon.length === 0) {
-      cy.log('Drawer icon not found');
-      return;
-    }
-    if (!$icon.is(':visible')) {
-      cy.log('Drawer icon found but not visible');
-      return;
-    }
-    cy.wrap($icon).click({ force: true });
-  });
-});
 
 describe("Worker Module e2e - Access Control Page Tests", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains('JCI - HQ turnstile')
-        .click();
-    });
-    cy.visit(`/projects/106553747/workers`)
-  });
 
   beforeEach(() => {
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('106553747'));
     cy.cleanUI()
   });
   it("Should display red tag when an invalid picture is uploaded", () => {

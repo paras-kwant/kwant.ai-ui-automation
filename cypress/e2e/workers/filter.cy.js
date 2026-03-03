@@ -8,39 +8,27 @@ import workerHelper from '../../support/helper/workerHelper.js';
 import filterPage from '../../pages/workforce/filter.js';
 
 describe("Worker Module - Filter", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-  });
+  let columnsConfigured = false;
+
+  beforeEach(() => {
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
   
-  before(() => {
-    cy.wait(1000)
+    if (!columnsConfigured) {
       cy.get(".icon-button button").first().click();
-       cy.contains('button p', "Reset to default").click() 
-       cy.wait(5000) 
+      cy.contains('button p', "Reset to default").click();
+      cy.wait(5000);
       cy.get('[data-rbd-draggable-id="safetyAlert"] [type="checkbox"]').click();
-      cy.get('[data-rbd-draggable-id="mwbe"] [type="checkbox"]').click()
+      cy.get('[data-rbd-draggable-id="mwbe"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="raceName"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="crewName"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="ethnicity"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="sex"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="status"] [type="checkbox"]').click();
       cy.get('[data-rbd-draggable-id="boolean_test"] [type="checkbox"]').click();
-
-      cy.wait(1000)
       cy.get('button p').contains('Save').should('be.visible').click();
+      columnsConfigured = true;
+    }
   });
-  
-  beforeEach(() => {
-    cy.cleanUI();
-
-  });
-  
   
 
   it("Verify the table header filter - name", () => {
@@ -592,7 +580,6 @@ describe("Worker Module - Filter", () => {
       });
     });
   
-    // Apply filter
     cy.contains("Filters:").click();
     cy.wait(1000);
   

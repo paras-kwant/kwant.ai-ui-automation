@@ -3,18 +3,9 @@ import { workforceSelector } from "../../support/workforceSelector.js";
 import workerHelper from "../../support/helper/workerHelper.js";
 
 describe("Worker Alerts & SMS Communication Flow (UI + Twilio Integration)", () => {
-  before(() => {
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
-    });
-    workerHelper.visitWorkersPage();
-  });
-
   beforeEach(() => {
-    cy.cleanUI();
-  });
-
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
   it("Sending Alert to Worker with Missing Contact Information", () => {
     cy.get(workforceSelector.tableRow).first().should("be.visible");
 

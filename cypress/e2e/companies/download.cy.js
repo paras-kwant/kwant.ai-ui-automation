@@ -9,20 +9,10 @@ import companiesHelper from '../../support/helper/companiesHelper.js';
 
 describe("WorkForce Companies Modulee -  Download", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.contains('.card-title', Cypress.env('PROJECT_NAME'), { timeout: 40000 })
-        .should('be.visible')
-        .click();
-    });
-	companiesHelper.visitCompaniesPage();
-  });
-  beforeEach(() => {
-
-    cy.cleanUI()
-  });
-  describe('Download company CSV', () => {
+	beforeEach(() => {
+		cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+		cy.cleanUI();
+	  });
 
     it('Should download the worker CSV template successfully', () => {
 		const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
@@ -168,7 +158,7 @@ describe("WorkForce Companies Modulee -  Download", () => {
 
   }); // closes describe('Download company CSV')
 
-}); // closes outer describe
+
 
 
 

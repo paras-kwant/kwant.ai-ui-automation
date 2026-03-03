@@ -1,9 +1,17 @@
 import { workforceSelector } from '../workforceSelector';
 
 const companiesHelper = {
-  visitCompaniesPage: () => cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/companies`),
+
+  visitCompaniesPage: (projectId) => {
+    const id = projectId || Cypress.env('PROJECT_ID');
+    cy.visit(`/projects/${id}/companies`);
+  },
+
+  visitCompaniesInsightPage: (projectId) => {
+    const id = projectId || Cypress.env('PROJECT_ID');
+    cy.visit(`/projects/${id}/insights/companies`);
+  },
 
 };
-
 
 export default companiesHelper;

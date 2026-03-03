@@ -7,12 +7,9 @@ import { generateCompanyData } from "../../fixtures/workerData.js";
 describe("WorkForce Companies Module - overflow menu", () => {
   let authHeaders = {};
 
-  before(() => {
-	cy.viewport(1440, 900);
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
-    });
+  beforeEach(() => {
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.cleanUI();
   });
 
   beforeEach(() => {
@@ -26,20 +23,11 @@ describe("WorkForce Companies Module - overflow menu", () => {
     companiesHelper.visitCompaniesPage();
     cy.wait('@getConfig');
 
-    // Clear search if present
     cy.get("body").then(($body) => {
       if($body.find(workforceSelector.searchInput).length > 0){
         cy.get(workforceSelector.searchInput).clear();
       }
-    });
 
-    // Clear filters if present
-    cy.get("body").then(($body) => {
-      if ($body.find(".filter-tag svg").length > 0) {
-        cy.get(".filter-tag svg")
-          .should("be.visible")
-          .click({ force: true });
-      }
     });
     
     cy.url().should("include", "/companies");

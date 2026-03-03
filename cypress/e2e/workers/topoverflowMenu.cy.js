@@ -6,21 +6,12 @@ import workerHelper from '../../support/helper/workerHelper.js';
 
 
 describe("Worker Module - overflowMenu", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-
-  });
   beforeEach(() => {
-    cy.cleanUI()
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it("Validate  the options in overflow menu", () => {
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Delete").should("not.exist");
     cy.contains(".dropdown-option", "Disable").should("not.exist");
@@ -39,7 +30,7 @@ describe("Worker Module - overflowMenu", () => {
 
 
   it('Verify the Save button is disabled unless the inputs are selected from the drop-down of Cost Code, Crew, Job Title.',()=>{
-    cy.get('.personal-info-content__title').should('be.visible')
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.get(workforceSelector.tableRow).eq(0).find('[type="checkbox"]').check({force: true});
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Change Value").click();
@@ -49,14 +40,14 @@ describe("Worker Module - overflowMenu", () => {
   })
 
   it(" Verify that the 'Disable' button is hidden when no worker is selected in the worker data table.", () => {
-    cy.get('.personal-info-content__title').should('be.visible')
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Disable").should("not.exist");
   });
 
 
   it("Validate the Change Value functionality - Job Title", () => {
-  
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.get(workforceSelector.tableRow).eq(2).find('[type="checkbox"]').check({ force: true });
   
     cy.get(workforceSelector.overflowMenu).click();
@@ -83,7 +74,7 @@ describe("Worker Module - overflowMenu", () => {
 
 
   it("Validate the Change Value functionality - Crew", () => {
-  
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.get(workforceSelector.tableRow).eq(2).find('[type="checkbox"]').check({ force: true });
   
     cy.get(workforceSelector.overflowMenu).click();
@@ -112,6 +103,8 @@ describe("Worker Module - overflowMenu", () => {
 
 
   it("Validate the Change Value for multiple user using select feature", () => {
+    cy.get(workforceSelector.tableRow).should("be.visible");
+
     cy.get(workforceSelector.tableRow)
       .eq(0)
       .find('[type="checkbox"]')
@@ -166,7 +159,8 @@ describe("Worker Module - overflowMenu", () => {
   });
   
   it("Verify Disable Worker Functionality for multiple user", () => {
-    cy.get('.personal-info-content__title').should('be.visible')
+    cy.get(workforceSelector.tableRow).should("be.visible");
+
     cy.readFile("cypress/fixtures/createdWorker.json").then(
       ({ lastName }) => {
         cy.get(workforceSelector.searchInput)
@@ -194,7 +188,7 @@ describe("Worker Module - overflowMenu", () => {
   });
 
   it("Verify warning message on disabling a disable user.", () => {
-    cy.wait(3000);
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.readFile("cypress/fixtures/createdWorker.json").then(
       ({ firstName, lastName }) => {
         cy.get(workforceSelector.searchInput)
@@ -214,7 +208,8 @@ describe("Worker Module - overflowMenu", () => {
   });
 
   it("Verify warning message on disabling a worker without any assigned device.", () => {
-    cy.wait(3000);
+    cy.get(workforceSelector.tableRow).should("be.visible");
+
     cy.readFile("cypress/fixtures/noEmailWorker.json").then(
       ({ firstName, lastName }) => {
         cy.get(workforceSelector.searchInput)
@@ -332,6 +327,7 @@ describe("Worker Module - overflowMenu", () => {
     }
   }
   it("Verify workers data is downloaded based on applied search filter", () => {
+    cy.get(workforceSelector.tableRow).should("be.visible");
     const FILE_NAME = "Ontarget-Employee-Report.csv";
     const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
     const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
@@ -427,6 +423,8 @@ describe("Worker Module - overflowMenu", () => {
   
 
   it("Verify filtered worker data is downloaded correctly", () => {
+    cy.get(workforceSelector.tableRow).should("be.visible");
+
     const FILE_NAME = "Ontarget-Employee-Report.csv";
     const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
     const FILE_PATH = path.join(DOWNLOADS_FOLDER, FILE_NAME);
@@ -521,7 +519,8 @@ describe("Worker Module - overflowMenu", () => {
   }
 
   it("Verify the deletion functionality for the selected user.", () => {
-    cy.get('.personal-info-content__title').should('be.visible')
+    cy.get(workforceSelector.tableRow).should("be.visible");
+
     cy.readFile("cypress/fixtures/createdWorker.json").then(
       ({ firstName, lastName }) => {
         cy.get(workforceSelector.searchInput)
@@ -543,7 +542,7 @@ describe("Worker Module - overflowMenu", () => {
 
 
   it('Verify Cancel and X cancels the page.', ()=>{
-    cy.get('.personal-info-content__title').should('be.visible')
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.readFile("cypress/fixtures/createdWorker.json").then(
       ({ firstName, lastName }) => {
         cy.get(workforceSelector.searchInput)

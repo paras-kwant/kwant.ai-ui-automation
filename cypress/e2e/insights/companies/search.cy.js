@@ -1,44 +1,33 @@
 /// <reference types="cypress" />
 import { searchPage } from "../../../pages/insights/companies/search";
+import companiesHelper from "../../../support/helper/companiesHelper";
 
 describe("Insight Company - Search ", () => {
   let companyNames = [];
 
-  before(() => {
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title").contains(Cypress.env("PROJECT_NAME")).click();
-    });
+  beforeEach(() => {
 
-    cy.visit("https://uat.kwant.ai/projects/500526306/insights/companies");
-
-    cy.intercept("POST", "/api/insight/company/table*").as("companiesApiInit");
-    cy.wait("@companiesApiInit").then((interception) => {
+    // ✅ Register BOTH intercepts FIRST
+    cy.intercept("POST", "/api/insight/company/table*")
+      .as("companiesApi");
+  
+    // Visit page
+    companiesHelper.visitCompaniesInsightPage('500526306');
+  
+    // Wait for initial table load
+    cy.wait("@companiesApi").then((interception) => {
       companyNames = searchPage.getCompanyNamesFromApi(interception);
       expect(companyNames.length).to.be.greaterThan(0);
     });
-  });
-
-  beforeEach(() => {
-    // Re-establish intercept alias before every test
-    searchPage.interceptCompaniesApi();
-
-    // Only clear if the input exists and is visible
+  
+    // Clear search if exists
     cy.get("body").then(($body) => {
       if ($body.find(searchPage.searchInputSelector).length > 0) {
         searchPage.searchInput.clear({ force: true });
       }
     });
+  
   });
-
-  afterEach(() => {
-    cy.get("body").then(($body) => {
-      if ($body.find(searchPage.searchInputSelector).length > 0) {
-        searchPage.searchInput.clear({ force: true });
-      }
-    });
-  });
-
   // ─────────────────────────────────────────────────────────────────────────────
 
   it.skip("Verify if the bookmarked company falls on the list of searches performed then the bookmarked company should always appear on the top.", () => {
@@ -55,7 +44,6 @@ describe("Insight Company - Search ", () => {
   // ─────────────────────────────────────────────────────────────────────────────
 
   it("Validating the search functionality - run twice", () => {
-    // Guard: ensure companyNames was populated
     cy.wrap(null).then(() => {
       expect(companyNames.length, "companyNames should not be empty").to.be.greaterThan(0);
     });

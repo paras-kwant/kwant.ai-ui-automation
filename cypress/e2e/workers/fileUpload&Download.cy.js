@@ -7,20 +7,9 @@ import { generateWorkerData } from '../../fixtures/workerData.js';
 
 
 describe("Worker Module - File Upload and Download", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.contains('.card-title', Cypress.env('PROJECT_NAME'), { timeout: 40000 })
-  .should('be.visible')
-  .click();
-    });
-    workerHelper.visitWorkersPage();
-
-  });
-
   beforeEach(() => {
-    cy.cleanUI()
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
 
   it('Should add a worker by uploading a valid CSV file', () => {
    workerHelper.openUploadModal()

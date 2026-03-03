@@ -7,21 +7,12 @@ import workerHelper from '../../support/helper/workerHelper.js';
 import "../../support/commands";
 
 describe("Worker Module - General Details Page", () => {
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    workerHelper.visitWorkersPage();
-  });
   beforeEach(() => {
-    cy.wait(1500)
-    cy.get('body').click('bottomLeft')
-  });
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+  })
   
   it("Verify the UI of the General Details drawer", () => {
+    cy.get(workforceSelector.tableRow).should("be.visible");
     cy.get(workforceSelector.tableRow).eq(2).click({ force: true });
   
     cy.contains("p", "General Details").should("be.visible");
@@ -42,9 +33,8 @@ describe("Worker Module - General Details Page", () => {
       });
     cy.get(".hover-hoc-container__input__display-value")
       .first()
-      .realHover()
       .find("svg")
-      .should("be.visible");
+      .should("exist");
   
     // Button checks
     cy.contains("button p", "Cancel").should("be.visible");

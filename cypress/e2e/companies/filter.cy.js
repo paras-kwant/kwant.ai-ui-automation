@@ -6,46 +6,12 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 describe("WorkForce Companies Module - Filter", () => {
 
-  before(() => {
-	cy.viewport(1440, 900);
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
+  
 
-  beforeEach(() => {
-	cy.viewport(1440, 900)
-	        
-        cy.get('body').then($body => {
-          if ($body.find('aside button svg, .sc-krNlru svg').length > 0) {
-            cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
-          }
-    
-          if ($body.find('.sc-ktJbId.sc-gmgFlS').length > 0) {
-            cy.get('.sc-ktJbId.sc-gmgFlS').eq(0).click({ force: true });
-          } else {
-            cy.log('Pagination not found, skipping to page one selection');
-          }
-      
-          if ($body.find('.tag.default.grey:contains("Clear")').length > 0) {
-            cy.contains('.tag.default.grey', 'Clear')
-              .click({ force: true });
-          }
-    
-          if ($body.find('.filters-header-container svg').length > 0) {
-            cy.get('.filters-header-container svg').eq(0).click();
-          }
-    
-          if($body.find(workforceSelector.searchInput).length > 0){
-            cy.get(workforceSelector.searchInput).clear();
-          }
-        });
-	
-  });
+	beforeEach(() => {
+		cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+		cy.cleanUI();
+	  });
   
   it("Verify Company Name filter dropdown can be opened", () => {
 	cy.contains(workforceSelector.tableColumn, 'Company Name').find('.table-header-filter-btn').click();

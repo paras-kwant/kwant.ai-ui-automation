@@ -1,27 +1,8 @@
 import { workforceSelector } from "../../../support/workforceSelector";
+import companiesHelper from '../../../support/helper/companiesHelper.js';
 
 describe('Companies Insights - Filter Functionality', () => {
-  before(() => {
-    cy.session("userSession", () => {
-      cy.login();
-      cy.get(".card-title").contains('Pearl Apartments').click();
-    });
-    cy.visit('/projects/5007477836/insights/companies');
-    cy.get('.filters_header_right_section .selector-item.first').click()
-  })
   let authHeaders = {};
-  const getLabel = (labelText) => {
-    return cy.get('body').then(($body) => {
-      if ($body.find(`.select-container__label:contains("${labelText}")`).length > 0) {
-        return cy.contains('.select-container__label', labelText)
-      } else {
-        return cy.contains('label', labelText)
-      }
-    })
-  }
-  beforeEach(() => {
-    cy.cleanUI()
-  })
 
   beforeEach(() => {
     cy.intercept('GET', '/api/projectConfigs', (req) => {
@@ -30,7 +11,21 @@ describe('Companies Insights - Filter Functionality', () => {
         'x-auth-project': req.headers['x-auth-project']
       };
     }).as('getConfig');
+  
+cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+    cy.get('.filters_header_right_section .selector-item.first').click();
+    cy.cleanUI();
   });
+  
+  const getLabel = (labelText) => {
+    return cy.get('body').then(($body) => {
+      if ($body.find(`.select-container__label:contains("${labelText}")`).length > 0) {
+        return cy.contains('.select-container__label', labelText);
+      } else {
+        return cy.contains('label', labelText);
+      }
+    });
+  };
 
   it('verify the UI of the filter form', () => {
     cy.contains('button p', 'Filter').click();

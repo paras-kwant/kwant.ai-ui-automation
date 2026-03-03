@@ -9,18 +9,8 @@ import { addWorkerSelector } from '../../selector/addWorker';
 import addCompanyPage from '/cypress/pages/companies/addCompany'
 
 describe("WorkForce Companies Module - add Company", () => {
-
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
-
   beforeEach(() => {
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
     cy.cleanUI();
   });
 
@@ -88,7 +78,9 @@ describe("WorkForce Companies Module - add Company", () => {
     addCompanyPage.takeAPictureButton.click();
     addCompanyPage.verifyVideoViewerVisible();
     addCompanyPage.captureButton.click();
+    cy.wait(1000);
     addCompanyPage.verifyVideoViewerNotVisible();
+    cy.wait(1000);
     addCompanyPage.retakePicture();
     addCompanyPage.verifyVideoViewerVisible();
   });

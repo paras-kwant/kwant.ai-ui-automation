@@ -6,19 +6,9 @@ import { workforceSelector } from '../../support/workforceSelector';
 
 describe("WorkForce Companies Module - Search", () => {
 
-  before(() => {
-    cy.session('userSession', () => {
-      cy.login();
-      cy.get('.card-title')
-        .contains(Cypress.env('PROJECT_NAME'))
-        .click();
-    });
-    companiesHelper.visitCompaniesPage();
-  });
-
   beforeEach(() => {
-    companiesHelper.visitCompaniesPage();
-    cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.cleanUI();
   });
 
   it("Validating the search functionality - run twice (using TaskTrade API)", () => {

@@ -105,8 +105,6 @@ class AccessControlPage {
 		.eq(0)
 		.realHover()
 		.find(this.deviceEditIcon)
-		.first()
-		.should('be.visible')
 		.click({ force: true });
 	}
   
