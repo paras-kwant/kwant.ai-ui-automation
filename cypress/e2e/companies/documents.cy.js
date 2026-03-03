@@ -117,7 +117,11 @@ describe("WorkForce Companies Module - Documents Page", () => {
             .should('not.be.disabled')        
             .clear({ force: true })
             .type('11/06/2026', { delay: 100 }); 
-            cy.wait(1000)
+            cy.get('section').first().click()
+            cy.wait(2000)
+            cy.get('.hover-hoc-container__input__display-value')
+          .eq(3)
+          .should('contain.text', '11/06/2026')
 
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)
