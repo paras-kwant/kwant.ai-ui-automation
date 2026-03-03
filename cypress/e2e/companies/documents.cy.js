@@ -114,7 +114,6 @@ describe("WorkForce Companies Module - Documents Page", () => {
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)
           .find('svg')
-          // .invoke('show')
           .click({ force: true });
 
           cy.get('[placeholder="Select Expiry date"]')
@@ -122,7 +121,6 @@ describe("WorkForce Companies Module - Documents Page", () => {
             .should('not.be.disabled')        // wait until enabled
             .clear({ force: true })           // force clearing if needed
             .type('11/06/2026', { delay: 100 }); // type date
-          cy.get('body').click();   
 
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)

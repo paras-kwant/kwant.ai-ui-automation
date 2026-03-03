@@ -9,6 +9,7 @@ const twilio = require("twilio");
 
 module.exports = defineConfig({
   e2e: {
+    taskTimeout: 120000,
     viewportWidth: 1440,
     viewportHeight: 900,
     projectId: "qqtmqa",
@@ -231,6 +232,7 @@ module.exports = defineConfig({
       allureAddVideoOnPass: false,
       allureSkipAutomaticScreenshots: false,
       allureLogCypress: false,
+      allureReuseAfterSpec: true,
     },
   },
 });

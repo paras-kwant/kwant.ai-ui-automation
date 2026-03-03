@@ -49,6 +49,10 @@ jobs:
             --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
+      - name: Wait for Allure results to flush
+        if: always()
+        run: sleep 10
+
       - name: Upload Companies Allure Results
         uses: actions/upload-artifact@v4
         if: always()
@@ -99,6 +103,10 @@ jobs:
             --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
+      - name: Wait for Allure results to flush
+        if: always()
+        run: sleep 10
+
       - name: Upload Workers Allure Results
         uses: actions/upload-artifact@v4
         if: always()
@@ -148,6 +156,10 @@ jobs:
             --spec "cypress/e2e/insights/companies/**/*.cy.js" \
             --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
+
+      - name: Wait for Allure results to flush
+        if: always()
+        run: sleep 10
 
       - name: Upload Insights/Companies Allure Results
         uses: actions/upload-artifact@v4
