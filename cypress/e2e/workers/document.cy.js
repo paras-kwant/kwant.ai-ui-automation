@@ -282,7 +282,7 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Verify that expired or expiring document's expiry date is update to future date and updating it should display grey color row in the document list", () => {
+  it.only("Verify that expired or expiring document's expiry date is update to future date and updating it should display grey color row in the document list", () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -301,6 +301,7 @@ cy.get(workforceSelector.documentPage)
           cy.log(`Original Credential ID: ${origCred}`);
 
           cy.get(workforceSelector.documentTableRow).eq(0).click();
+          cy.wait(4000)
 
           cy.get('.hover-hoc-container__input__display-value')
             .eq(3)
@@ -337,7 +338,7 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it('should update an existing certificate', () => {
+  it.only('should update an existing certificate', () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -356,6 +357,7 @@ cy.get(workforceSelector.documentPage)
           cy.log(`Original Credential ID: ${origCred}`);
 
           cy.get(workforceSelector.documentTableRow).eq(0).click();
+          cy.wait(4000)
 
           cy.get('.hover-hoc-container__input__display-value')
             .eq(3)

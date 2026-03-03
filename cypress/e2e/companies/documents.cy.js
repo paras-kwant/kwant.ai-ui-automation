@@ -93,7 +93,7 @@ describe("WorkForce Companies Module - Documents Page", () => {
     });
   });
 
-  it.only('Should update an existing company certificate', () => {
+  it('Should update an existing company certificate', () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage();
     cy.get(workforceSelector.documentTableRow)
@@ -106,6 +106,7 @@ describe("WorkForce Companies Module - Documents Page", () => {
         cy.log(`Original Credential ID: ${origCred}`);
 
         cy.get(workforceSelector.documentTableRow).eq(0).click();
+        cy.wait(4000)
 
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)
