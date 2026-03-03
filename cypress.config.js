@@ -20,7 +20,7 @@ module.exports = defineConfig({
     responseTimeout: 30000,
     pageLoadTimeout: 30000,
     taskTimeout: 120000,        // ✅ gives Allure + Twilio enough time
-    retries: { runMode: 1, openMode: 0 },
+    // retries: { runMode: 1, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
     testIsolation: false,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
