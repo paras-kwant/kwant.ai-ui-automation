@@ -34,12 +34,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug Secrets
+        run: |
+          echo "TWILIO_ACCOUNT_SID is set: ${{ secrets.TWILIO_ACCOUNT_SID != '' }}"
+          echo "TWILIO_AUTH_TOKEN is set: ${{ secrets.TWILIO_AUTH_TOKEN != '' }}"
+          echo "TWILIO_NUMBER is set: ${{ secrets.TWILIO_NUMBER != '' }}"
+          echo "EXPECTED_FROM is set: ${{ secrets.EXPECTED_FROM != '' }}"
+
       - name: Run Companies Cypress Tests
         run: |
           rm -rf allure-results && mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/companies/**/*.cy.js" \
-            --env email=$EMAIL,password=$PASSWORD,TWILIO_NUMBER=$TWILIO_NUMBER,TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN,EXPECTED_FROM=$EXPECTED_FROM \
+            --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
       - name: Upload Companies Allure Results
@@ -77,12 +84,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug Secrets
+        run: |
+          echo "TWILIO_ACCOUNT_SID is set: ${{ secrets.TWILIO_ACCOUNT_SID != '' }}"
+          echo "TWILIO_AUTH_TOKEN is set: ${{ secrets.TWILIO_AUTH_TOKEN != '' }}"
+          echo "TWILIO_NUMBER is set: ${{ secrets.TWILIO_NUMBER != '' }}"
+          echo "EXPECTED_FROM is set: ${{ secrets.EXPECTED_FROM != '' }}"
+
       - name: Run Workers Cypress Tests
         run: |
           rm -rf allure-results && mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/workers/**/*.cy.js" \
-            --env email=$EMAIL,password=$PASSWORD,TWILIO_NUMBER=$TWILIO_NUMBER,TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN,EXPECTED_FROM=$EXPECTED_FROM \
+            --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
       - name: Upload Workers Allure Results
@@ -120,12 +134,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug Secrets
+        run: |
+          echo "TWILIO_ACCOUNT_SID is set: ${{ secrets.TWILIO_ACCOUNT_SID != '' }}"
+          echo "TWILIO_AUTH_TOKEN is set: ${{ secrets.TWILIO_AUTH_TOKEN != '' }}"
+          echo "TWILIO_NUMBER is set: ${{ secrets.TWILIO_NUMBER != '' }}"
+          echo "EXPECTED_FROM is set: ${{ secrets.EXPECTED_FROM != '' }}"
+
       - name: Run Insights/Companies Cypress Tests
         run: |
           rm -rf allure-results && mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/insights/companies/**/*.cy.js" \
-            --env email=$EMAIL,password=$PASSWORD,TWILIO_NUMBER=$TWILIO_NUMBER,TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN,EXPECTED_FROM=$EXPECTED_FROM \
+            --env email="${EMAIL}",password="${PASSWORD}" \
             --browser chrome --headless || true
 
       - name: Upload Insights/Companies Allure Results
