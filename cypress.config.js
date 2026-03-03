@@ -9,7 +9,6 @@ const twilio = require("twilio");
 
 module.exports = defineConfig({
   e2e: {
-    taskTimeout: 120000,
     viewportWidth: 1440,
     viewportHeight: 900,
     projectId: "qqtmqa",
@@ -20,9 +19,10 @@ module.exports = defineConfig({
     requestTimeout: 30000,
     responseTimeout: 30000,
     pageLoadTimeout: 30000,
+    taskTimeout: 120000,        // ✅ gives Allure + Twilio enough time
     retries: { runMode: 1, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
-    testIsolation: false,
+    testIsolation: true,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
 
     setupNodeEvents(on, config) {
@@ -184,7 +184,7 @@ module.exports = defineConfig({
         },
 
         getTwilioOtp({ accountSid, authToken, to }) {
-          // ✅ Guard against missing credentials — prevents config crash in CI
+          // ✅ Guard — prevents config crash when credentials missing in CI
           if (!accountSid || !authToken) {
             console.error("❌ Twilio credentials missing for getTwilioOtp");
             return null;
@@ -201,7 +201,7 @@ module.exports = defineConfig({
         },
 
         getTwilioMessages({ accountSid, authToken, to }) {
-          // ✅ Guard against missing credentials — prevents config crash in CI
+          // ✅ Guard — prevents config crash when credentials missing in CI
           if (!accountSid || !authToken) {
             console.error("❌ Twilio credentials missing for getTwilioMessages");
             return [];
@@ -232,7 +232,7 @@ module.exports = defineConfig({
       allureAddVideoOnPass: false,
       allureSkipAutomaticScreenshots: false,
       allureLogCypress: false,
-      allureReuseAfterSpec: true,
+      allureReuseAfterSpec: true, // ✅ forces Allure to flush results after every spec
     },
   },
 });

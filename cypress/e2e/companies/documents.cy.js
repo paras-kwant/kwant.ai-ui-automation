@@ -117,10 +117,13 @@ describe("WorkForce Companies Module - Documents Page", () => {
           .click({ force: true });
 
           cy.get('[placeholder="Select Expiry date"]')
-            .scrollIntoView()                 // scrolls element into viewport
-            .should('not.be.disabled')        // wait until enabled
-            .clear({ force: true })           // force clearing if needed
-            .type('11/06/2026', { delay: 100 }); // type date
+          .scrollIntoView()
+          .should('be.visible')
+          .and('not.be.disabled')
+          .invoke('val', '11/06/2026')
+          .trigger('input')
+          .trigger('change');
+          cy.wait(1000)
 
         cy.get('.hover-hoc-container__input__display-value')
           .eq(3)
