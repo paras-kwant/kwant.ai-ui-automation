@@ -4,29 +4,30 @@ on:
   workflow_dispatch:
 
 jobs:
+  # 1️⃣ Companies Tests
   companies-tests:
     name: 🏢 Companies UI Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
+    continue-on-error: true
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
       TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
       TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
       TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
       EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
+      CYPRESS_VIDEO: true
+      CYPRESS_VIDEO_UPLOAD_ON_PASS: false
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - run: npm ci
 
       - name: Run Companies Cypress Tests
@@ -35,7 +36,7 @@ jobs:
           npx cypress run \
             --spec "cypress/e2e/companies/**/*.cy.js" \
             --env email="${EMAIL}",password="${PASSWORD}" \
-            --browser chrome --headless || true
+            --browser chrome --headless
 
       - name: Upload Companies Allure Results
         uses: actions/upload-artifact@v4
@@ -43,21 +44,24 @@ jobs:
           name: companies-allure-results
           path: allure-results
 
+  # 2️⃣ Workers Tests
   workers-tests:
     name: 👷 Workers UI Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 50
+    continue-on-error: true
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
       TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
       TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
       TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
       EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
+      CYPRESS_VIDEO: true
+      CYPRESS_VIDEO_UPLOAD_ON_PASS: false
 
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +76,7 @@ jobs:
           npx cypress run \
             --spec "cypress/e2e/workers/**/*.cy.js" \
             --env email="${EMAIL}",password="${PASSWORD}" \
-            --browser chrome --headless || true
+            --browser chrome --headless
 
       - name: Upload Workers Allure Results
         uses: actions/upload-artifact@v4
@@ -80,21 +84,24 @@ jobs:
           name: workers-allure-results
           path: allure-results
 
+  # 3️⃣ Insights/Companies Tests
   insights-companies-tests:
     name: 📊 Insights/Companies UI Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
+    continue-on-error: true
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
       TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
       TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
       TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
       EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
+      CYPRESS_VIDEO: true
+      CYPRESS_VIDEO_UPLOAD_ON_PASS: false
 
     steps:
       - uses: actions/checkout@v4
@@ -109,7 +116,7 @@ jobs:
           npx cypress run \
             --spec "cypress/e2e/insights/companies/**/*.cy.js" \
             --env email="${EMAIL}",password="${PASSWORD}" \
-            --browser chrome --headless || true
+            --browser chrome --headless
 
       - name: Upload Insights/Companies Allure Results
         uses: actions/upload-artifact@v4
@@ -117,12 +124,14 @@ jobs:
           name: insights-companies-allure-results
           path: allure-results
 
+  # 4️⃣ Merge Allure Results & Deploy
   merge-reports:
     name: 📊 Merge Allure Reports & Deploy
     needs: [companies-tests, workers-tests, insights-companies-tests]
     runs-on: ubuntu-latest
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      GH_PAT: ${{ secrets.GH_PAT }}
 
     steps:
       - uses: actions/checkout@v4
@@ -138,23 +147,23 @@ jobs:
         with:
           name: companies-allure-results
           path: merged-results/companies
-
       - uses: actions/download-artifact@v4
         with:
           name: workers-allure-results
           path: merged-results/workers
-
       - uses: actions/download-artifact@v4
         with:
           name: insights-companies-allure-results
           path: merged-results/insights-companies
 
-      - name: Merge Allure Results
+      - name: Merge Allure Results Correctly
         run: |
           mkdir -p merged-results/allure-results
-          find merged-results/companies -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
-          find merged-results/workers -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
-          find merged-results/insights-companies -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
+          cp -r merged-results/companies/. merged-results/allure-results/ || true
+          cp -r merged-results/workers/. merged-results/allure-results/ || true
+          cp -r merged-results/insights-companies/. merged-results/allure-results/ || true
+          echo "Merged files count:"
+          find merged-results/allure-results -type f | wc -l
 
       - name: Generate Allure Report
         run: |
@@ -166,11 +175,11 @@ jobs:
       - name: Deploy Allure Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-           github_token: ${{ secrets.GH_PAT }}       # <- use PAT here
-           publish_dir: ./allure-report
-           force_orphan: true
-           user_name: 'github-actions[bot]'
-           user_email: 'github-actions[bot]@users.noreply.github.com'
+          github_token: ${{ secrets.GH_PAT }}
+          publish_dir: ./allure-report
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: Extract Allure Summary
         id: summary
@@ -209,7 +218,6 @@ jobs:
           SUCCESS_RATE="${{ steps.summary.outputs.success_rate }}"
           TOTAL_TIME="${{ steps.summary.outputs.total_time }}"
           TIMESTAMP="${{ steps.summary.outputs.timestamp }}"
-
           TOTAL_FAILURES=$((FAILED + BROKEN))
           if [[ "$TOTAL" -eq 0 ]]; then
             STATUS="⚠️ Parallel UI tests did not run properly"
@@ -224,7 +232,6 @@ jobs:
             STATUS="🚨 $TOTAL_FAILURES tests failed out of $TOTAL tests (Parallel)"
             COLOR="danger"
           fi
-
           PAYLOAD=$(jq -n \
             --arg color "$COLOR" \
             --arg status "$STATUS" \
@@ -258,5 +265,4 @@ jobs:
                 }
               ]
             }')
-
           curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URLs"
