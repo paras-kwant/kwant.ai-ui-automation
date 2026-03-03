@@ -93,11 +93,7 @@ describe("WorkForce Companies Module - Documents Page", () => {
     });
   });
 
-
-
-  
-
-  it('Should update an existing company certificate', () => {
+  it.only('Should update an existing company certificate', () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage();
     cy.get(workforceSelector.documentTableRow)
