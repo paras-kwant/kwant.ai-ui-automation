@@ -166,11 +166,11 @@ jobs:
       - name: Deploy Allure Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-report
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+           github_token: ${{ secrets.GH_PAT }}       # <- use PAT here
+           publish_dir: ./allure-report
+           force_orphan: true
+           user_name: 'github-actions[bot]'
+           user_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: Extract Allure Summary
         id: summary
@@ -259,4 +259,4 @@ jobs:
               ]
             }')
 
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URLs"
