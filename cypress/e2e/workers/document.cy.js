@@ -282,7 +282,7 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it.only("Verify that expired or expiring document's expiry date is update to future date and updating it should display grey color row in the document list", () => {
+  it("Verify that expired or expiring document's expiry date is update to future date and updating it should display grey color row in the document list", () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
