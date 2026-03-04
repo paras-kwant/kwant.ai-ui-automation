@@ -9,7 +9,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
   });
 
-  it('Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', { tags: ["Story:Download Default Date Range Matches Insight Page", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', { tags: ["Story:Download Default Date Range Matches Insight Page", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
 
     downloadPage.getDateRangeFromFilter().then(({ startDate, endDate }) => {
@@ -18,7 +18,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     });
   });
 
-  it('Verify the downloaded quick report is in CSV format', { tags: ["Story:Download Quick Report Is CSV Format", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify the downloaded quick report is in CSV format', { tags: ["Story:Download Quick Report Is CSV Format", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     downloadPage.visitCompaniesPage();
 
@@ -34,7 +34,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     });
   });
 
-  it('Verify the fields on the report - Company Name, Date, Number of Workers, On-site Hours', { tags: ["Story:Download Report Has Required Fields", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify the fields on the report - Company Name, Date, Number of Workers, On-site Hours', { tags: ["Story:Download Report Has Required Fields", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     downloadPage.openDownloadModal();
     downloadPage.clickDownloadButton();
@@ -48,7 +48,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     });
   });
 
-  it('Verify the data on the downloaded CSV report matches with the application data', { tags: ["Story:Download CSV Data Matches Application Data", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify the data on the downloaded CSV report matches with the application data', { tags: ["Story:Download CSV Data Matches Application Data", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     downloadPage.interceptCompaniesApi();
 
     downloadPage.waitForCompaniesApi().then((interception) => {
@@ -67,7 +67,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     });
   });
 
-  it('Verify selecting a company checkbox only downloads that company data in the report', { tags: ["Story:Download Selected Company Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify selecting a company checkbox only downloads that company data in the report', { tags: ["Story:Download Selected Company Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
 
     downloadPage.getRandomCompanyFromUI().then((selectedCompany) => {
@@ -88,11 +88,11 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     });
   });
 
-  it('download for Today',            { tags: ["Story:Download Report For Today", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Today'); });
-  it('download for Current Week',     { tags: ["Story:Download Report For Current Week", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Current Week'); });
-  it('download for Last 7 Days',      { tags: ["Story:Download Report For Last 7 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 7 Days'); });
-  it('download for Last 30 days',     { tags: ["Story:Download Report For Last 30 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 30 days'); });
-  it('download for This Month',       { tags: ["Story:Download Report For This Month", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('This Month'); });
-  it('download for Project Duration', { tags: ["Story:Download Report For Project Duration", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Project Duration'); });
+  it('Insights-Company - download for Today',            { tags: ["Story:Download Report For Today", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Today'); });
+  it('Insights-Company - download for Current Week',     { tags: ["Story:Download Report For Current Week", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Current Week'); });
+  it('Insights-Company - download for Last 7 Days',      { tags: ["Story:Download Report For Last 7 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 7 Days'); });
+  it('Insights-Company - download for Last 30 days',     { tags: ["Story:Download Report For Last 30 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 30 days'); });
+  it('Insights-Company - download for This Month',       { tags: ["Story:Download Report For This Month", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('This Month'); });
+  it('Insights-Company - download for Project Duration', { tags: ["Story:Download Report For Project Duration", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Project Duration'); });
 
 });

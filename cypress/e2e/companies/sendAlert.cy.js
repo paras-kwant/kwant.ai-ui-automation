@@ -10,7 +10,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
     cy.cleanUI();
   });
 
-  it("Sending Alert to company with Missing Contact Information", { tags: ["Story:Alert With Missing Contact Info", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Sending Alert to company with Missing Contact Information", { tags: ["Story:Alert With Missing Contact Info", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).type('No Info Company');
     cy.get(workforceSelector.tableRow).contains('No Info Company').should('be.visible').click();
     cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
@@ -23,7 +23,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
     cy.get(workforceSelector.toastMessage).contains("None of the selected company(s) have phone number added.");
   });
 
-  it("Cancelling the Alert Sending Process", { tags: ["Story:Cancel Alert Sending Process", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Cancelling the Alert Sending Process", { tags: ["Story:Cancel Alert Sending Process", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('No Info Company');
     cy.get(workforceSelector.tableRow).contains('No Info Company').should('be.visible').click();
     cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
@@ -35,7 +35,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
     cy.get("p").contains("View Alerts History").should("not.exist");
   });
 
-  it("Enforces maximum character limit for General Communication messages", { tags: ["Story:Max Character Limit General Communication", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Enforces maximum character limit for General Communication messages", { tags: ["Story:Max Character Limit General Communication", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('No Info Company');
     cy.get(workforceSelector.tableRow).contains('No Info Company').should('be.visible').click();
     cy.get(".header-checkbox-container [type='checkbox']").first().check({ force: true });
@@ -62,7 +62,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
       });
   });
 
-  it("Modifying and Saving an Existing Alert Template", { tags: ["Story:Modify And Save Alert Template", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Modifying and Saving an Existing Alert Template", { tags: ["Story:Modify And Save Alert Template", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('No Info Company');
     cy.get(workforceSelector.tableRow).contains('No Info Company').should("be.visible");
     cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
@@ -83,7 +83,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
       });
   });
 
-  it("Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", { tags: ["Story:Send General Communication And Verify Twilio SMS", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", { tags: ["Story:Send General Communication And Verify Twilio SMS", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const randomText = Math.random().toString(36).substring(2, 12);
 
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs');
@@ -167,7 +167,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
       });
   });
 
-  it("Sending an Alert Message with Special Characters", { tags: ["Story:Alert With Special Characters", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Sending an Alert Message with Special Characters", { tags: ["Story:Alert With Special Characters", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs');
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').should("be.visible");
     cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });

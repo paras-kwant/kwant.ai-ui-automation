@@ -27,7 +27,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   };
 
-  it('verify the UI of the filter form', { tags: ["Story:Insights Filter Form UI Verification", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - verify the UI of the filter form', { tags: ["Story:Insights Filter Form UI Verification", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     cy.contains('button p', 'Filter').click();
     cy.contains('h1', 'Filters').should('be.visible');
 
@@ -58,7 +58,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('verify the options button in the filter button (UI random)', { tags: ["Story:Insights Filter Options UI Random", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - verify the options button in the filter button (UI random)', { tags: ["Story:Insights Filter Options UI Random", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Company').click();
 
@@ -109,12 +109,12 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Filter button should be disable until user select any filter option', { tags: ["Story:Insights Filter Button Disabled Until Selection", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Filter button should be disable until user select any filter option', { tags: ["Story:Insights Filter Button Disabled Until Selection", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     cy.contains('button p', 'Filter').click();
     cy.contains(' section button', 'Filter').should('be.disabled');
   });
 
-  it('Verify Company Name Filter', { tags: ["Story:Insights Filter By Company Name", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify Company Name Filter', { tags: ["Story:Insights Filter By Company Name", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
 
     cy.contains('button p', 'Filter').click();
@@ -146,7 +146,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Verify Crew Filter', { tags: ["Story:Insights Filter By Crew", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify Crew Filter', { tags: ["Story:Insights Filter By Crew", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
 
     cy.contains('button p', 'Filter').click();
@@ -176,7 +176,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Validate the Job Title Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Job Title", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Validate the Job Title Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Job Title", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
     cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
     cy.wait('@taskTradeFilter').its('response.statusCode').should('eq', 200);
@@ -240,7 +240,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Workers On-site filter should return correct results based on range selection', { tags: ["Story:Insights Filter Workers On-site Range", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Workers On-site filter should return correct results based on range selection', { tags: ["Story:Insights Filter Workers On-site Range", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
 
     cy.contains('button p', 'Filter').click();
@@ -272,7 +272,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Workers On-site filter - only min set should return results greater than or equal to min', { tags: ["Story:Insights Filter Workers On-site Min Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Workers On-site filter - only min set should return results greater than or equal to min', { tags: ["Story:Insights Filter Workers On-site Min Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(0).as('minInput');
@@ -296,7 +296,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Workers On-site filter - only max set should return results less than or equal to max', { tags: ["Story:Insights Filter Workers On-site Max Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Workers On-site filter - only max set should return results less than or equal to max', { tags: ["Story:Insights Filter Workers On-site Max Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(1).as('maxInput');
@@ -320,7 +320,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Actual Work-Days filter should return correct results based on range selection', { tags: ["Story:Insights Filter Actual Work-Days Range", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Actual Work-Days filter should return correct results based on range selection', { tags: ["Story:Insights Filter Actual Work-Days Range", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(0).as('minInput');
@@ -351,7 +351,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Actual Work-Days filter - only min set should return results greater than or equal to min', { tags: ["Story:Insights Filter Actual Work-Days Min Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Actual Work-Days filter - only min set should return results greater than or equal to min', { tags: ["Story:Insights Filter Actual Work-Days Min Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(0).as('minInput');
@@ -375,7 +375,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Actual Work-Days filter - only max set should return results less than or equal to max', { tags: ["Story:Insights Filter Actual Work-Days Max Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Actual Work-Days filter - only max set should return results less than or equal to max', { tags: ["Story:Insights Filter Actual Work-Days Max Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(1).as('maxInput');
@@ -399,7 +399,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Workers On-site + Company filter combined should return correct results (UI only)', { tags: ["Story:Insights Filter Workers On-site And Company Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Workers On-site + Company filter combined should return correct results (UI only)', { tags: ["Story:Insights Filter Workers On-site And Company Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Company').click();
@@ -441,7 +441,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Actual Work-Days + Crew filter combined should return correct results (UI only)', { tags: ["Story:Insights Filter Actual Work-Days And Crew Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Actual Work-Days + Crew filter combined should return correct results (UI only)', { tags: ["Story:Insights Filter Actual Work-Days And Crew Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Crew').click();
@@ -479,7 +479,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Workers On-site + Actual Work-Days combined should return correct results (UI only)', { tags: ["Story:Insights Filter Workers On-site And Actual Work-Days Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Workers On-site + Actual Work-Days combined should return correct results (UI only)', { tags: ["Story:Insights Filter Workers On-site And Actual Work-Days Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(0).clear().type('1');
@@ -509,7 +509,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Company + Crew + Workers On-site all combined should return correct results (UI only)', { tags: ["Story:Insights Filter Company Crew Workers On-site Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Company + Crew + Workers On-site all combined should return correct results (UI only)', { tags: ["Story:Insights Filter Company Crew Workers On-site Combined", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Company').click();
@@ -563,7 +563,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Validate Filter of certificate expired', { tags: ["Story:Insights Filter Certificate Expired", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Validate Filter of certificate expired', { tags: ["Story:Insights Filter Certificate Expired", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTable');
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Certificate Status').click();
@@ -594,7 +594,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Validate the Cost Code Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Cost Code", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Validate the Cost Code Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Cost Code", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
     cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
     cy.wait('@taskTradeFilter');
@@ -658,7 +658,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Validate the Pay Group Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Pay Group", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Validate the Pay Group Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Pay Group", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
     cy.contains(workforceSelector.tableColumn, 'Workers On-site')
       .find('.table-header-filter-btn').click();
@@ -718,7 +718,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Verify Safety Alert filter functionality', { tags: ["Story:Insights Filter By Safety Alert Type", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify Safety Alert filter functionality', { tags: ["Story:Insights Filter By Safety Alert Type", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
     cy.intercept('POST', 'https://uat.kwant.ai/api/insight/company/table?sort=companyName,asc&page=1&size=100').as('companyTable');
     cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
@@ -800,7 +800,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Verify Safety Alert filter functionality (Type + Multiple Dates)', { tags: ["Story:Insights Filter Safety Alert Type And Multiple Dates", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify Safety Alert filter functionality (Type + Multiple Dates)', { tags: ["Story:Insights Filter Safety Alert Type And Multiple Dates", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
     cy.intercept('POST', 'https://uat.kwant.ai/api/insight/company/table?sort=companyName,asc&page=1&size=100').as('companyTable');
     cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
@@ -896,7 +896,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Verify the Certificate Status', { tags: ["Story:Insights Filter By Certificate Status", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify the Certificate Status', { tags: ["Story:Insights Filter By Certificate Status", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTable');
     cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
 
@@ -968,7 +968,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Verify Certificate Type Filter using document name from row', { tags: ["Story:Insights Filter By Certificate Type", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify Certificate Type Filter using document name from row', { tags: ["Story:Insights Filter By Certificate Type", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTable');
     cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
 

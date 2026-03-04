@@ -13,7 +13,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     cy.cleanUI();
   });
 
-  it("Verify the UI of the company documents page", { tags: ["Story:Company Documents UI", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Verify the UI of the company documents page", { tags: ["Story:Company Documents UI", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage()
     cy.get("p").contains("Documents").should("be.visible");
@@ -25,7 +25,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     documents.validateDocumentTableHeaders(headers);
   });
 
-  it("Validate the UI of the company document form", { tags: ["Story:Document Form UI", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Validate the UI of the company document form", { tags: ["Story:Document Form UI", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage()
     documents.clickAddCertificateButton();
@@ -39,7 +39,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     cy.get("p").contains("Documents").scrollIntoView().should("be.visible");
   });
 
-  it('Verify that updating the company details and adding the documents and then refreshing the page should redirect to the company list page without saving', { tags: ["Story:Unsaved Document Redirect", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify that updating the company details and adding the documents and then refreshing the page should redirect to the company list page without saving', { tags: ["Story:Unsaved Document Redirect", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage()
     documents.clickAddCertificateButton();
@@ -51,7 +51,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     cy.get(workforceSelector.addCompanyButton).should('be.visible');
   });
 
-  it("Displays red warning icon for company documents expired or expiring today", { tags: ["Story:Expired Document Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Displays red warning icon for company documents expired or expiring today", { tags: ["Story:Expired Document Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const credentialId = generateCredentialID();
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage()
@@ -87,7 +87,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     });
   });
 
-  it('Should update an existing company certificate', { tags: ["Story:Update Company Document", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Should update an existing company certificate', { tags: ["Story:Update Company Document", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage();
     cy.get(workforceSelector.documentTableRow)
@@ -151,7 +151,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       });
   });
 
-  it('Send request renewal to the company', { tags: ["Story:Send Renewal Request", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Send request renewal to the company', { tags: ["Story:Send Renewal Request", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage();
     documents.getDocumentName({ rowIndex: 0 }).then((docName) => {
@@ -164,7 +164,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     });
   });
 
-  it("Displays Yellow warning icon for company documents expiring within 7 days", { tags: ["Story:Expiring Soon Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Displays Yellow warning icon for company documents expiring within 7 days", { tags: ["Story:Expiring Soon Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const credentialId = generateCredentialID();
     const d = new Date();
     d.setDate(d.getDate() + 4);
@@ -204,7 +204,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     });
   });
 
-  it("Deleting a company certificate", { tags: ["Story:Delete Company Document", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Deleting a company certificate", { tags: ["Story:Delete Company Document", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage();
     cy.get(workforceSelector.documentTableRow)
@@ -246,7 +246,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       });
   });
 
-  it("Verify expired company licence shows red color for close date", { tags: ["Story:Expired Licence Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Verify expired company licence shows red color for close date", { tags: ["Story:Expired Licence Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const credID = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join("");
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
@@ -283,7 +283,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       .should("exist");
   });
 
-  it("Deleting a company licence", { tags: ["Story:Delete Company Licence", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Deleting a company licence", { tags: ["Story:Delete Company Licence", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
     cy.get(workforceSelector.companyDocumentPage).click()
@@ -304,7 +304,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       });
   });
 
-  it("Adding company document with invalid file type", { tags: ["Story:Invalid File Upload", "Severity:minor", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Adding company document with invalid file type", { tags: ["Story:Invalid File Upload", "Severity:minor", "UI", "Module:WorkForce-Company"] }, () => {
     const credID = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join("");
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
@@ -320,7 +320,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     });
   });
 
-  it("Should not allow adding company document which expiry date is already done", { tags: ["Story:Expiry Date Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should not allow adding company document which expiry date is already done", { tags: ["Story:Expiry Date Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
     cy.get(workforceSelector.companyDocumentPage).click()
@@ -332,7 +332,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     cy.get('[placeholder="Expiry Date"]').invoke("val").should("eq", "");
   });
 
-  it("Should not allow adding company document which expiry date is older than issued date", { tags: ["Story:Expiry vs Issued Date Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should not allow adding company document which expiry date is older than issued date", { tags: ["Story:Expiry vs Issued Date Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
     cy.get(workforceSelector.companyDocumentPage).click()
@@ -346,7 +346,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     cy.get('[placeholder="Expiry Date"]').invoke("val").should("eq", "");
   });
 
-  it("Should not save company document when modal is closed without submitting", { tags: ["Story:Modal Close Without Submit", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should not save company document when modal is closed without submitting", { tags: ["Story:Modal Close Without Submit", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     const credID = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join("");
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
@@ -362,7 +362,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     });
   });
 
-  it("Download uploaded company document - validate downloaded file name", { tags: ["Story:Download Company Document", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Download uploaded company document - validate downloaded file name", { tags: ["Story:Download Company Document", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
     cy.get(workforceSelector.companyDocumentPage).click()
@@ -385,7 +385,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       });
   });
 
-  it("Editing the existing company document and add a jpeg document", { tags: ["Story:Edit Document Upload JPEG", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Editing the existing company document and add a jpeg document", { tags: ["Story:Edit Document Upload JPEG", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     documents.openCompany('AutoQA Labs')
     documents.openCompanyDocumentsPage()
     cy.get(workforceSelector.documentTableRow).eq(0).click();

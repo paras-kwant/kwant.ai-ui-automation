@@ -11,7 +11,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
     cy.cleanUI();
   });
 
-  it('shows error message when invalid phone number is entered while adding a company', { 
+  it('WorkForce-Company - shows error message when invalid phone number is entered while adding a company', { 
     tags: ["Story:Invalid Phone Number", "Severity:critical", "UI", "Module:WorkForce-Company"] 
   }, () => {
     const companyData = generateCompanyData();
@@ -30,7 +30,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
     });
   });
 
-  it('Should restrict worker image upload to PNG, JPG, JPEG', { 
+  it('WorkForce-Company - Should restrict worker image upload to PNG, JPG, JPEG', { 
     tags: ["Story:Image Upload Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] 
   }, () => {
     addCompanyPage.clickAddCompany();
@@ -50,7 +50,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
     });
   });
 
-  it('Validate submitting the Add Company form while leaving all field empty', { 
+  it('WorkForce-Company - Validate submitting the Add Company form while leaving all field empty', { 
     tags: ["Story:Mandatory Fields Validation", "Severity:critical", "UI", "Module:WorkForce-Company"] 
   }, () => {
     addCompanyPage.clickAddCompany();
@@ -58,7 +58,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
     addCompanyPage.verifyErrorMessage('Company name is required.');
   });
 
-  it('Validate the Back button functionality while clicking picture', { 
+  it('WorkForce-Company - Validate the Back button functionality while clicking picture', { 
     tags: ["Story:Camera Functionality", "Severity:minor", "UI", "Module:WorkForce-Company"] 
   }, () => {
     addCompanyPage.clickAddCompany();
@@ -69,7 +69,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
     addCompanyPage.verifyVideoViewerNotVisible();
   });
 
-  it('Should Validate Retake Picture Functionality', { 
+  it('WorkForce-Company - Should Validate Retake Picture Functionality', { 
     tags: ["Story:Camera Retake", "Severity:minor", "UI", "Module:WorkForce-Company"] 
   }, () => {
     addCompanyPage.clickAddCompany();
@@ -83,7 +83,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
     addCompanyPage.verifyVideoViewerVisible();
   });
 
-  it("Verify that a company can be added with only the mandatory field filled.", { 
+  it("WorkForce-Company - Verify that a company can be added with only the mandatory field filled.", { 
     tags: ["Story:Add Company Mandatory Fields", "Severity:critical", "UI", "API", "Module:WorkForce-Company"] 
   }, () => {
     const companyData = generateCompanyData();
@@ -108,7 +108,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
       .and('contain.text', 'Company added successfully');
   });
 
-  it('Verify adding company while using the camera to capture logo', { 
+  it('WorkForce-Company - Verify adding company while using the camera to capture logo', { 
     tags: ["Story:Add Company With Camera", "Severity:normal", "UI", "Module:WorkForce-Company"] 
   }, () => {
     addCompanyPage.clickAddCompany();
@@ -117,7 +117,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
     addCompanyPage.verifyImageUploaded();
   });
 
-  it('Verify adding company with all fields filled', { 
+  it('WorkForce-Company - Verify adding company with all fields filled', { 
     tags: ["Story:Add Company Full Fields", "Severity:critical", "UI", "API", "Module:WorkForce-Company","Module:WorkForce-Company"] 
   }, () => {
     const companyData = generateCompanyData();

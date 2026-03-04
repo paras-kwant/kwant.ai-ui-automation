@@ -11,7 +11,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		cy.cleanUI();
 	});
 
-	it("Verify Company Name filter dropdown can be opened", { tags: ["Story:Open Company Name Filter Dropdown", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify Company Name filter dropdown can be opened", { tags: ["Story:Open Company Name Filter Dropdown", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Company Name').find('.table-header-filter-btn').click();
 	});
 
@@ -29,7 +29,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Primary Trade selection", { tags: ["Story:Filter By Primary Trade", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Primary Trade selection", { tags: ["Story:Filter By Primary Trade", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Primary Trade')
 			.find('.table-header-filter-btn')
 			.click();
@@ -78,7 +78,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Company Name selection", { tags: ["Story:Filter By Company Name", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Company Name selection", { tags: ["Story:Filter By Company Name", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Company Name').find('.table-header-filter-btn').click();
 
 		cy.get('[class*="select_item_container"]').within(() => {
@@ -106,7 +106,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Status selection", { tags: ["Story:Filter By Status", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Status selection", { tags: ["Story:Filter By Status", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Status')
 			.find('.table-header-filter-btn')
 			.click();
@@ -151,7 +151,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Safety Manager selection", { tags: ["Story:Filter By Safety Manager", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Safety Manager selection", { tags: ["Story:Filter By Safety Manager", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Safety Manager')
 			.find('.table-header-filter-btn')
 			.click();
@@ -200,7 +200,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Project Manager selection", { tags: ["Story:Filter By Project Manager", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Project Manager selection", { tags: ["Story:Filter By Project Manager", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Project Manager')
 			.find('.table-header-filter-btn')
 			.click();
@@ -249,7 +249,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Phone Number", { tags: ["Story:Filter By Phone Number", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Phone Number", { tags: ["Story:Filter By Phone Number", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		const phoneNumber = '+9779812345678';
 
 		cy.contains(workforceSelector.tableColumn, 'Phone Number')
@@ -281,7 +281,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Address", { tags: ["Story:Filter By Address", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Address", { tags: ["Story:Filter By Address", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		const address = 'kathmandu';
 
 		cy.contains(workforceSelector.tableColumn, 'Address')
@@ -312,7 +312,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Zip Code", { tags: ["Story:Filter By Zip Code", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Zip Code", { tags: ["Story:Filter By Zip Code", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		const zipCode = '112233';
 
 		cy.contains(workforceSelector.tableColumn, 'Zip Code')
@@ -343,7 +343,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it("Verify filtering by Certificates selection", { tags: ["Story:Filter By Certificates", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify filtering by Certificates selection", { tags: ["Story:Filter By Certificates", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.get(workforceSelector.tableRow).should('be.visible');
 		const validStatuses = ["Expired", "Expiring", "All Uploaded"];
 		cy.get(workforceSelector.tableColumn).then(($headers) => {
@@ -483,7 +483,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it('Verify filtering by Total Worker filter', { tags: ["Story:Filter By Total Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Verify filtering by Total Worker filter', { tags: ["Story:Filter By Total Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Total Workers')
 			.find('.table-header-filter-btn')
 			.click();
@@ -523,7 +523,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it('Verify clearing all filters works correctly', { tags: ["Story:Clear All Filters", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Verify clearing all filters works correctly', { tags: ["Story:Clear All Filters", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Company Name')
 			.find('.table-header-filter-btn')
 			.click();
@@ -564,7 +564,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 			.should('not.exist');
 	});
 
-	it('Verify filtering with multiple filters applied simultaneously', { tags: ["Story:Multiple Filters Applied", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Verify filtering with multiple filters applied simultaneously', { tags: ["Story:Multiple Filters Applied", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Primary Trade')
 			.find('.table-header-filter-btn')
 			.click();
@@ -642,7 +642,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it('Verify sorting functionality', { tags: ["Story:Sorting Functionality", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Verify sorting functionality', { tags: ["Story:Sorting Functionality", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Company Name').realHover();
 
 		cy.get('[class*="sorting-icon"]').eq(0).click();

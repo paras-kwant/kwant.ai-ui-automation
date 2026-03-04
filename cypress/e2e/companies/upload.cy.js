@@ -13,7 +13,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.cleanUI();
   });
 
-  it('Should add a worker by uploading a valid CSV file', { tags: ["Story:Upload Valid CSV File", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Should add a worker by uploading a valid CSV file', { tags: ["Story:Upload Valid CSV File", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
@@ -33,7 +33,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.searchAndDeleteWorker('Test', 'Company');
   });
 
-  it('Verify the uploading of a blank template shows a message saying "No new company(s) will be imported.', { tags: ["Story:Upload Blank Template Shows Message", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify the uploading of a blank template shows a message saying "No new company(s) will be imported.', { tags: ["Story:Upload Blank Template Shows Message", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-empty.csv', 'base64').then(fileContent => {
@@ -51,7 +51,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.get('span').should('contain.text', 'No Content to upload');
   });
 
-  it('Should add a worker by uploading a valid xls file and validate in the table', { tags: ["Story:Upload Valid XLS File", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Should add a worker by uploading a valid xls file and validate in the table', { tags: ["Story:Upload Valid XLS File", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-template (1).xls', 'base64').then(fileContent => {
@@ -71,20 +71,20 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.searchAndDeleteWorker('Test', 'Company');
   });
 
-  it('Verify the X cancels the page', { tags: ["Story:X Button Closes Upload Modal", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify the X cancels the page', { tags: ["Story:X Button Closes Upload Modal", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.viewport(1440, 900);
     workerHelper.openUploadModal();
     cy.get('aside button svg, .sc-krNlru svg').first().click({ force: true });
     cy.get('p').should('not.contain', 'Upload Companies');
   });
 
-  it('Verify clicking outside the drawer page collapses the page', { tags: ["Story:Click Outside Closes Upload Modal", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify clicking outside the drawer page collapses the page', { tags: ["Story:Click Outside Closes Upload Modal", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
     cy.get('body').click(0, 0);
     cy.get('p').should('not.contain', 'Upload Companies');
   });
 
-  it('Should add a worker by uploading a valid file and validate in the table and check the data entered', { tags: ["Story:Upload Valid File And Validate Data", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Should add a worker by uploading a valid file and validate in the table and check the data entered', { tags: ["Story:Upload Valid File And Validate Data", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
@@ -113,7 +113,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.searchAndDeleteWorker('Test', 'Company');
   });
 
-  it('Verify the delete icon is shown on the input box once the file is selected for upload', { tags: ["Story:Delete Icon Shown After File Selected", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify the delete icon is shown on the input box once the file is selected for upload', { tags: ["Story:Delete Icon Shown After File Selected", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
@@ -142,7 +142,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
   });
 
-  it('Validate uploading a file with invalid email', { tags: ["Story:Upload File With Invalid Email", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Validate uploading a file with invalid email', { tags: ["Story:Upload File With Invalid Email", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-invalidEmail.csv', 'base64').then(fileContent => {
@@ -160,7 +160,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.get('span').should('contain.text', 'No new company(s) will be imported.');
   });
 
-  it('Duplicate company upload validation', { tags: ["Story:Duplicate Company Upload Validation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Duplicate company upload validation', { tags: ["Story:Duplicate Company Upload Validation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
     cy.wait(1000);
 
@@ -199,7 +199,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.searchAndDeleteWorker('Test', 'Company');
   });
 
-  it('Validate uploading a file with invalid phone number', { tags: ["Story:Upload File With Invalid Phone Number", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Validate uploading a file with invalid phone number', { tags: ["Story:Upload File With Invalid Phone Number", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-invalidNumber.csv', 'base64').then(fileContent => {
@@ -217,7 +217,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.get('span').should('contain.text', 'No new company(s) will be imported.');
   });
 
-  it('Uploading file with duplicate companies in the file only one of them should get added', { tags: ["Story:Duplicate Companies In File Only One Imported", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Uploading file with duplicate companies in the file only one of them should get added', { tags: ["Story:Duplicate Companies In File Only One Imported", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
     cy.fixture('testdata/companies/Company-upload-duplicateInFile.csv', 'base64').then(fileContent => {
       cy.get(workforceSelector.dragAndDrop).attachFile(
@@ -234,7 +234,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.get('span').should('contain.text', '1 duplicate company(s) found and will not be imported.').should('be.visible');
   });
 
-  it('upload file with multiple valid rows', { tags: ["Story:Upload File With Multiple Valid Rows", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - upload file with multiple valid rows', { tags: ["Story:Upload File With Multiple Valid Rows", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
     cy.fixture('testdata/companies/Company-upload-multipleCompany.csv', 'base64').then(fileContent => {
       cy.get(workforceSelector.dragAndDrop).attachFile(
@@ -254,7 +254,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.searchAndDeleteWorker('Test', 'Company2');
   });
 
-  it('Should display an error message when trying to upload an invalid file', { tags: ["Story:Upload Invalid File Type Shows Error", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Should display an error message when trying to upload an invalid file', { tags: ["Story:Upload Invalid File Type Shows Error", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/invalid.pdf', 'base64').then(fileContent => {

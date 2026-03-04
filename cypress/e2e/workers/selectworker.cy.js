@@ -6,7 +6,7 @@ import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper.js';
 
 describe(
-  "Worker Module - Selection Functionality",
+  "Workforce Worker Module - Selection Functionality",
   { tags: ["Epic:WorkForce", "Feature:Selection", "Module:Workforce-Worker"] },
   () => {
 

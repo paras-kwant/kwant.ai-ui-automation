@@ -12,7 +12,7 @@ describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:
     cy.cleanUI();
   });
 
-  it('should display correct total worker count when selecting all workers via header checkbox', { tags: ["Story:Select All Via Header Checkbox", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should display correct total worker count when selecting all workers via header checkbox', { tags: ["Story:Select All Via Header Checkbox", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('.workforce-footer')
       .invoke('text')
       .then((text) => {
@@ -32,7 +32,7 @@ describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:
       });
   });
 
-  it('should display correct count when a single worker is selected', { tags: ["Story:Single Worker Selection Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should display correct count when a single worker is selected', { tags: ["Story:Single Worker Selection Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('[type="checkbox"]')
       .eq(1)
       .check({ force: true });
@@ -41,7 +41,7 @@ describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:
       .should('contain', '1');
   });
 
-  it('should clear selection when clear selection icon is clicked after selecting a worker', { tags: ["Story:Clear Selection After Select", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should clear selection when clear selection icon is clicked after selecting a worker', { tags: ["Story:Clear Selection After Select", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('[type="checkbox"]')
       .eq(1)
       .check({ force: true });
@@ -56,7 +56,7 @@ describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:
       .should('not.exist');
   });
 
-  it('should display correct total worker count when selecting all workers from action menu', { tags: ["Story:Select All Via Action Menu", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should display correct total worker count when selecting all workers from action menu', { tags: ["Story:Select All Via Action Menu", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow)
       .should('be.visible');
 
@@ -80,7 +80,7 @@ describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:
       });
   });
 
-  it('should select only workers on the current page when using Select On This Page option', { tags: ["Story:Select On This Page Only", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should select only workers on the current page when using Select On This Page option', { tags: ["Story:Select On This Page Only", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableColumn).eq(2).click();
 
     cy.get('p')

@@ -13,7 +13,7 @@ describe("WorkForce Companies Module - Download CSV", { tags: ["Epic:WorkForce",
 		cy.cleanUI();
 	});
 
-	it('Should download the companies CSV template successfully', { tags: ["Story:Download CSV Template", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Should download the companies CSV template successfully', { tags: ["Story:Download CSV Template", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
 		const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
 		const fileName = 'Company-upload-template.csv';
 
@@ -34,7 +34,7 @@ describe("WorkForce Companies Module - Download CSV", { tags: ["Epic:WorkForce",
 			});
 	});
 
-	it('Should verify downloaded Company CSV content matches UI Company list', { tags: ["Story:Verify CSV Matches UI List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Should verify downloaded Company CSV content matches UI Company list', { tags: ["Story:Verify CSV Matches UI List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
 		cy.wait(4000);
 
@@ -89,7 +89,7 @@ describe("WorkForce Companies Module - Download CSV", { tags: ["Epic:WorkForce",
 		});
 	});
 
-	it('Should verify downloaded CSV contains only the selected Company', { tags: ["Story:Verify Selected Company CSV", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Should verify downloaded CSV contains only the selected Company', { tags: ["Story:Verify Selected Company CSV", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
 		const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
 		cy.wait(4000);
 

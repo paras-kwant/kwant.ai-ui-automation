@@ -13,7 +13,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
     cy.cleanUI();
   });
 
-  it('Verify total workers count matches workers list data', { tags: ["Story:Total Workers Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify total workers count matches workers list data', { tags: ["Story:Total Workers Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')
       .click();
@@ -95,7 +95,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
       });
   });
 
-  it('Add a worker and verify total workers count increases', { tags: ["Story:Add Worker Increases Total Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Add a worker and verify total workers count increases', { tags: ["Story:Add Worker Increases Total Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')
       .click();
@@ -313,7 +313,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
     });
   });
 
-  it("Verify total workers count matches workers list data - Flagged Workers On-site", { tags: ["Story:Flagged Workers Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Verify total workers count matches workers list data - Flagged Workers On-site", { tags: ["Story:Flagged Workers Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')
@@ -445,7 +445,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
     });
   });
 
-  it('Add a flagged worker and verify total flagged count increases', { tags: ["Story:Add Flagged Worker Increases Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Add a flagged worker and verify total flagged count increases', { tags: ["Story:Add Flagged Worker Increases Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')
@@ -551,7 +551,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
       });
   });
 
-  it("Verify total workers count matches workers list data - Total Workers On-site", { tags: ["Story:Total Workers On-site Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Verify total workers count matches workers list data - Total Workers On-site", { tags: ["Story:Total Workers On-site Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')

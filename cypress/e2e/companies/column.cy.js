@@ -11,7 +11,7 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
     cy.cleanUI();
   });
   
-  it('Validate adding and updating column settings', { tags: ["Story:Update Column Settings", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Validate adding and updating column settings', { tags: ["Story:Update Column Settings", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('.icon-button button').eq(0).click();
     cy.get(workforceSelector.tableColumn)
     .contains('E Mail')
@@ -37,7 +37,7 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
     cy.contains('button p', 'Save').click();
   });
 
-  it('Open Add New Column drawer and verify initial UI state', { tags: ["Story:Add Column Drawer UI", "Severity:normal", "UI", "Module:WorkForce-Company"] }, ()=>{
+  it('WorkForce-Company - Open Add New Column drawer and verify initial UI state', { tags: ["Story:Add Column Drawer UI", "Severity:normal", "UI", "Module:WorkForce-Company"] }, ()=>{
     cy.get('.icon-button button').eq(0).click();
     cy.get('button p').contains('Add New Column').click()
     cy.get('[placeholder="Add Field Name"]').should('be.visible')
@@ -58,7 +58,7 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
   })
   
   
-  it('Verify that clicking in “clear” clears the input boxes', { tags: ["Story:Clear Column Input", "Severity:minor", "UI", "Module:WorkForce-Company"] }, ()=>{
+  it('WorkForce-Company - Verify that clicking in “clear” clears the input boxes', { tags: ["Story:Clear Column Input", "Severity:minor", "UI", "Module:WorkForce-Company"] }, ()=>{
     cy.get('.icon-button button').eq(0).click();
     cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible')
     cy.get('button p').contains('Add New Column').click()
@@ -73,7 +73,7 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
   .should('have.value', '');
   })
 
-  it('Verify that clicking on the back button navigates back to the column setting page.', { tags: ["Story:Back Button Functionality", "Severity:minor", "UI", "Module:WorkForce-Company"] }, ()=>{
+  it('WorkForce-Company - Verify that clicking on the back button navigates back to the column setting page.', { tags: ["Story:Back Button Functionality", "Severity:minor", "UI", "Module:WorkForce-Company"] }, ()=>{
     cy.get('.icon-button button').eq(0).click()
     cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible')
     cy.get('button p').contains('Add New Column').click()
@@ -85,7 +85,7 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
 
 
 
-it('Displays checked columns in table preserving drawer order', { tags: ["Story:Column Order Persistence", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+it('WorkForce-Company - Displays checked columns in table preserving drawer order', { tags: ["Story:Column Order Persistence", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
   cy.get('.icon-button button').eq(0).click();
   cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
 
@@ -143,7 +143,7 @@ cy.get('button p').contains('Save').click();
 })
 })
 
-it('Validate drag and drop column feature', { tags: ["Story:Drag And Drop Columns", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+it('WorkForce-Company - Validate drag and drop column feature', { tags: ["Story:Drag And Drop Columns", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
   cy.get('.icon-button button').eq(0).click();
   cy.wait(1000);
 
@@ -210,7 +210,7 @@ it('Validate drag and drop column feature', { tags: ["Story:Drag And Drop Column
 
 });
 
-it('Verify horizontal scroll availability based on number of table columns', { tags: ["Story:Horizontal Scroll Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+it('WorkForce-Company - Verify horizontal scroll availability based on number of table columns', { tags: ["Story:Horizontal Scroll Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableColumn).then($columns => {
       const columnCount = $columns.length;
 

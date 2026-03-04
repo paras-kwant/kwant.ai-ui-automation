@@ -11,7 +11,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     cy.cleanUI();
   });
 
-  it('Verify pagination is visible and default page is focused', { tags: ["Story:Pagination Default Page Focused", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify pagination is visible and default page is focused', { tags: ["Story:Pagination Default Page Focused", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('.workforce-footer button')
       .filter((_, el) => el.innerText.trim() === '1')
       .invoke('attr', 'class')
@@ -20,7 +20,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
       });
   });
 
-  it('Verify pagination breaks into pages if 100+ workers exist', { tags: ["Story:Pagination Breaks Into Pages", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify pagination breaks into pages if 100+ workers exist', { tags: ["Story:Pagination Breaks Into Pages", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.getTotalWorkers().then((totalValue) => {
       if (totalValue > 100) {
         cy.get('.workforce-footer button')
@@ -34,7 +34,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     });
   });
 
-  it('Verify Next and previous button navigates to respective page', { tags: ["Story:Next Previous Button Navigation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify Next and previous button navigates to respective page', { tags: ["Story:Next Previous Button Navigation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.getTotalWorkers().then((totalValue) => {
       const totalPages = Math.ceil(totalValue / 100);
 
@@ -58,7 +58,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     });
   });
 
-  it('Verify ellipsis appears when total pages exceed threshold', { tags: ["Story:Ellipsis Appears On Many Pages", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify ellipsis appears when total pages exceed threshold', { tags: ["Story:Ellipsis Appears On Many Pages", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
     cy.getTotalWorkers().then((totalValue) => {
       cy.log('Total Workers:', totalValue);
@@ -70,7 +70,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     });
   });
 
-  it('Verify LAST page disables Next button', { tags: ["Story:Last Page Disables Next Button", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify LAST page disables Next button', { tags: ["Story:Last Page Disables Next Button", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
     cy.getTotalWorkers().then((totalValue) => {
@@ -89,7 +89,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     });
   });
 
-  it('Verify FIRST page disables previous button', { tags: ["Story:First Page Disables Previous Button", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify FIRST page disables previous button', { tags: ["Story:First Page Disables Previous Button", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
     cy.getTotalWorkers().then((totalValue) => {
@@ -108,7 +108,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     });
   });
 
-  it('Verify clicking page numbers navigates to correct page', { tags: ["Story:Page Number Navigation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify clicking page numbers navigates to correct page', { tags: ["Story:Page Number Navigation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
     cy.getTotalWorkers().then((totalValue) => {
@@ -144,7 +144,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     });
   });
 
-  it('Verify page scroll resets to top after navigating between pages', { tags: ["Story:Scroll Resets On Page Navigation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify page scroll resets to top after navigating between pages', { tags: ["Story:Scroll Resets On Page Navigation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
 
     cy.getTotalWorkers().then((totalValue) => {
