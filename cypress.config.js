@@ -19,15 +19,11 @@ module.exports = defineConfig({
     requestTimeout: 30000,
     responseTimeout: 30000,
     pageLoadTimeout: 30000,
-    taskTimeout: 120000,        // ✅ gives Allure + Twilio enough time
-    // retries: { runMode: 1, openMode: 0 },
+    taskTimeout: 120000,        
+    retries: { runMode: 1, openMode: 0 },
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
     testIsolation: false,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
-
-    // videosFolder: path.join(__dirname, "cypress", "videos"),
-    // video: true,                 // enable video recording
-    // videoUploadOnPasses: false,  // only save videos for failed tests
 
     setupNodeEvents(on, config) {
 
@@ -42,11 +38,8 @@ module.exports = defineConfig({
       } else {
         console.log("ℹ️ Running in CI - skipping allure-results cleanup (handled by workflow)");
       }
-
-      // Allure plugin
       allureWriter(on, config);
 
-      // Environment variables
       config.env.EMAIL = process.env.EMAIL;
       config.env.PASSWORD = process.env.PASSWORD;
       config.env.TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
@@ -205,7 +198,6 @@ module.exports = defineConfig({
         },
 
         getTwilioMessages({ accountSid, authToken, to }) {
-          // ✅ Guard — prevents config crash when credentials missing in CI
           if (!accountSid || !authToken) {
             console.error("❌ Twilio credentials missing for getTwilioMessages");
             return [];
@@ -236,7 +228,7 @@ module.exports = defineConfig({
       allureAddVideoOnPass: false,
       allureSkipAutomaticScreenshots: false,
       allureLogCypress: false,
-      allureReuseAfterSpec: false, // ✅ forces Allure to flush results after every spec
+      allureReuseAfterSpec: false, 
     },
   },
 });

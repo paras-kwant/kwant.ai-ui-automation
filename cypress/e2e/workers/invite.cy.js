@@ -52,8 +52,8 @@ describe(
 
           cy.get(workforceSelector.searchInput).clear().type(fullName);
           cy.get(workforceSelector.tableRow).first().should('be.visible');
-          workforceSelector.selectAllCheckbox().check({ force: true });
           cy.get('.personal-info-content__title').contains(fullName).should('be.visible');
+          workforceSelector.selectAllCheckbox().check({ force: true });
 
           cy.contains("button p", "Send Onboarding Invite").click();
           cy.log('📧 Checking email...');

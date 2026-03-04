@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # -----------------------------
-  # Step 1: Run Companies Tests
-  # -----------------------------
   companies-tests:
     name: 🏢 Companies UI Tests
     runs-on: ubuntu-latest
@@ -14,7 +11,14 @@ jobs:
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
       TERM: xterm
     steps:
       - uses: actions/checkout@v4
@@ -37,9 +41,6 @@ jobs:
           name: companies-allure-results
           path: allure-results
 
-  # -----------------------------
-  # Step 2: Run Workers Tests
-  # -----------------------------
   workers-tests:
     name: 👷 Workers UI Tests
     runs-on: ubuntu-latest
@@ -47,7 +48,14 @@ jobs:
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
       TERM: xterm
     steps:
       - uses: actions/checkout@v4
@@ -70,9 +78,6 @@ jobs:
           name: workers-allure-results
           path: allure-results
 
-  # -----------------------------
-  # Step 3: Run Insights/Companies Tests
-  # -----------------------------
   insights-tests:
     name: 📊 Insights/Companies UI Tests
     runs-on: ubuntu-latest
@@ -80,7 +85,14 @@ jobs:
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
       TERM: xterm
     steps:
       - uses: actions/checkout@v4
@@ -103,9 +115,6 @@ jobs:
           name: insights-allure-results
           path: allure-results
 
-  # -----------------------------
-  # Step 4: Merge Allure & Deploy
-  # -----------------------------
   merge-reports:
     name: 📊 Merge Allure Reports & Deploy
     needs: [companies-tests, workers-tests, insights-tests]
