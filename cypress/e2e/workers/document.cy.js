@@ -4,12 +4,16 @@ const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
 import workerHelper from '../../support/helper/workerHelper.js';
 
-describe("Worker Module - Documents Page", () => {
+describe("Worker Module - Documents Page",
+  { tags: ["Epic:WorkForce", "Feature:Add Worker", "Module:Workforce-Worker"]},
+   () => {
   beforeEach(() => {
     cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
   })
 
-  it("Verify the UI of the document", () => {
+  it("Verify the UI of the document",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
 
@@ -38,7 +42,8 @@ describe("Worker Module - Documents Page", () => {
     });
   });
 
-  it("Validate the ui of the document form", () => {
+  it("Validate the ui of the document form",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },() => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
     cy.get(workforceSelector.addCertificationButton).click()
@@ -94,7 +99,9 @@ describe("Worker Module - Documents Page", () => {
     cy.get("p").contains("Documents").should("be.visible");
   });
 
-  it("Verify that the 1st field (No. of Period) of 'Expires In' should not accept the decimal number.", () => {
+  it("Verify that the 1st field (No. of Period) of 'Expires In' should not accept the decimal number.",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
@@ -110,7 +117,9 @@ describe("Worker Module - Documents Page", () => {
     cy.get('input[type="number"]').should('have.value', '');
   });
 
-  it("Verify that clicking on the 'X' on the 'Expires In' 2nd Field should remove the selected period.", () => {
+  it("Verify that clicking on the 'X' on the 'Expires In' 2nd Field should remove the selected period.",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
@@ -127,7 +136,9 @@ describe("Worker Module - Documents Page", () => {
     cy.get('[placeholder="Period(s)"]').should('have.attr', 'value', '');
   });
 
-  it('Verify that updating the worker details and adding the documents and then refreshing the page should redirect to the worker list page without saving.', () => {
+  it('Verify that updating the worker details and adding the documents and then refreshing the page should redirect to the worker list page without saving.',
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
@@ -150,7 +161,9 @@ describe("Worker Module - Documents Page", () => {
     workforceSelector.addWorkerButton().should('be.visible')
   });
 
-  it("Verify that removing the 'Issued Date' should disable the 'Issued Date' but should not remove the populated 'Expiry Date'.", () => {
+  it("Verify that removing the 'Issued Date' should disable the 'Issued Date' but should not remove the populated 'Expiry Date'.", 
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
@@ -180,7 +193,9 @@ describe("Worker Module - Documents Page", () => {
     });
   });
 
-  it("Displays yellow row and red warning icon for documents expiring within 7 days", () => {
+  it("Displays yellow row and red warning icon for documents expiring within 7 days", 
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
     ).join("");
@@ -233,7 +248,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Displays red row and red warning icon for documents expired", () => {
+  it("Displays red row and red warning icon for documents expired",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
     ).join("");
@@ -282,7 +299,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Verify that expired or expiring document's expiry date is update to future date and updating it should display grey color row in the document list", () => {
+  it("Verify that expired or expiring document's expiry date is update to future date and updating it should display grey color row in the document list",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -339,7 +358,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it('should update an existing certificate', () => {
+  it('should update an existing certificate',
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -416,7 +437,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Deleting a certificate", () => {
+  it("Deleting a certificate", 
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -476,7 +499,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Verify expired licence shows red color for close date", () => {
+  it("Verify expired licence shows red color for close date",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
     ).join("");
@@ -524,7 +549,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it('send request renewal to the worker', () => {
+  it('send request renewal to the worker',
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -588,7 +615,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Deleting a licence", () => {
+  it("Deleting a licence",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -656,7 +685,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("adding with invalid file type", () => {
+  it("adding with invalid file type",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
     ).join("");
@@ -692,7 +723,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Should not allow adding document which expire date is already done", () => {
+  it("Should not allow adding document which expire date is already done",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
 
     cy.get(workforceSelector.documentPage).click();
@@ -712,7 +745,9 @@ cy.get(workforceSelector.documentPage)
       .should("eq", "");
   });
 
-  it("Should not allow adding document which expire date is older than issued date", () => {
+  it("Should not allow adding document which expire date is older than issued date",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
 
     cy.get(workforceSelector.documentPage).click();
@@ -736,7 +771,9 @@ cy.get(workforceSelector.documentPage)
       .should("eq", "");
   });
 
-  it("Should auto-calculate expiry date when Expires In is set", () => {
+  it("Should auto-calculate expiry date when Expires In is set",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
     workforceSelector.AddCertificationButton().click();
@@ -768,7 +805,9 @@ cy.get(workforceSelector.documentPage)
     });
   });
 
-  it("Should not save document when modal is closed without submitting", () => {
+  it("Should not save document when modal is closed without submitting",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
     ).join("");
@@ -790,7 +829,9 @@ cy.get(workforceSelector.documentPage)
   });
 
   
-  it("Download uploaded document - validate downloaded file name", () => {
+  it("Download uploaded document - validate downloaded file name",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;
@@ -826,7 +867,9 @@ cy.get(workforceSelector.documentPage)
   });
 })
 
-  it("Editing the existing document and add a jpeg document", () => {
+  it("Editing the existing document and add a jpeg document",
+    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
       const fullName = `${firstName} ${lastName}`;

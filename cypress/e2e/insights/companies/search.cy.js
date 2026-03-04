@@ -2,48 +2,38 @@
 import { searchPage } from "../../../pages/insights/companies/search";
 import companiesHelper from "../../../support/helper/companiesHelper";
 
-describe("Insight Company - Search ", () => {
+describe("Insight Company - Search ", { tags: ["Epic:WorkForce", "Feature:Search", "Module:Insights-Company"] }, () => {
   let companyNames = [];
 
   beforeEach(() => {
+    cy.intercept("POST", "/api/insight/company/table*").as("companiesApi");
 
-    // ✅ Register BOTH intercepts FIRST
-    cy.intercept("POST", "/api/insight/company/table*")
-      .as("companiesApi");
-  
-    // Visit page
     companiesHelper.visitCompaniesInsightPage('500526306');
-  
-    // Wait for initial table load
+
     cy.wait("@companiesApi").then((interception) => {
       companyNames = searchPage.getCompanyNamesFromApi(interception);
       expect(companyNames.length).to.be.greaterThan(0);
     });
-  
-    // Clear search if exists
+
     cy.get("body").then(($body) => {
       if ($body.find(searchPage.searchInputSelector).length > 0) {
         searchPage.searchInput.clear({ force: true });
       }
     });
-  
   });
-  // ─────────────────────────────────────────────────────────────────────────────
 
-  it.skip("Verify if the bookmarked company falls on the list of searches performed then the bookmarked company should always appear on the top.", () => {
+  it.skip("Verify if the bookmarked company falls on the list of searches performed then the bookmarked company should always appear on the top.", { tags: ["Story:Insights Search Bookmarked Company Appears First", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     searchPage.companyTitles.eq(0).should("be.visible");
 
     searchPage.companyTitles.eq(2).invoke("text").then((companyName) => {
       searchPage.clickFavoriteForCompany(companyName);
       cy.wait(1000);
       searchPage.assertFirstRowContains(companyName);
-      searchPage.clickFavoriteForCompany(companyName); // undo
+      searchPage.clickFavoriteForCompany(companyName);
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  it("Validating the search functionality - run twice", () => {
+  it("Validating the search functionality - run twice", { tags: ["Story:Insights Search Company Name Twice", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.wrap(null).then(() => {
       expect(companyNames.length, "companyNames should not be empty").to.be.greaterThan(0);
     });
@@ -59,17 +49,13 @@ describe("Insight Company - Search ", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  it("Search triggers API only when at least 3 letters are entered", () => {
-    // Type 1 character — API should NOT be called
+  it("Search triggers API only when at least 3 letters are entered", { tags: ["Story:Insights Search API Triggers After 3 Characters", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     searchPage.typeInSearch("a");
-    cy.wait(500); // give time in case API fires incorrectly
+    cy.wait(500);
 
     cy.get("@companiesApi.all").then((calls) => {
       const countAfterOne = calls.length;
 
-      // Type 2 characters — API should still NOT be called
       searchPage.searchInput.clear({ force: true });
       searchPage.typeInSearch("aa");
       cy.wait(500);
@@ -77,7 +63,6 @@ describe("Insight Company - Search ", () => {
       cy.get("@companiesApi.all").then((calls2) => {
         expect(calls2.length, "API should not fire for 2 chars").to.equal(countAfterOne);
 
-        // Type 3 characters — API SHOULD be called
         searchPage.searchInput.clear({ force: true });
         searchPage.typeInSearch("aha");
         cy.wait("@companiesApi");
@@ -89,22 +74,16 @@ describe("Insight Company - Search ", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  it("Validating the search functionality for the search with no results", () => {
+  it("Validating the search functionality for the search with no results", { tags: ["Story:Insights Search No Results Found", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     searchPage.typeInSearch("NonExistentName12345");
     cy.wait("@companiesApi");
     cy.get(".empty-body").should("contain.text", "No Results Found");
   });
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  it("Validating search functionality with empty input keeps rows unchanged", () => {
-    // Wait for initial table to load
+  it("Validating search functionality with empty input keeps rows unchanged", { tags: ["Story:Insights Search Empty Input Keeps Rows Unchanged", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
     searchPage.companyTitles.first().should("be.visible");
 
     searchPage.companyTitles.first().invoke("text").then((beforeValue) => {
-      // Spaces-only input should not trigger search
       searchPage.typeInSearch("   ");
       cy.wait(1000);
 
@@ -114,9 +93,7 @@ describe("Insight Company - Search ", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  it("Verify search Supports Case Insensitivity (Uppercase, Lowercase, Mixed Case)", () => {
+  it("Verify search Supports Case Insensitivity (Uppercase, Lowercase, Mixed Case)", { tags: ["Story:Insights Search Case Insensitive", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.wrap(null).then(() => {
       expect(companyNames.length, "companyNames should not be empty").to.be.greaterThan(0);
     });
@@ -140,9 +117,7 @@ describe("Insight Company - Search ", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  it("Verify the search is cleared once the whole text from the search bar is cleared", () => {
+  it("Verify the search is cleared once the whole text from the search bar is cleared", { tags: ["Story:Insights Search Cleared On Text Removal", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.wrap(null).then(() => {
       expect(companyNames.length, "companyNames should not be empty").to.be.greaterThan(0);
     });
@@ -161,9 +136,7 @@ describe("Insight Company - Search ", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  it("Verify clicking on 'x' available on the search bar to clear off the text and search applied", () => {
+  it("Verify clicking on 'x' available on the search bar to clear off the text and search applied", { tags: ["Story:Insights Search X Button Clears Search", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.wrap(null).then(() => {
       expect(companyNames.length, "companyNames should not be empty").to.be.greaterThan(0);
     });
@@ -184,4 +157,5 @@ describe("Insight Company - Search ", () => {
       searchPage.assertTableMatchesState(initialList);
     });
   });
+
 });

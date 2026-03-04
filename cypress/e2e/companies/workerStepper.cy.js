@@ -6,23 +6,23 @@ import { generateRandomEmail, generateRandomWorldAddress } from '../../fixtures/
 import { workforceSelector } from '../../support/workforceSelector';
 import { generateWorkerData } from '../../fixtures/workerData';
 
-describe("Companies Module - Worker Stepper", () => {
-  
+describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Feature:WorkerStepper", "Module:WorkForce-Company"] }, () => {
+
   beforeEach(() => {
     cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('5007477836'));
     cy.cleanUI();
   });
-  
-  it('Verify total workers count matches workers list data', () => {
+
+  it('Verify total workers count matches workers list data', { tags: ["Story:Total Workers Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.contains(workforceSelector.tableColumn, 'Status')
-	.find('.table-header-filter-btn')
-	.click();
-	cy.get('body').should('be.visible')
-  cy.get('.select_item_container label')
-  .contains('Active')
-  .parent()
-  .find('input[type="checkbox"]')
-  .check({ force: true });
+      .find('.table-header-filter-btn')
+      .click();
+    cy.get('body').should('be.visible');
+    cy.get('.select_item_container label')
+      .contains('Active')
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
     cy.get('p').contains('Filters:').click();
     cy.wait(3000);
     cy.get(workforceSelector.tableRow).each(($row) => {
@@ -34,7 +34,7 @@ describe("Companies Module - Worker Stepper", () => {
     cy.get(workforceSelector.tableRow)
       .first()
       .as('activeCompanyRow');
-  
+
     cy.get('@activeCompanyRow')
       .parent()
       .find('.personal-info-content__title')
@@ -43,59 +43,59 @@ describe("Companies Module - Worker Stepper", () => {
       .then((companyName) => {
         cy.wrap(companyName.trim()).as('companyName');
       });
-  
+
     cy.get('@activeCompanyRow').first().click();
-    cy.wait(1000)
+    cy.wait(1000);
     cy.get(workforceSelector.companyWorkerPage).click();
-  
+
     cy.contains('p', 'Total Workers')
       .parent()
       .parent()
       .parent()
       .as('totalWorkersCard');
-  
+
     cy.get('@totalWorkersCard')
       .find('p')
       .contains('Total Workers')
       .should('be.visible');
-  
+
     cy.get('@totalWorkersCard')
       .find('p')
       .eq(1)
       .invoke('text')
       .then((totalWorkersText) => {
-  
         cy.log('Total Workers Text:', totalWorkersText);
-  
+
         cy.get('@totalWorkersCard').find('button').click();
-  
+
         cy.url().should('include', '/workers');
-  
+
         cy.get('.filter-tag-container')
           .eq(0)
           .should('be.visible').realHover();
-  
+
         cy.get('@companyName').then((companyName) => {
           cy.get('.label.default__label')
             .contains(companyName)
             .should('be.visible');
         });
-  
+
         cy.get(workforceSelector.tableRow).should('be.visible');
-  
+
         cy.get('.workers-footer')
           .invoke('text')
           .then((text) => {
             const totalWorker = text
               .trim()
               .match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/)[3];
-  
+
             cy.log(`Total number of workers: ${totalWorker}`);
             expect(parseInt(totalWorkersText)).to.eq(parseInt(totalWorker));
           });
       });
-    })
-  it('Add a worker and verify total workers count increases', () => {
+  });
+
+  it('Add a worker and verify total workers count increases', { tags: ["Story:Add Worker Increases Total Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')
       .click();
@@ -105,15 +105,15 @@ describe("Companies Module - Worker Stepper", () => {
       .parent()
       .find('input[type="checkbox"]')
       .check({ force: true });
-  
+
     cy.get('p').contains('Filters:').click();
-    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp')
+    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp');
     cy.wait(3000);
-  
+
     cy.get(workforceSelector.tableRow)
       .first()
       .as('activeCompanyRow');
-  
+
     cy.get('@activeCompanyRow')
       .parent()
       .find('.personal-info-content__title')
@@ -122,7 +122,7 @@ describe("Companies Module - Worker Stepper", () => {
       .then((companyName) => {
         cy.wrap(companyName.trim()).as('companyName');
       });
-  
+
     cy.get('@activeCompanyRow').first().click();
     cy.get(workforceSelector.companyWorkerPage).click();
     cy.contains('p', 'Total Workers')
@@ -130,7 +130,7 @@ describe("Companies Module - Worker Stepper", () => {
       .parent()
       .parent()
       .as('totalWorkersCard');
-  
+
     cy.get('@totalWorkersCard')
       .find('p')
       .eq(1)
@@ -139,11 +139,11 @@ describe("Companies Module - Worker Stepper", () => {
         cy.wrap(parseInt(initialTotalWorkersText)).as('initialCount');
         cy.log(`Initial Total Workers: ${initialTotalWorkersText}`);
       });
-  
+
     cy.get('@totalWorkersCard').find('button').click();
     cy.url().should('include', '/workers');
     cy.wait(3000);
-  
+
     cy.get('.workers-footer')
       .invoke('text')
       .then((text) => {
@@ -151,6 +151,7 @@ describe("Companies Module - Worker Stepper", () => {
         cy.wrap(initialWorkerCount).as('initialWorkerCount');
         cy.log(`Initial worker count from footer: ${initialWorkerCount}`);
       });
+
     const workerData = generateWorkerData();
     cy.get('button p').contains('Add Worker').click();
     cy.get('input[name="firstName"]').type(workerData.firstName);
@@ -160,16 +161,19 @@ describe("Companies Module - Worker Stepper", () => {
     cy.get('.select_item_container [role="button"]').contains('King Mechanical Corp.').click();
     cy.contains('footer [label="Add Worker"] button', 'Add Worker').click();
     cy.wait(3000);
+
     cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
     cy.get(workforceSelector.searchInput).type('king mechanical corp');
     cy.wait(2000);
     cy.get(workforceSelector.tableRow).contains('King Mechanical Corp').click();
     cy.get(workforceSelector.companyWorkerPage).click();
+
     cy.contains('p', 'Total Workers')
       .parent()
       .parent()
       .parent()
       .as('totalWorkersCardFinal');
+
     cy.get('@totalWorkersCardFinal')
       .find('p')
       .eq(1)
@@ -177,23 +181,20 @@ describe("Companies Module - Worker Stepper", () => {
       .then((finalTotalWorkersText) => {
         const finalCount = parseInt(finalTotalWorkersText);
         cy.log(`Final Total Workers: ${finalTotalWorkersText}`);
-  
-        // Verify count increased by 1
+
         cy.get('@initialCount').then((initialCount) => {
           expect(finalCount).to.eq(initialCount + 1);
           cy.log(`✅ Total Workers increased from ${initialCount} to ${finalCount}`);
         });
       });
-    })
+  });
 
-
-  
-  it.skip("Verify total workers count matches workers list data Workers With Safety Alerts", () => {
+  it.skip("Verify total workers count matches workers list data Workers With Safety Alerts", { tags: ["Story:Safety Alerts Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
-	.find('.table-header-filter-btn')
-	.click();
-    
+      .find('.table-header-filter-btn')
+      .click();
+
     cy.get('.sc-dxUMQK.kTpyWF')
       .contains('.sc-gFqAkR.gorvtv', 'Active')
       .parents('.sc-dxUMQK.kTpyWF')
@@ -223,34 +224,33 @@ describe("Companies Module - Worker Stepper", () => {
     cy.get('@activeCompanyRow').first().click();
 
     cy.get(workforceSelector.companyWorkerPage).click();
-    
+
     cy.contains('p', 'Workers With Safety Alerts')
-      .parent()           
-      .parent()  
-      .parent()           
+      .parent()
+      .parent()
+      .parent()
       .as('totalSafteyAlerts');
-    
+
     cy.get('@totalSafteyAlerts').find('p').contains('Workers With Safety Alerts').should('be.visible');
-    
+
     cy.get('@totalSafteyAlerts').find('p').eq(1).invoke('text').then((totalWorkersText) => {
       cy.log('Total Workers With Safety Alerts Text:', totalWorkersText);
       cy.get('@totalSafteyAlerts').find('button').click();
-      cy.url().should('include',`/projects/${Cypress.env('PROJECT_ID')}/workers`);
+      cy.url().should('include', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
 
-      cy.get('.filter-tag').eq(0).realHover();
       const labels = ['SOS', 'Fall', 'Near miss', 'Restricted', 'Fatigue', 'Unsafe'];
-
+      cy.get('.filter-tag').eq(0).realHover();
       labels.forEach((label) => {
         cy.get('.label.default__label')
           .contains(label)
           .should('be.visible');
       });
-      
+
       cy.get('.filter-tag').eq(1).realHover();
       cy.get('.label.default__label').contains('AutoQA Labs').should("be.visible");
 
       cy.get(workforceSelector.tableRow).should('be.visible');
-      
+
       cy.get('.sc-jIGnZt.ieNRXe')
         .invoke('text')
         .then((text) => {
@@ -261,10 +261,10 @@ describe("Companies Module - Worker Stepper", () => {
           expect(parseInt(totalWorkersText)).to.eq(parseInt(totalWorker));
         });
     });
-    
+
     cy.get(workforceSelector.tableColumn).then(($headers) => {
       let companyIndex = -1;
-      
+
       $headers.each((i, el) => {
         const headerText = Cypress.$(el).text().trim();
         if (headerText.toLowerCase().includes('company')) {
@@ -272,20 +272,20 @@ describe("Companies Module - Worker Stepper", () => {
           cy.log(`✅ Company column at index: ${i}`);
         }
       });
-      
+
       expect(companyIndex).to.be.greaterThan(-1);
-      
+
       cy.get('.sc-jIGnZt.ieNRXe').invoke('text').then((text) => {
         const totalWorkers = parseInt(text.trim().match(/of\s*(\d+)/)[1]);
         cy.log(`Total workers to validate: ${totalWorkers}`);
-        
+
         let validatedRows = 0;
-        
+
         function validateVisibleRows() {
           cy.get(workforceSelector.tableRow).then(($rows) => {
             const currentRowCount = $rows.length;
             cy.log(`Currently visible rows: ${currentRowCount}`);
-            
+
             cy.wrap($rows).each(($row, index) => {
               cy.wrap($row)
                 .find('.table_td')
@@ -297,14 +297,11 @@ describe("Companies Module - Worker Stepper", () => {
                   cy.log(`✅ Row ${validatedRows}/${totalWorkers} verified`);
                 });
             });
-            
           }).then(() => {
             if (validatedRows < totalWorkers) {
               cy.log(`Scrolling to load more... (${validatedRows}/${totalWorkers})`);
-              
               cy.get(workforceSelector.tableRow).last().scrollIntoView();
               cy.wait(100);
-              
               validateVisibleRows();
             } else {
               cy.log(`🎉 All ${validatedRows} rows validated!`);
@@ -316,30 +313,30 @@ describe("Companies Module - Worker Stepper", () => {
     });
   });
 
-  it("Verify total workers count matches workers list data - Flagged Workers On-site", () => {
+  it("Verify total workers count matches workers list data - Flagged Workers On-site", { tags: ["Story:Flagged Workers Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
-	.find('.table-header-filter-btn')
-	.click();
-    
-  cy.get('.select_item_container label')
-  .contains('Active')
-  .parent()
-  .find('input[type="checkbox"]')
-  .check({ force: true });
+      .find('.table-header-filter-btn')
+      .click();
+
+    cy.get('.select_item_container label')
+      .contains('Active')
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
 
     cy.get('p').contains('Filters:').click();
-    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp')
+    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp');
     cy.wait(1000);
 
     cy.get(workforceSelector.tableRow)
       .contains('Active')
       .should('be.visible');
-  
+
     cy.get(workforceSelector.tableRow)
       .first()
       .as('activeCompanyRow');
-  
+
     cy.get('@activeCompanyRow')
       .parent()
       .find('.personal-info-content__title')
@@ -348,71 +345,53 @@ describe("Companies Module - Worker Stepper", () => {
       .then((companyName) => {
         cy.wrap(companyName.trim()).as('companyName');
       });
-  
+
     cy.get('@activeCompanyRow').first().click();
-  
     cy.get(workforceSelector.companyWorkerPage).click();
-  
+
     cy.contains('p', 'Flagged Workers On-site')
       .parent()
       .parent()
       .parent()
       .as('flaggedWorkersCard');
-  
+
     cy.get('@flaggedWorkersCard')
       .find('p')
       .contains('Flagged Workers On-site')
       .should('be.visible');
-  
+
     cy.get('@flaggedWorkersCard')
       .find('p')
       .eq(1)
       .invoke('text')
       .then((totalWorkersText) => {
-  
         cy.log(`Total Flagged Workers On-site: ${totalWorkersText}`);
-  
+
         cy.get('@flaggedWorkersCard').find('button').click();
-  
         cy.url().should('include', '/workers');
-  
-        cy.get('.filter-tag-container')
-          .eq(0)
-          .should('be.visible')
-          .realHover();
-  
-        cy.get('.label.default__label')
-          .contains('Flagged')
-          .should('be.visible');
-  
-        cy.get('.filter-tag-container')
-          .eq(1)
-          .should('be.visible')
-          .realHover();
-  
+
+        cy.get('.filter-tag-container').eq(0).should('be.visible').realHover();
+        cy.get('.label.default__label').contains('Flagged').should('be.visible');
+
+        cy.get('.filter-tag-container').eq(1).should('be.visible').realHover();
         cy.get('@companyName').then((companyName) => {
-          cy.get('.label.default__label')
-            .contains(companyName)
-            .should('be.visible');
+          cy.get('.label.default__label').contains(companyName).should('be.visible');
         });
-  
+
         cy.get(workforceSelector.tableRow).should('be.visible');
-  
+
         cy.get('.workers-footer')
           .invoke('text')
           .then((text) => {
-            const totalFromTable = text
-              .trim()
-              .match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/)[3];
-  
+            const totalFromTable = text.trim().match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/)[3];
             cy.log(`Total workers from table: ${totalFromTable}`);
             expect(parseInt(totalWorkersText)).to.eq(parseInt(totalFromTable));
           });
       });
-  
+
     cy.get(workforceSelector.tableColumn).then(($headers) => {
       let companyIndex = -1;
-  
+
       $headers.each((i, el) => {
         const headerText = Cypress.$(el).text().trim();
         if (headerText.toLowerCase().includes('company')) {
@@ -420,26 +399,26 @@ describe("Companies Module - Worker Stepper", () => {
           cy.log(`✅ Company column index: ${i}`);
         }
       });
-  
+
       expect(companyIndex).to.be.greaterThan(-1);
-  
+
       cy.get('.workers-footer')
         .invoke('text')
         .then((text) => {
           const totalWorkers = parseInt(text.trim().match(/of\s*(\d+)/)[1]);
           cy.log(`Total workers to validate: ${totalWorkers}`);
-  
+
           let validatedRows = 0;
-  
+
           function validateVisibleRows() {
             cy.get(workforceSelector.tableRow)
               .then(($rows) => {
                 cy.log(`Currently visible rows: ${$rows.length}`);
-  
+
                 cy.wrap($rows).each(($row) => {
                   cy.wrap($row)
                     .find('.table_td')
-                    .eq(companyIndex-1)
+                    .eq(companyIndex - 1)
                     .invoke('text')
                     .then((company) => {
                       cy.get('@companyName').then((companyName) => {
@@ -466,8 +445,7 @@ describe("Companies Module - Worker Stepper", () => {
     });
   });
 
-  it('Add a flagged worker and verify total flagged count increases', () => {
-    // Step 1: Navigate to companies and filter for Active
+  it('Add a flagged worker and verify total flagged count increases', { tags: ["Story:Add Flagged Worker Increases Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')
@@ -479,13 +457,10 @@ describe("Companies Module - Worker Stepper", () => {
       .find('input[type="checkbox"]')
       .check({ force: true });
     cy.get('p').contains('Filters:').click();
-    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp')
+    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp');
     cy.wait(3000);
-  
-    // Step 2: Get first active company
-    cy.get(workforceSelector.tableRow)
-      .first()
-      .as('activeCompanyRow');
+
+    cy.get(workforceSelector.tableRow).first().as('activeCompanyRow');
     cy.get('@activeCompanyRow')
       .parent()
       .find('.personal-info-content__title')
@@ -495,11 +470,9 @@ describe("Companies Module - Worker Stepper", () => {
         cy.wrap(companyName.trim()).as('companyName');
       });
     cy.get('@activeCompanyRow').first().click();
-  
-    // Step 3: Navigate to company workers page
+
     cy.get(workforceSelector.companyWorkerPage).click();
-  
-    // Step 4: Get initial flagged workers count
+
     cy.contains('p', 'Flagged Workers On-site')
       .parent()
       .parent()
@@ -513,13 +486,13 @@ describe("Companies Module - Worker Stepper", () => {
         cy.wrap(parseInt(initialFlaggedWorkersText)).as('initialFlaggedCount');
         cy.log(`Initial Flagged Workers On-site: ${initialFlaggedWorkersText}`);
       });
-  
+
     cy.contains('p', 'Total Workers')
       .parent()
       .parent()
       .parent()
       .as('totalWorkersCard');
-  
+
     cy.get('@totalWorkersCard')
       .find('p')
       .eq(1)
@@ -528,11 +501,11 @@ describe("Companies Module - Worker Stepper", () => {
         cy.wrap(parseInt(initialTotalWorkersText)).as('initialCount');
         cy.log(`Initial Total Workers: ${initialTotalWorkersText}`);
       });
-  
+
     cy.get('@totalWorkersCard').find('button').click();
     cy.url().should('include', '/workers');
     cy.wait(3000);
-  
+
     const workerData = generateWorkerData();
     cy.get('button p').contains('Add Worker').click();
     cy.get('input[name="firstName"]').type(workerData.firstName);
@@ -541,9 +514,9 @@ describe("Companies Module - Worker Stepper", () => {
     cy.get('input[name="company"]').type('King Mechanical Corp');
     cy.get('.select_item_container [role="button"]').contains('King Mechanical Corp.').click();
     cy.contains('footer [label="Add Worker"] button', 'Add Worker').click();
-    cy.get("body").click(0,0);
+    cy.get("body").click(0, 0);
     cy.wait(3000);
-  
+
     cy.get(workforceSelector.searchInput).type(`${workerData.firstName} ${workerData.lastName}`);
     cy.get(workforceSelector.tableRow).contains(`${workerData.firstName}`).click();
     cy.get(workforceSelector.accessControlPage).click();
@@ -551,15 +524,15 @@ describe("Companies Module - Worker Stepper", () => {
       .parent()
       .find('input[type="checkbox"]')
       .check({ force: true });
-  
+
     cy.get('button p').contains('Update').click();
     cy.wait(3000);
-  
+
     cy.visit(`/projects/5007477836/companies`);
     cy.get(workforceSelector.searchInput).type('King Mechanical Corp');
     cy.get(workforceSelector.tableRow).contains('King Mechanical Corp').click();
     cy.get(workforceSelector.companyWorkerPage).click();
-  
+
     cy.contains('p', 'Flagged Workers On-site')
       .parent()
       .parent()
@@ -570,37 +543,34 @@ describe("Companies Module - Worker Stepper", () => {
       .then((finalFlaggedWorkersText) => {
         const finalFlaggedCount = parseInt(finalFlaggedWorkersText);
         cy.log(`Final Flagged Workers On-site: ${finalFlaggedWorkersText}`);
-  
+
         cy.get('@initialFlaggedCount').then((initialFlaggedCount) => {
           expect(finalFlaggedCount).to.eq(initialFlaggedCount + 1);
           cy.log(`✅ Flagged Workers increased from ${initialFlaggedCount} to ${finalFlaggedCount}`);
         });
       });
   });
-  it("Verify total workers count matches workers list data - Total Workers On-site", () => {
+
+  it("Verify total workers count matches workers list data - Total Workers On-site", { tags: ["Story:Total Workers On-site Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
-  .find('.table-header-filter-btn')
-	  .click();
-    
+      .find('.table-header-filter-btn')
+      .click();
+
     cy.get('.select_item_container label')
-  .contains('Active')
-  .parent()
-  .find('input[type="checkbox"]')
-  .check({ force: true });
+      .contains('Active')
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
 
     cy.get('p').contains('Filters:').click();
-    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp')
+    cy.get(workforceSelector.searchInput).clear().type('King Mechanical Corp');
     cy.wait(1000);
 
-    cy.get(workforceSelector.tableRow)
-      .contains('Active')
-      .should('be.visible');
-  
-    cy.get(workforceSelector.tableRow)
-      .first()
-      .as('activeCompanyRow');
-  
+    cy.get(workforceSelector.tableRow).contains('Active').should('be.visible');
+
+    cy.get(workforceSelector.tableRow).first().as('activeCompanyRow');
+
     cy.get('@activeCompanyRow')
       .parent()
       .find('.personal-info-content__title')
@@ -609,7 +579,7 @@ describe("Companies Module - Worker Stepper", () => {
       .then((companyName) => {
         cy.wrap(companyName.trim()).as('companyName');
       });
-  
+
     cy.get('@activeCompanyRow').first().click();
     cy.get(workforceSelector.companyWorkerPage).click();
 
@@ -618,62 +588,45 @@ describe("Companies Module - Worker Stepper", () => {
       .parent()
       .parent()
       .as('totalWorkersOnSiteCard');
-  
+
     cy.get('@totalWorkersOnSiteCard')
       .find('p')
       .contains('Total Workers On-site')
       .should('be.visible');
-  
+
     cy.get('@totalWorkersOnSiteCard')
       .find('p')
       .eq(1)
       .invoke('text')
       .then((totalWorkersText) => {
-  
         cy.log(`Total Workers On-site: ${totalWorkersText}`);
-  
+
         cy.get('@totalWorkersOnSiteCard').find('button').click();
-  
         cy.url().should('include', '/workers');
-  
-        cy.get('.filter-tag-container')
-          .eq(0)
-          .should('be.visible')
-          .realHover();
-  
-        cy.get('.label.default__label')
-          .contains('On-site')
-          .should('be.visible');
-  
-        cy.get('.filter-tag-container')
-          .eq(1)
-          .should('be.visible')
-          .realHover();
-  
+
+        cy.get('.filter-tag-container').eq(0).should('be.visible').realHover();
+        cy.get('.label.default__label').contains('On-site').should('be.visible');
+
+        cy.get('.filter-tag-container').eq(1).should('be.visible').realHover();
         cy.get('@companyName').then((companyName) => {
-          cy.get('.label.default__label')
-            .contains(companyName)
-            .should('be.visible');
+          cy.get('.label.default__label').contains(companyName).should('be.visible');
         });
-  
+
         cy.get(workforceSelector.tableRow).should('be.visible');
-  
+
         cy.get('.workers-footer')
           .invoke('text')
           .then((text) => {
-            const totalFromTable = text
-              .trim()
-              .match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/)[3];
-  
+            const totalFromTable = text.trim().match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/)[3];
             cy.log(`Total workers from table: ${totalFromTable}`);
             expect(parseInt(totalWorkersText)).to.eq(parseInt(totalFromTable));
           });
       });
-  
+
     cy.get(workforceSelector.tableColumn).then(($headers) => {
       let companyIndex = -1;
       let siteStatusIndex = -1;
-  
+
       $headers.each((i, el) => {
         const headerText = Cypress.$(el).text().trim();
         if (headerText.toLowerCase().includes('company')) {
@@ -685,37 +638,37 @@ describe("Companies Module - Worker Stepper", () => {
           cy.log(`✅ Site Status column index: ${i}`);
         }
       });
-  
+
       expect(companyIndex).to.be.greaterThan(-1);
       expect(siteStatusIndex).to.be.greaterThan(-1);
-  
+
       cy.get('.workers-footer')
         .invoke('text')
         .then((text) => {
           const totalWorkers = parseInt(text.trim().match(/of\s*(\d+)/)[1]);
           cy.log(`Total workers to validate: ${totalWorkers}`);
-  
+
           let validatedRows = 0;
-  
+
           function validateVisibleRows() {
             cy.get(workforceSelector.tableRow)
               .then(($rows) => {
                 cy.log(`Currently visible rows: ${$rows.length}`);
-  
+
                 cy.wrap($rows).each(($row) => {
                   cy.wrap($row)
                     .find('.table_td')
-                    .eq(companyIndex-1)
+                    .eq(companyIndex - 1)
                     .invoke('text')
                     .then((company) => {
                       cy.get('@companyName').then((companyName) => {
                         expect(company.trim()).to.contain(companyName);
                       });
                     });
-  
+
                   cy.wrap($row)
                     .find('.table_td')
-                    .eq(siteStatusIndex-1)
+                    .eq(siteStatusIndex - 1)
                     .invoke('text')
                     .then((siteStatus) => {
                       expect(siteStatus.trim()).to.equal('On-site');
@@ -735,9 +688,10 @@ describe("Companies Module - Worker Stepper", () => {
                 }
               });
           }
-  
+
           validateVisibleRows();
         });
     });
   });
-})
+
+});

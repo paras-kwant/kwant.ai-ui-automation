@@ -5,14 +5,14 @@ const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import companiesHelper from '../../support/helper/companiesHelper';
 
-describe("WorkForce Companies Module - Selection Functionality", () => {
+describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:WorkForce", "Feature:Selection", "Module:WorkForce-Company"] }, () => {
 
   beforeEach(() => {
     cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
     cy.cleanUI();
   });
 
-  it('should display correct total worker count when selecting all workers via header checkbox', () => {
+  it('should display correct total worker count when selecting all workers via header checkbox', { tags: ["Story:Select All Via Header Checkbox", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('.workforce-footer')
       .invoke('text')
       .then((text) => {
@@ -32,7 +32,7 @@ describe("WorkForce Companies Module - Selection Functionality", () => {
       });
   });
 
-  it('should display correct count when a single worker is selected', () => {
+  it('should display correct count when a single worker is selected', { tags: ["Story:Single Worker Selection Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('[type="checkbox"]')
       .eq(1)
       .check({ force: true });
@@ -41,7 +41,7 @@ describe("WorkForce Companies Module - Selection Functionality", () => {
       .should('contain', '1');
   });
 
-  it('should clear selection when clear selection icon is clicked after selecting a worker', () => {
+  it('should clear selection when clear selection icon is clicked after selecting a worker', { tags: ["Story:Clear Selection After Select", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('[type="checkbox"]')
       .eq(1)
       .check({ force: true });
@@ -56,7 +56,7 @@ describe("WorkForce Companies Module - Selection Functionality", () => {
       .should('not.exist');
   });
 
-  it('should display correct total worker count when selecting all workers from action menu', () => {
+  it('should display correct total worker count when selecting all workers from action menu', { tags: ["Story:Select All Via Action Menu", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow)
       .should('be.visible');
 
@@ -68,8 +68,8 @@ describe("WorkForce Companies Module - Selection Functionality", () => {
 
         cy.log(`Total number of workers: ${totalWorker}`);
 
-       cy.get(workforceSelector.tableColumn).eq(2).click()
-       cy.get('body').should('be.visible')
+        cy.get(workforceSelector.tableColumn).eq(2).click();
+        cy.get('body').should('be.visible');
 
         cy.get('p')
           .contains('Select All')
@@ -80,8 +80,8 @@ describe("WorkForce Companies Module - Selection Functionality", () => {
       });
   });
 
-  it('should select only workers on the current page when using Select On This Page option', () => {
-    cy.get(workforceSelector.tableColumn).eq(2).click()
+  it('should select only workers on the current page when using Select On This Page option', { tags: ["Story:Select On This Page Only", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+    cy.get(workforceSelector.tableColumn).eq(2).click();
 
     cy.get('p')
       .contains('Select On This Page')

@@ -3,16 +3,14 @@ import { downloadPage } from "../../../pages/insights/companies/download";
 import companiesHelper from "../../../support/helper/companiesHelper";
 import { workforceSelector } from "../../../support/workforceSelector";
 
-describe("Insights Company Module - Download", () => {
+describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Feature:Download", "Module:Insights-Company"] }, () => {
 
-    beforeEach(() => {
-      cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
-    });
+  beforeEach(() => {
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
+  });
 
-
-  it('Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', () => { // Add a wait to ensure the page has loaded before interacting with it
+  it('Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', { tags: ["Story:Download Default Date Range Matches Insight Page", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
-
 
     downloadPage.getDateRangeFromFilter().then(({ startDate, endDate }) => {
       downloadPage.openDownloadModal();
@@ -20,8 +18,7 @@ describe("Insights Company Module - Download", () => {
     });
   });
 
-
-  it('Verify the downloaded quick report is in CSV format', () => {
+  it('Verify the downloaded quick report is in CSV format', { tags: ["Story:Download Quick Report Is CSV Format", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     downloadPage.visitCompaniesPage();
 
@@ -29,7 +26,7 @@ describe("Insights Company Module - Download", () => {
       downloadPage.openDownloadModal();
       downloadPage.assertDatesMatch(startDate, endDate);
       downloadPage.clickDownloadButton();
-      cy.wait(4000)
+      cy.wait(4000);
 
       downloadPage.getLatestDownloadedFile().then(({ fileName }) => {
         downloadPage.assertFileIsCsv(fileName);
@@ -37,12 +34,11 @@ describe("Insights Company Module - Download", () => {
     });
   });
 
-
-  it('Verify the fields on the report - Company Name, Date, Number of Workers, On-site Hours', () => {
+  it('Verify the fields on the report - Company Name, Date, Number of Workers, On-site Hours', { tags: ["Story:Download Report Has Required Fields", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     downloadPage.openDownloadModal();
     downloadPage.clickDownloadButton();
-    cy.wait(4000)
+    cy.wait(4000);
 
     downloadPage.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
       downloadPage.assertFileIsCsv(fileName);
@@ -52,8 +48,7 @@ describe("Insights Company Module - Download", () => {
     });
   });
 
-
-  it('Verify the data on the downloaded CSV report matches with the application data', () => {
+  it('Verify the data on the downloaded CSV report matches with the application data', { tags: ["Story:Download CSV Data Matches Application Data", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     downloadPage.interceptCompaniesApi();
 
     downloadPage.waitForCompaniesApi().then((interception) => {
@@ -62,7 +57,7 @@ describe("Insights Company Module - Download", () => {
 
       downloadPage.openDownloadModal();
       downloadPage.clickDownloadButton();
-      cy.wait(4000)
+      cy.wait(4000);
 
       downloadPage.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
         downloadPage.parseDownloadedFile(downloadsFolder, fileName).then((rows) => {
@@ -72,8 +67,7 @@ describe("Insights Company Module - Download", () => {
     });
   });
 
-
-  it('Verify selecting a company checkbox only downloads that company data in the report', () => {
+  it('Verify selecting a company checkbox only downloads that company data in the report', { tags: ["Story:Download Selected Company Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
 
     downloadPage.getRandomCompanyFromUI().then((selectedCompany) => {
@@ -94,11 +88,11 @@ describe("Insights Company Module - Download", () => {
     });
   });
 
+  it('download for Today',            { tags: ["Story:Download Report For Today", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Today'); });
+  it('download for Current Week',     { tags: ["Story:Download Report For Current Week", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Current Week'); });
+  it('download for Last 7 Days',      { tags: ["Story:Download Report For Last 7 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 7 Days'); });
+  it('download for Last 30 days',     { tags: ["Story:Download Report For Last 30 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 30 days'); });
+  it('download for This Month',       { tags: ["Story:Download Report For This Month", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('This Month'); });
+  it('download for Project Duration', { tags: ["Story:Download Report For Project Duration", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Project Duration'); });
 
-  it('download for Today',            () => { downloadPage.runDownloadTestForFilter('Today'); });
-  it('download for Current Week',     () => { downloadPage.runDownloadTestForFilter('Current Week'); });
-  it('download for Last 7 Days',      () => { downloadPage.runDownloadTestForFilter('Last 7 Days'); });
-  it('download for Last 30 days',     () => { downloadPage.runDownloadTestForFilter('Last 30 days'); });
-  it('download for This Month',       () => { downloadPage.runDownloadTestForFilter('This Month'); });
-  it('download for Project Duration', () => { downloadPage.runDownloadTestForFilter('Project Duration'); });
-})
+});

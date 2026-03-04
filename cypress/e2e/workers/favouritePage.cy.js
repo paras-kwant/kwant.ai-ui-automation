@@ -1,78 +1,107 @@
 /// <reference types="cypress" />
 import workerHelper from '../../support/helper/workerHelper.js';
-
-
 import { workforceSelector } from '../../support/workforceSelector';
 
-describe("Worker Module - Favorites", () => {
-  beforeEach(() => {
-    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
-  })
+describe(
+  "Worker Module - Favorites",
+  { tags: ["Epic:WorkForce", "Feature:Favorites", "Module:Workforce-Worker"] },
+  () => {
 
-  it('Verify remove worker page from Favorite', () => {
-    cy.get('body').then(($body) => {
-      const isFavorited =
-        $body.find('.top-nav-left-section [role="button"] [fill="#FACC15"]').length > 0;
-
-      if (!isFavorited) {
-        cy.get('.top-nav-left-section [role="button"]').click();
-        cy.get(workforceSelector.toastMessage).should('contain.text', 'Added to favorite');
-      }
-
-      cy.wait(2000);
-      cy.get('.top-nav-left-section [role="button"]').click();
-
-      cy.get(workforceSelector.toastMessage).should('contain.text', 'Removed from favorite');
-
-      cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
-        .should('not.exist');
-
-      cy.get('[title="Workforce Workers"]').should('not.exist');
+    beforeEach(() => {
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
     });
-  });
 
-  it('Verify adding worker page as favourite', () => {
-    cy.get(workforceSelector.tableRow).should('be.visible')
-    cy.get('.top-nav-left-section [role="button"]').click();
+    it(
+      'Verify remove worker page from Favorite',
+      { tags: ["Story:Remove Favorite", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      () => {
+        cy.get(workforceSelector.tableRow).should('be.visible');
+        cy.get('body').then(($body) => {
+          const isFavorited =
+            $body.find('.top-nav-left-section [role="button"] [fill="#FACC15"]').length > 0;
 
-    cy.get(workforceSelector.toastMessage, { timeout: 10000 })
-      .should('contain.text', 'Added to favorite');
+          if (!isFavorited) {
+            cy.get('.top-nav-left-section [role="button"]').click();
+            cy.get(workforceSelector.toastMessage).should('contain.text', 'Added to favorite');
+          }
 
-    cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
-      .should('be.visible');
+          cy.wait(2000);
+          cy.get('.top-nav-left-section [role="button"]').click();
 
-    cy.get('[title="Workforce Workers"]').should('exist');
-  });
+          cy.get(workforceSelector.toastMessage).should('contain.text', 'Removed from favorite');
 
-  it('Verify Worker Page Accessibility from Favorites', () => {
-    cy.get('[title="Workforce Workers"]')
-      .should('be.visible')
-      .click();
+          cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
+            .should('not.exist');
 
-    cy.url().should(
-      'include',
-      `/projects/${Cypress.env('PROJECT_ID')}/workers`
+          cy.get('[title="Workforce Workers"]').should('not.exist');
+        });
+      }
     );
-  });
 
-  it('Verify Favorite Status Persistence', () => {
-    cy.reload();
+    it(
+      'Verify adding worker page as favourite',
+      { tags: ["Story:Add Favorite", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      () => {
 
-    cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
-      .should('be.visible');
-  });
+        cy.get(workforceSelector.tableRow).should('be.visible');
+        cy.get('.top-nav-left-section [role="button"]').click();
 
-  it('Verify latest worker page added appears at top of favorites list', () => {
-    cy.get('.top-nav-left-section [role="button"]').then(($btn) => {
-      if ($btn.find('[fill="#FACC15"]').length === 0) {
-        cy.wrap($btn).click();
-        cy.get(workforceSelector.toastMessage).should('contain.text', 'Added to favorite');
+        cy.get(workforceSelector.toastMessage, { timeout: 10000 })
+          .should('contain.text', 'Added to favorite');
+
+        cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
+          .should('be.visible');
+
+        cy.get('[title="Workforce Workers"]').should('exist');
       }
+    );
 
-      cy.get('[title]')
-        .eq(0)
-        .should('have.attr', 'title', 'Workforce Workers');
-    });
-  });
+    it(
+      'Verify Worker Page Accessibility from Favorites',
+      { tags: ["Story:Favorite Navigation", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      () => {
+        cy.get('[title="Workforce Workers"]')
+          .should('be.visible')
+          .click();
 
-});
+        cy.url().should(
+          'include',
+          `/projects/${Cypress.env('PROJECT_ID')}/workers`
+        );
+      }
+    );
+
+    it(
+      'Verify Favorite Status Persistence',
+      { tags: ["Story:Favorite Persistence", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      () => {
+        cy.reload();
+        cy.get(workforceSelector.tableRow).should('be.visible');
+
+
+        cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]')
+          .should('be.visible');
+      }
+    );
+
+    it(
+      'Verify latest worker page added appears at top of favorites list',
+      { tags: ["Story:Favorite Ordering", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      () => {
+        cy.get(workforceSelector.tableRow).should('be.visible');
+
+        cy.get('.top-nav-left-section [role="button"]').then(($btn) => {
+          if ($btn.find('[fill="#FACC15"]').length === 0) {
+            cy.wrap($btn).click();
+            cy.get(workforceSelector.toastMessage).should('contain.text', 'Added to favorite');
+          }
+
+          cy.get('[title]')
+            .eq(0)
+            .should('have.attr', 'title', 'Workforce Workers');
+        });
+      }
+    );
+
+  }
+);

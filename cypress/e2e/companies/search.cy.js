@@ -4,14 +4,14 @@ const fs = require("fs");
 import companiesHelper from '../../support/helper/companiesHelper';
 import { workforceSelector } from '../../support/workforceSelector';
 
-describe("WorkForce Companies Module - Search", () => {
+describe("WorkForce Companies Module - Search", { tags: ["Epic:WorkForce", "Feature:Search", "Module:WorkForce-Company"] }, () => {
 
   beforeEach(() => {
     cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
     cy.cleanUI();
   });
 
-  it("Validating the search functionality - run twice (using TaskTrade API)", () => {
+  it("Validating the search functionality - run twice (using TaskTrade API)", { tags: ["Story:Search By Company Name API", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
 
@@ -46,12 +46,12 @@ describe("WorkForce Companies Module - Search", () => {
     });
   });
 
-  it("Non existing company", () => {
+  it("Non existing company", { tags: ["Story:Search Non Existing Company", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('nonexistingcompany');
     cy.get('.empty-body').should("contain.text", "No Results FoundTry adjusting your search or filter to find what you are looking for.");
   });
 
-  it("Searching with partial keywords", () => {
+  it("Searching with partial keywords", { tags: ["Story:Search By Partial Keyword", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
 
@@ -96,7 +96,7 @@ describe("WorkForce Companies Module - Search", () => {
     });
   });
 
-  it('search with the status Active or Inactive', () => {
+  it('search with the status Active or Inactive', { tags: ["Story:Search By Status", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
 
     const statuses = ['Active', 'Inactive'];
@@ -129,7 +129,7 @@ describe("WorkForce Companies Module - Search", () => {
     });
   });
 
-  it("Searching by safety manager name", () => {
+  it("Searching by safety manager name", { tags: ["Story:Search By Safety Manager Name", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("filterApi");
 
     cy.reload();
@@ -176,7 +176,7 @@ describe("WorkForce Companies Module - Search", () => {
     });
   });
 
-  it("Search Compatibility with Filter Feature (Apply Search after Filter)", () => {
+  it("Search Compatibility with Filter Feature (Apply Search after Filter)", { tags: ["Story:Search After Filter Applied", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("filterApi");
 
@@ -227,7 +227,7 @@ describe("WorkForce Companies Module - Search", () => {
     });
   });
 
-  it("Search Compatibility with Filter Feature (Apply Filter after Search)", () => {
+  it("Search Compatibility with Filter Feature (Apply Filter after Search)", { tags: ["Story:Filter After Search Applied", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("filterApi");
 
@@ -269,7 +269,6 @@ describe("WorkForce Companies Module - Search", () => {
               .find(".table_td")
               .should("contain.text", "Inactive");
 
-            // FIX: was referencing undefined `name`, now uses `searchText`
             cy.wrap($row)
               .find(".personal-info-content__title")
               .invoke("text")
@@ -288,7 +287,7 @@ describe("WorkForce Companies Module - Search", () => {
     });
   });
 
-  it("Should search and prioritize Company name with 3 or more keywords", () => {
+  it("Should search and prioritize Company name with 3 or more keywords", { tags: ["Story:Search Priority By Keywords", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
 
@@ -346,7 +345,7 @@ describe("WorkForce Companies Module - Search", () => {
     });
   });
 
-  it("Should perform case-insensitive search with all case variations", () => {
+  it("Should perform case-insensitive search with all case variations", { tags: ["Story:Case Insensitive Search", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
 
