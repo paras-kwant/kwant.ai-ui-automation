@@ -58,7 +58,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     });
   };
 
-  it('should show the overflow option when no worker is selected', { tags: ["Story:Overflow Menu Options Without Selection", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should show the overflow option when no worker is selected', { tags: ["Story:Overflow Menu Options Without Selection", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Delete").should("not.exist");
     cy.contains(".dropdown-option", "Merge").should("not.exist");
@@ -66,7 +66,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     cy.contains(".dropdown-option", "Upload").should('be.visible');
   });
 
-  it("Should cancel deletion when Cancel is clicked", { tags: ["Story:Cancel Company Deletion", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should cancel deletion when Cancel is clicked", { tags: ["Story:Cancel Company Deletion", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     let companyName;
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get(".personal-info-content__title").first().then(($row) => {
@@ -82,7 +82,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     });
   });
 
-  it("Should not delete a company which has workers, then cleanup", { tags: ["Story:Delete Company With Workers Blocked", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should not delete a company which has workers, then cleanup", { tags: ["Story:Delete Company With Workers Blocked", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const companyName = `deleteTestWithWorkers_${Date.now()}`;
 
     createCompany({
@@ -147,7 +147,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
-  it("Should delete company successfully with no workers", { tags: ["Story:Delete Company Without Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should delete company successfully with no workers", { tags: ["Story:Delete Company Without Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const companyName = `deleteCompanyNoWorker_${Date.now()}`;
 
     createCompany({
@@ -180,7 +180,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
-  it("Should delete multiple companies successfully without workers", { tags: ["Story:Bulk Delete Companies Without Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should delete multiple companies successfully without workers", { tags: ["Story:Bulk Delete Companies Without Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const timestamp = Date.now();
     const companyBaseName = "bulkDeleteTest";
 
@@ -246,7 +246,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
-  it("Should merge companies with no workers successfully", { tags: ["Story:Merge Companies Without Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should merge companies with no workers successfully", { tags: ["Story:Merge Companies Without Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const timestamp = Date.now();
     const company1Name = `mergeNoWorkerTest_${timestamp}_1`;
     const company2Name = `mergeNoWorkerTest_${timestamp}_2`;
@@ -322,7 +322,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
-  it("Should merge 3 companies with workers and validate all workers are present", { tags: ["Story:Merge Companies With Workers And Validate", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should merge 3 companies with workers and validate all workers are present", { tags: ["Story:Merge Companies With Workers And Validate", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     const timestamp = Date.now();
     const company1Name = `merge3WorkerTest_${timestamp}_1`;
     const company2Name = `merge3WorkerTest_${timestamp}_2`;
