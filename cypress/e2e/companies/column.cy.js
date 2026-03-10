@@ -237,4 +237,4 @@ it('WorkForce-Company - Verify horizontal scroll availability based on number of
 );
 
 
-})
+})  

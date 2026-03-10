@@ -10,7 +10,9 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
   });
 
   it('Insights-Company - Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', { tags: ["Story:Download Default Date Range Matches Insight Page", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+    cy.intercept('POST', '**/api/insight/company/table?**').as('getCompanyTableData');
     cy.get(workforceSelector.tableRow).should('be.visible');
+    cy.wait('@getCompanyTableData').its('response.statusCode').should('eq', 200);
 
     downloadPage.getDateRangeFromFilter().then(({ startDate, endDate }) => {
       downloadPage.openDownloadModal();
@@ -19,7 +21,9 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
   });
 
   it('Insights-Company - Verify the downloaded quick report is in CSV format', { tags: ["Story:Download Quick Report Is CSV Format", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+    cy.intercept('POST', '**/api/insight/company/table?**').as('getCompanyTableData');
     cy.get(workforceSelector.tableRow).should('be.visible');
+    cy.wait('@getCompanyTableData').its('response.statusCode').should('eq', 200);
     downloadPage.visitCompaniesPage();
 
     downloadPage.getDateRangeFromFilter().then(({ startDate, endDate }) => {
@@ -35,7 +39,9 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
   });
 
   it('Insights-Company - Verify the fields on the report - Company Name, Date, Number of Workers, On-site Hours', { tags: ["Story:Download Report Has Required Fields", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+    cy.intercept('POST', '**/api/insight/company/table?**').as('getCompanyTableData');
     cy.get(workforceSelector.tableRow).should('be.visible');
+    cy.wait('@getCompanyTableData').its('response.statusCode').should('eq', 200);
     downloadPage.openDownloadModal();
     downloadPage.clickDownloadButton();
     cy.wait(4000);
@@ -68,8 +74,9 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
   });
 
   it('Insights-Company - Verify selecting a company checkbox only downloads that company data in the report', { tags: ["Story:Download Selected Company Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+    cy.intercept('POST', '**/api/insight/company/table?**').as('getCompanyTableData');
     cy.get(workforceSelector.tableRow).should('be.visible');
-
+    cy.wait('@getCompanyTableData').its('response.statusCode').should('eq', 200);
     downloadPage.getRandomCompanyFromUI().then((selectedCompany) => {
       cy.log('Selected Company: ' + selectedCompany);
 
