@@ -1,10 +1,10 @@
 name: Debug Single Cypress Spec with Allure
 
 on:
-  push: # Trigger the workflow on push events
-    branches:
-      - main # Specify the branch(es) to trigger the workflow
-      - develop # Add other branches if needed
+  # push: # Trigger the workflow on push events
+  #   branches:
+  #     - main # Specify the branch(es) to trigger the workflow
+  #     - develop # Add other branches if needed
   workflow_dispatch: # Allow manual triggering of the workflow
 
 jobs:
@@ -43,40 +43,9 @@ jobs:
           rm -rf allure-results allure-report
           mkdir -p allure-results
           npx cypress run \
-<<<<<<< HEAD
             --spec "cypress/e2e/insights/companies/download.cy.js" \
-=======
-<<<<<<< HEAD
-            --spec "cypress/e2e/companies/sendAlert.cy.js" \
-=======
-            --spec "cypress/e2e/insights/companies/download.cy.js" \
->>>>>>> 80aa198 (fix flaky download test file)
->>>>>>> ec817ac8 (insight companies added)
             --browser chrome --headless
 
       - name: Debug - Count Allure JSON Files
         run: |
-<<<<<<< HEAD
           ls -l allure-results/*.json | wc -l
-=======
-<<<<<<< HEAD
-          echo "JSON files generated:"
-          find allure-results -name "*.json" | wc -l
-          echo "Listing files:"
-          ls -la allure-results
-
-      - name: Generate Allure Report
-        run: |
-          allure generate allure-results --clean -o allure-report
-
-      - name: Deploy to Separate GitHub Page
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GH_PAT }}
-          publish_dir: ./allure-report
-          publish_branch: gh-pages-single
-          force_orphan: true
-=======
-          ls -l allure-results/*.json | wc -l
->>>>>>> 80aa198 (fix flaky download test file)
->>>>>>> ec817ac8 (insight companies added)
