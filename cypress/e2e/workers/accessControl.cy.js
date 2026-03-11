@@ -124,16 +124,13 @@ describe("Worker Module - Access Control Page Tests",
   it("should show error toast when enabling Motion Mode without a device", 
     { tags: ["Story:Motion Mode Validation", "Severity:normal", "UI", "Module:Workforce-Worker"] }, 
   () => {
-    cy.readFile("cypress/fixtures/noEmailWorker.json").then((workerData) => {
-      const { firstName, lastName } = workerData;
-      const fullName = `${firstName} ${lastName}`;
-      cy.get(workforceSelector.searchInput).clear().type(fullName);
+    cy.get(workforceSelector.searchInput).type("No Device {enter}");
+    cy.get(workforceSelector.tableRow).contains("No Device").should("be.visible");
     accessControlPage.openWorkerAccessControl(0);
     accessControlPage.enableToggle("Motion Mode");
     accessControlPage.assertToast(
       "Motion Mode can only be enabled after assigning the device"
     );
-  });
 })
 
   it("should generate printable badge without API call", 

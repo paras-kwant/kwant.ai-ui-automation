@@ -7,16 +7,12 @@ import { workforceSelector } from '../../../support/workforceSelector';
 describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feature:Companies Module"] }, () => {
 
   beforeEach(() => {
-	cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
-<<<<<<< HEAD
-=======
-  cy.get('.selector-item.first').click()
-	cy.get('.selector-item.first')
-  .should('have.class', 'active');
->>>>>>> ec817ac8 (insight companies added)
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+    cy.get('.selector-item.first').click()
+    cy.get('.selector-item.first').should('have.class', 'active');
   });
   
-  it('WorkForce-Company - Validate drag and drop column syncs with table headers', () => {
+  it('Insight-Company - Validate drag and drop column syncs with table headers', () => {
 
     cy.get(workforceSelector.tableRow).should('exist');
   
@@ -30,14 +26,10 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
   
         cy.log('Initial Drawer Order:', initialOrder);
   
-        const sourceIndex = 1; // column to drag
-        const targetIndex = 2; // drop target
+        const sourceIndex = 1;
+        const targetIndex = 2;
         const draggedColumn = initialOrder[sourceIndex];
   
-<<<<<<< HEAD
-        // Expected drawer order after drag
-=======
->>>>>>> ec817ac8 (insight companies added)
         const expectedOrder = [...initialOrder];
         expectedOrder.splice(sourceIndex, 1);
         expectedOrder.splice(targetIndex, 0, draggedColumn);
@@ -58,11 +50,7 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
               .trigger('touchstart', { touches: [{ clientX: startX, clientY: startY }], force: true })
               .wait(200);
   
-<<<<<<< HEAD
-            for (let i = 1; i <= 8; i++) {
-=======
             for (let i = 1; i <= 10; i++) {
->>>>>>> ec817ac8 (insight companies added)
               const currentX = startX + ((endX - startX) * i / 8);
               const currentY = startY + ((endY - startY) * i / 8);
               cy.wrap($draggable)
@@ -80,10 +68,6 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
         cy.wait(1000);
         cy.get('body').click(0, 0);
   
-<<<<<<< HEAD
-        // Validate table headers exist in the same order as drawer
-=======
->>>>>>> ec817ac8 (insight companies added)
         cy.get(workforceSelector.tableColumn)
           .should('exist')
           .then($cols => {
@@ -93,10 +77,8 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
   
             cy.log('Table Columns:', tableColumns);
   
-            // Only compare the columns that actually exist in table
             const filteredExpected = expectedOrder.filter(col => tableColumns.includes(col));
   
-            // Check table columns are in the same order as expected
             let lastIndex = -1;
             filteredExpected.forEach(col => {
               const index = tableColumns.indexOf(col);
@@ -109,7 +91,8 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
       });
   
   });
-it('WorkForce-Company - Verify horizontal scroll availability based on number of table columns', { tags: ["Story:Horizontal Scroll Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+
+  it('Insight-Company - Verify horizontal scroll availability based on number of table columns', { tags: ["Story:Horizontal Scroll Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableColumn).then($columns => {
       const columnCount = $columns.length;
 
@@ -119,129 +102,114 @@ it('WorkForce-Company - Verify horizontal scroll availability based on number of
         if (columnCount > 6) {
           expect(el.scrollWidth, 'scrollWidth').to.be.greaterThan(el.clientWidth);
 
-          cy.wrap($wrapper)
-            .scrollTo('right', { duration: 300 });
+          cy.wrap($wrapper).scrollTo('right', { duration: 300 });
 
-          cy.wrap($wrapper)
-            .invoke('scrollLeft')
-            .should('be.gt', 0);
+          cy.wrap($wrapper).invoke('scrollLeft').should('be.gt', 0);
 
         } else {
-          expect(el.scrollWidth, 'scrollWidth')
-            .to.equal(el.clientWidth);
+          expect(el.scrollWidth, 'scrollWidth').to.equal(el.clientWidth);
         }
       });
     });
-  }
-);
+  });
 
-it('save button should be disable when their is no chnage ', ()=>{
-  cy.get(workforceSelector.tableRow).should('be.visible');
-	  cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
-<<<<<<< HEAD
-  cy.wait(1000);
-=======
-    
->>>>>>> ec817ac8 (insight companies added)
-  cy.get('[label="Save"] button').should('be.disabled')
-})
-
-it('reset the column setting', ()=>{
-  cy.get(workforceSelector.tableRow).should('be.visible');
-  cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
-  cy.get('[label="Reset to default"] button').should('be.visible').click()
-  cy.get(workforceSelector.toastMessage)
-      .contains('Column settings reset successfully').should('be.visible')
-      cy.get('[data-rbd-draggable-id="actualHours"]').find('input[type="checkbox"]').should('not.be.checked')
-      cy.get('[data-rbd-draggable-id="avgActualHours"]').find('input[type="checkbox"]').should('not.be.checked')
-      cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('not.be.checked')
-})
-
-it('save button should be enabled when their is chnage', ()=>{
-  cy.get(workforceSelector.tableRow).should('be.visible');
+  it('Insight-Company - save button should be disable when their is no chnage', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
-    cy.get('[label="Reset to default"] button').should('be.visible').click()
-<<<<<<< HEAD
-  cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check({force: true})
-=======
-  cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check()
-  cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('be.checked')
->>>>>>> ec817ac8 (insight companies added)
-  cy.get('[label="Save"] button').should('be.enabled')
-})
+    cy.wait(1000);
+    cy.get('[label="Save"] button').should('be.disabled');
+  });
 
-it('WorkForce-Company - Validate checked columns appear in table in same pattern', () => {
+  it('Insight-Company - reset the column setting', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
+    cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
+    cy.get('[label="Reset to default"] button').should('be.visible').click();
+    cy.get(workforceSelector.toastMessage)
+      .contains('Column settings reset successfully').should('be.visible');
+    cy.get('[data-rbd-draggable-id="actualHours"]').find('input[type="checkbox"]').should('not.be.checked');
+    cy.get('[data-rbd-draggable-id="avgActualHours"]').find('input[type="checkbox"]').should('not.be.checked');
+    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('not.be.checked');
+  });
 
-  cy.get(workforceSelector.tableRow).should('exist');
+  it('Insight-Company - save button should be enabled when their is chnage', () => {
+    cy.get(workforceSelector.tableRow).should('be.visible');
+    cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
+    cy.get('[label="Reset to default"] button').should('be.visible').click();
+    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check({ force: true });
+    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('be.checked');
+    cy.get('[label="Save"] button').should('be.enabled');
+  });
 
-  // open column drawer
-  cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
+  it('Insight-Company - Validate checked columns appear in table in same pattern', () => {
 
-  const checkedColumns = [];
+    cy.get(workforceSelector.tableRow).should('exist');
 
-  cy.get('[data-rbd-draggable-id]').each($col => {
+    cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
 
-    const checkbox = $col.find('input[type="checkbox"]');
+    const checkedColumns = [];
 
-    if (checkbox.prop('checked')) {    
-      const columnName = $col
-        .find('.columns-drawer-content__column-option__left')
-        .text()
-        .trim();
+    cy.get('[data-rbd-draggable-id]').each($col => {
 
-      checkedColumns.push(columnName);
-    }
+      const checkbox = $col.find('input[type="checkbox"]');
 
-  }).then(() => {
+      if (checkbox.prop('checked')) {    
+        const columnName = $col
+          .find('.columns-drawer-content__column-option__left')
+          .text()
+          .trim();
 
-    cy.log('Checked Columns:', checkedColumns);
+        checkedColumns.push(columnName);
+      }
 
-    // close drawer
-    cy.get('body').click(0,0);
+    }).then(() => {
 
-    cy.get(workforceSelector.tableColumn)
-      .should('exist')
-      .then($cols => {
+      cy.log('Checked Columns:', checkedColumns);
 
-        const tableColumns = [...$cols]
-          .map(col => col.innerText.trim())
-          .filter(text => text !== ""); // removes shell/empty columns
+      cy.get('body').click(0, 0);
 
-        cy.log('Table Columns:', tableColumns);
+      cy.get(workforceSelector.tableColumn)
+        .should('exist')
+        .then($cols => {
 
-        let lastIndex = -1;
+          const tableColumns = [...$cols]
+            .map(col => col.innerText.trim())
+            .filter(text => text !== "");
 
-        checkedColumns.forEach(col => {
+          cy.log('Table Columns:', tableColumns);
 
-          const index = tableColumns.indexOf(col);
+          let lastIndex = -1;
 
-          expect(index, `${col} should exist in table`).to.be.greaterThan(-1);
-          expect(index, `${col} should maintain order`).to.be.greaterThan(lastIndex);
+          checkedColumns.forEach(col => {
 
-          lastIndex = index;
+            const index = tableColumns.indexOf(col);
+
+            expect(index, `${col} should exist in table`).to.be.greaterThan(-1);
+            expect(index, `${col} should maintain order`).to.be.greaterThan(lastIndex);
+
+            lastIndex = index;
+
+          });
 
         });
 
-      });
+    });
 
   });
 
+  it('Insight-Company - clicking on the x icon should close the column setting drawer', () => {
+    cy.get(workforceSelector.tableRow).should('exist');
+    cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
+    cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
+    cy.get('header button svg').click();
+    cy.contains('.columns-drawer-header', 'Column Settings').should('not.exist');
+  });
+
+  it('Insight-Company - clicking outside the drawer should close the column setting drawer', () => {
+    cy.get(workforceSelector.tableRow).should('exist');
+    cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
+    cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
+    cy.get('body').click(0, 0);
+    cy.contains('.columns-drawer-header', 'Column Settings').should('not.exist');
+  });
+
 });
-
-it('clicking on the x icon should close the column setting drawer', () => {
-  cy.get(workforceSelector.tableRow).should('exist');
-  cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
-  cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
-  cy.get('header button svg').click();
-
-cy.contains('.columns-drawer-header', 'Column Settings').should('not.exist');
-})
-it('clicking outside the drawer should close the column setting drawer', () => {
-  cy.get(workforceSelector.tableRow).should('exist');
-  cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
-  cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
-  cy.get('body').click(0,0);
-  cy.contains('.columns-drawer-header', 'Column Settings').should('not.exist');
-})
-
-})

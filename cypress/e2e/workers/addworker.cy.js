@@ -209,7 +209,7 @@ describe("Worker Module - Add Worker Tests",
     addworkerPage.fillWorkerName(workerData);
     cy.selectRandomOption('input[name="company"]', '.select_item_container [role="button"]', 'company');
     addWorkerSelector.addMoreDetail().click();
-    addWorkerSelector.phoneInput().type('+9779868757379');
+    addWorkerSelector.phoneInput().type('+18167046777');
     addWorkerSelector.emailInput().type('paras+45@kwant.ai');
     workforceSelector.addressInput().type('Kathmandu');
     addWorkerSelector.zipcodeInput().type('44600');

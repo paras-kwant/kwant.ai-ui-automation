@@ -166,7 +166,7 @@ describe(
         cy.get(workforceSelector.tableRow)
           .eq(0)
           .find(".cell-content")
-          .eq(5)
+          .eq(4)
           .invoke("text")
           .then((device) => {
             cy.get(workforceSelector.searchInput).clear().type(device);
