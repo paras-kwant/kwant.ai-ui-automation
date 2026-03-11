@@ -70,7 +70,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
       })
       .then(randomTexts => {
         randomTexts.forEach(text => {
-          cy.contains('.multi-select-option__head', text).click();
+          cy.contains('.multi-select-option__head', text).scrollIntoView().click();
         });
       });
 
@@ -249,7 +249,8 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.get('@minInput').clear().type('1');
     cy.get('@maxInput').clear().type('2');
     cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi');
+    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+    cy.get('.loader-image').should('not.exist');
     cy.get('body').click(0, 0);
 
     cy.get(workforceSelector.tableRow).find('.table_td').then(($headers) => {
@@ -278,8 +279,9 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(0).as('minInput');
     cy.get('@minInput').clear().type('3');
     cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi');
+    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
     cy.get('body').click(0, 0);
+    cy.get('.loader-image').should('not.exist');
 
     cy.get('body').then(($body) => {
       if ($body.find(workforceSelector.tableRow).length > 0) {
@@ -302,8 +304,9 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(1).as('maxInput');
     cy.get('@maxInput').clear().type('5');
     cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi');
+    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
     cy.get('body').click(0, 0);
+    cy.get('.loader-image').should('not.exist');
 
     cy.get('body').then(($body) => {
       if ($body.find(workforceSelector.tableRow).length > 0) {
@@ -328,8 +331,9 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.get('@minInput').clear().type('1');
     cy.get('@maxInput').clear().type('2');
     cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi');
+    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
     cy.get('body').click(0, 0);
+    cy.get('.loader-image').should('not.exist');
 
     cy.get(workforceSelector.tableRow).find('.table_td').then(($headers) => {
       const colIndex = [...$headers].findIndex((th) => th.innerText.includes('Actual Work-Days'));
@@ -357,8 +361,9 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(0).as('minInput');
     cy.get('@minInput').clear().type('3');
     cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi');
     cy.get('body').click(0, 0);
+    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+    cy.get('.loader-image').should('not.exist');
 
     cy.get('body').then(($body) => {
       if ($body.find(workforceSelector.tableRow).length > 0) {
@@ -381,8 +386,9 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(1).as('maxInput');
     cy.get('@maxInput').clear().type('5');
     cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi');
     cy.get('body').click(0, 0);
+    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+    cy.get('.loader-image').should('not.exist');
 
     cy.get('body').then(($body) => {
       if ($body.find(workforceSelector.tableRow).length > 0) {
@@ -538,8 +544,8 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(0).clear().type('1');
     cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(1).clear().type('10');
     cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi');
     cy.get('body').click(0, 0);
+    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
     cy.get('.loader-image').should('not.exist');
 
     cy.get('@selectedCompany').then((selectedCompany) => {

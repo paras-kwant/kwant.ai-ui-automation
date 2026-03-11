@@ -8,6 +8,12 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
 
   beforeEach(() => {
 	cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+<<<<<<< HEAD
+=======
+  cy.get('.selector-item.first').click()
+	cy.get('.selector-item.first')
+  .should('have.class', 'active');
+>>>>>>> ec817ac8 (insight companies added)
   });
   
   it('WorkForce-Company - Validate drag and drop column syncs with table headers', () => {
@@ -28,7 +34,10 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
         const targetIndex = 2; // drop target
         const draggedColumn = initialOrder[sourceIndex];
   
+<<<<<<< HEAD
         // Expected drawer order after drag
+=======
+>>>>>>> ec817ac8 (insight companies added)
         const expectedOrder = [...initialOrder];
         expectedOrder.splice(sourceIndex, 1);
         expectedOrder.splice(targetIndex, 0, draggedColumn);
@@ -49,7 +58,11 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
               .trigger('touchstart', { touches: [{ clientX: startX, clientY: startY }], force: true })
               .wait(200);
   
+<<<<<<< HEAD
             for (let i = 1; i <= 8; i++) {
+=======
+            for (let i = 1; i <= 10; i++) {
+>>>>>>> ec817ac8 (insight companies added)
               const currentX = startX + ((endX - startX) * i / 8);
               const currentY = startY + ((endY - startY) * i / 8);
               cy.wrap($draggable)
@@ -67,7 +80,10 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
         cy.wait(1000);
         cy.get('body').click(0, 0);
   
+<<<<<<< HEAD
         // Validate table headers exist in the same order as drawer
+=======
+>>>>>>> ec817ac8 (insight companies added)
         cy.get(workforceSelector.tableColumn)
           .should('exist')
           .then($cols => {
@@ -122,7 +138,11 @@ it('WorkForce-Company - Verify horizontal scroll availability based on number of
 it('save button should be disable when their is no chnage ', ()=>{
   cy.get(workforceSelector.tableRow).should('be.visible');
 	  cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
+<<<<<<< HEAD
   cy.wait(1000);
+=======
+    
+>>>>>>> ec817ac8 (insight companies added)
   cy.get('[label="Save"] button').should('be.disabled')
 })
 
@@ -141,7 +161,12 @@ it('save button should be enabled when their is chnage', ()=>{
   cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('[label="Reset to default"] button').should('be.visible').click()
+<<<<<<< HEAD
   cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check({force: true})
+=======
+  cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check()
+  cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('be.checked')
+>>>>>>> ec817ac8 (insight companies added)
   cy.get('[label="Save"] button').should('be.enabled')
 })
 

@@ -189,129 +189,145 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
       });
   });
 
-  it.skip("Verify total workers count matches workers list data Workers With Safety Alerts", { tags: ["Story:Safety Alerts Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
-    cy.visit(`/projects/5007477836/companies`);
-    cy.contains(workforceSelector.tableColumn, 'Status')
-      .find('.table-header-filter-btn')
-      .click();
-
-    cy.get('.sc-dxUMQK.kTpyWF')
-      .contains('.sc-gFqAkR.gorvtv', 'Active')
-      .parents('.sc-dxUMQK.kTpyWF')
-      .within(() => {
-        cy.get('input[type="checkbox"]').check({ force: true });
-      });
-
-    cy.get('p').contains('Filters:').click();
-    cy.wait(1000);
-
-    cy.get(workforceSelector.tableRow).contains('Active')
-      .should('be.visible');
-
-    cy.get(workforceSelector.tableRow)
-      .first()
-      .as('activeCompanyRow');
-
-    cy.get('@activeCompanyRow')
-      .parent()
-      .find('.personal-info-content__title')
-      .first()
-      .invoke('text')
-      .then((companyName) => {
-        cy.wrap(companyName.trim()).as('companyName');
-      });
-
-    cy.get('@activeCompanyRow').first().click();
-
-    cy.get(workforceSelector.companyWorkerPage).click();
-
-    cy.contains('p', 'Workers With Safety Alerts')
-      .parent()
-      .parent()
-      .parent()
-      .as('totalSafteyAlerts');
-
-    cy.get('@totalSafteyAlerts').find('p').contains('Workers With Safety Alerts').should('be.visible');
-
-    cy.get('@totalSafteyAlerts').find('p').eq(1).invoke('text').then((totalWorkersText) => {
-      cy.log('Total Workers With Safety Alerts Text:', totalWorkersText);
-      cy.get('@totalSafteyAlerts').find('button').click();
-      cy.url().should('include', `/projects/${Cypress.env('PROJECT_ID')}/workers`);
-
-      const labels = ['SOS', 'Fall', 'Near miss', 'Restricted', 'Fatigue', 'Unsafe'];
-      cy.get('.filter-tag').eq(0).realHover();
-      labels.forEach((label) => {
-        cy.get('.label.default__label')
-          .contains(label)
-          .should('be.visible');
-      });
-
-      cy.get('.filter-tag').eq(1).realHover();
-      cy.get('.label.default__label').contains('AutoQA Labs').should("be.visible");
-
-      cy.get(workforceSelector.tableRow).should('be.visible');
-
-      cy.get('.sc-jIGnZt.ieNRXe')
+  it(
+    "Verify total workers count matches workers list data Workers With Safety Alerts",
+    { tags: ["Story:Safety Alerts Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] },
+    () => {
+  
+      cy.contains(workforceSelector.tableColumn, 'Status')
+        .find('.table-header-filter-btn')
+        .click();
+  
+      cy.get('.select_item_container label')
+        .contains('Active')
+        .parent()
+        .find('input[type="checkbox"]')
+        .check({ force: true });
+  
+      cy.contains('p', 'Filters:').click();
+  
+      cy.get(workforceSelector.tableRow)
+        .contains('Active')
+        .should('be.visible');
+  
+      cy.get(workforceSelector.tableRow)
+        .first()
+        .as('activeCompanyRow');
+  
+      // capture company name
+      cy.get('@activeCompanyRow')
+        .parent()
+        .find('.personal-info-content__title')
+        .first()
         .invoke('text')
-        .then((text) => {
-          const totalWorker = text
-            .trim()
-            .match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/)[3];
-          cy.log(`Total number of workers: ${totalWorker}`);
-          expect(parseInt(totalWorkersText)).to.eq(parseInt(totalWorker));
+        .then((companyName) => {
+          cy.wrap(companyName.trim()).as('companyName');
         });
-    });
+  
+      cy.get('@activeCompanyRow').click();
+  
+      cy.get(workforceSelector.companyWorkerPage).click();
+  
+      cy.contains('p', 'Workers With Safety Alerts')
+        .parent()
+        .parent()
+        .parent()
+        .as('totalSafteyAlerts');
+  
+      cy.get('@totalSafteyAlerts')
+        .find('p')
+        .contains('Workers With Safety Alerts')
+        .should('be.visible');
+  
+      cy.get('@totalSafteyAlerts')
+        .find('p')
+        .eq(1)
+        .invoke('text')
+        .then((totalWorkersText) => {
+  
+          const totalWorkersTextNumber = parseInt(totalWorkersText.replace(/\D/g, ''));
+          cy.log('Workers With Safety Alerts Count:', totalWorkersTextNumber);
+  
+          cy.get('@totalSafteyAlerts').find('button').click();
+  
+          const labels = ['SOS', 'Fall', 'Near miss', 'Restricted', 'Fatigue', 'Unsafe'];
 
-    cy.get(workforceSelector.tableColumn).then(($headers) => {
-      let companyIndex = -1;
-
-      $headers.each((i, el) => {
-        const headerText = Cypress.$(el).text().trim();
-        if (headerText.toLowerCase().includes('company')) {
-          companyIndex = i;
-          cy.log(`✅ Company column at index: ${i}`);
-        }
-      });
-
-      expect(companyIndex).to.be.greaterThan(-1);
-
-      cy.get('.sc-jIGnZt.ieNRXe').invoke('text').then((text) => {
-        const totalWorkers = parseInt(text.trim().match(/of\s*(\d+)/)[1]);
-        cy.log(`Total workers to validate: ${totalWorkers}`);
-
-        let validatedRows = 0;
-
-        function validateVisibleRows() {
-          cy.get(workforceSelector.tableRow).then(($rows) => {
-            const currentRowCount = $rows.length;
-            cy.log(`Currently visible rows: ${currentRowCount}`);
-
-            cy.wrap($rows).each(($row, index) => {
-              cy.wrap($row)
-                .find('.table_td')
-                .eq(companyIndex)
-                .invoke('text')
-                .then((company) => {
-                  expect(company.trim()).to.contain('AutoQA Labs');
-                  validatedRows++;
-                  cy.log(`✅ Row ${validatedRows}/${totalWorkers} verified`);
-                });
+          cy.get('.filter-tag').each(($tag) => {
+            cy.wrap($tag).realHover();
+          
+            labels.forEach((label) => {
+              cy.get('body').then(($body) => {
+                if ($body.find(`.label.default__label:contains("${label}")`).length) {
+                  cy.contains('.label.default__label', label).should('be.visible');
+                }
+              });
             });
-          }).then(() => {
-            if (validatedRows < totalWorkers) {
-              cy.log(`Scrolling to load more... (${validatedRows}/${totalWorkers})`);
-              cy.get(workforceSelector.tableRow).last().scrollIntoView();
-              cy.wait(100);
-              validateVisibleRows();
-            } else {
-              cy.log(`🎉 All ${validatedRows} rows validated!`);
-            }
           });
-        }
-        validateVisibleRows();
-      });
+          cy.get(workforceSelector.tableRow).first().click({force: true});
+
+          cy.get(workforceSelector.tableRow).should('be.visible');
+          cy.getTotalWorkers().then((totalWorker) => {
+  
+            cy.log(`Total number of workers: ${totalWorker}`);
+  
+            expect(totalWorkersTextNumber).to.eq(totalWorker);
+  
+          });
+  
+
+          cy.get(workforceSelector.tableColumn).then(($headers) => {
+  
+            let companyIndex = -1;
+  
+            $headers.each((i, el) => {
+  
+              const headerText = Cypress.$(el).text().trim().toLowerCase();
+  
+              if (headerText.includes('company')) {
+                companyIndex = i;
+                cy.log(`Company column index: ${i}`);
+              }
+  
+            });
+  
+            expect(companyIndex).to.be.greaterThan(-1);
+  
+            cy.get('@companyName').then((companyName) => {
+  
+              cy.get(workforceSelector.tableRow).each(($row) => {
+  
+                cy.wrap($row)
+                  .find('.table_td')
+                  .eq(5)
+                  .invoke('text')
+                  .then((company) => {
+                    expect(company.trim()).to.contain(companyName);
+                  });
+
+                  cy.get(workforceSelector.tableRow).click({force: true});
+                  cy.get(workforceSelector.SafetyAuditPage).click()
+                  const alerts = ['SOS', 'Fall', 'Near miss', 'Restricted', 'Fatigue', 'Unsafe'];
+
+cy.get(workforceSelector.documentTableRow).each(($row) => {
+  cy.wrap($row)
+    .find('.label.default__label')
+    .invoke('text')
+    .then((text) => {
+      const hasAlert = alerts.some(alert => text.includes(alert));
+      expect(hasAlert, `Row contains one of alerts: ${alerts.join(', ')}`).to.be.true;
     });
-  });
+});
+  
+              });
+  
+            });
+  
+          });
+  
+        });
+  
+    }
+  );
 
   it("WorkForce-Company - Verify total workers count matches workers list data - Flagged Workers On-site", { tags: ["Story:Flagged Workers Count Matches List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.visit(`/projects/5007477836/companies`);

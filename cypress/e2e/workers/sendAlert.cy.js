@@ -20,12 +20,11 @@ describe(
           const { firstName, lastName } = workerData;
           const fullName = `${firstName} ${lastName}`;
           cy.get(workforceSelector.searchInput).clear().type(fullName);
-          cy.wait(2000);
-
+          cy.get('.personal-info-content__title').contains(fullName).should("be.visible");
           cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
           cy.get(workforceSelector.overflowMenu).click();
           cy.contains("button p", "Send Alert").click();
-          cy.get('[label="Message Type"] [placeholder="Select"]').click();
+          cy.get('[label="Message Type"] [placeholder="Select"]').click({force:true});
           cy.contains("General Communication").click();
           cy.get("textarea").type(Math.random().toString(36).substring(2, 12));
           cy.get(workforceSelector.sendAlertButton).click();
@@ -120,7 +119,7 @@ describe(
           const { firstName, lastName } = workerData;
           const fullName = `${firstName} ${lastName}`;
           cy.get(workforceSelector.searchInput).clear().type(fullName);
-          cy.get(workforceSelector.tableRow).first().should("be.visible");
+          cy.get('.personal-info-content__title').contains(fullName).should("be.visible");
 
           cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
           cy.contains("button p", "Send Alert").click();

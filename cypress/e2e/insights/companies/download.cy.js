@@ -30,7 +30,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
       downloadPage.openDownloadModal();
       downloadPage.assertDatesMatch(startDate, endDate);
       downloadPage.clickDownloadButton();
-      cy.wait(4000);
+      cy.wait(7000);
 
       downloadPage.getLatestDownloadedFile().then(({ fileName }) => {
         downloadPage.assertFileIsCsv(fileName);
@@ -44,7 +44,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     cy.wait('@getCompanyTableData').its('response.statusCode').should('eq', 200);
     downloadPage.openDownloadModal();
     downloadPage.clickDownloadButton();
-    cy.wait(4000);
+    cy.wait(7000);
 
     downloadPage.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
       downloadPage.assertFileIsCsv(fileName);
@@ -63,7 +63,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
 
       downloadPage.openDownloadModal();
       downloadPage.clickDownloadButton();
-      cy.wait(4000);
+      cy.wait(7000);
 
       downloadPage.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
         downloadPage.parseDownloadedFile(downloadsFolder, fileName).then((rows) => {
@@ -85,7 +85,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
       cy.get('button').contains('Download Report').click();
       cy.get('.footer button').contains('Download').click();
 
-      cy.wait(5000);
+      cy.wait(7000);
 
       downloadPage.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
         downloadPage.parseDownloadedFile(downloadsFolder, fileName).then((rows) => {
