@@ -176,9 +176,10 @@ describe(
               cy.wrap($row)
                 .find(".cell-content")
                 .eq(4)
-                .should("contain.text", device);
+                .should("contain.text", device)
+                .should("exist");
             });
-          });
+          })
       }
     );
 

@@ -9,6 +9,9 @@ const twilio = require("twilio");
 
 module.exports = defineConfig({
   e2e: {
+    video: true,                        // ← ADD THIS (was missing!)
+    videoCompression: 32,               // ← ADD THIS (keeps file size small)
+    screenshotsOnRunFailure: true, 
     viewportWidth: 1440,
     viewportHeight: 900,
     projectId: "qqtmqa",
@@ -220,15 +223,15 @@ module.exports = defineConfig({
 
       return config;
     },
-
     env: {
       allure: true,
       allureResultsPath: "allure-results",
       allureSkipCommands: "wrap",
       allureAddVideoOnPass: false,
-      allureSkipAutomaticScreenshots: false,
+      allureSkipAutomaticScreenshots: false, 
       allureLogCypress: false,
-      allureReuseAfterSpec: false, 
+      allureReuseAfterSpec: false,
+      allureAddVideoOnFail: true,            
     },
   },
 });

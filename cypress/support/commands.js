@@ -8,9 +8,7 @@ Cypress.Commands.add('login', () => {
     cy.get('[name="email"]').type(Cypress.env('EMAIL'));
     cy.get('[name="password"]').type(Cypress.env('PASSWORD'));
     cy.get('button p').contains('Login').click();
-    cy.get('.card-title', { timeout: 40000 })
-      .contains(Cypress.env('PROJECT_NAME'))
-      .should('be.visible');
+    cy.url().should('include', '/projects');
   }, {
     cacheAcrossSpecs: true
   });

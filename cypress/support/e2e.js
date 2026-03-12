@@ -5,6 +5,7 @@ import "cypress-real-events/support";
 
 
 Cypress.on('uncaught:exception', (err) => {
+  // Ignore API parse failures like "no healthy upstream"
   if (
     err.message.includes("Unexpected token") ||
     err.message.includes("no healthy upstream") ||
@@ -12,11 +13,4 @@ Cypress.on('uncaught:exception', (err) => {
   ) {
     return false;
   }
-  return false;
-});
-
-afterEach(function () {
-  if (this.currentTest?.state === 'failed') {
-    cy.screenshot(`FAILED -- ${this.currentTest.fullTitle()}`, { capture: 'fullPage' });
-  }
-});
+})
