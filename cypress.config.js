@@ -41,7 +41,20 @@ module.exports = defineConfig({
       } else {
         console.log("ℹ️ Running in CI - skipping allure-results cleanup (handled by workflow)");
       }
+    
       allureWriter(on, config);
+    
+      on("after:spec", (spec, results) => {
+        if (results && results.video) {
+          const hasFailures = results.tests.some(test =>
+            test.attempts.some(a => a.state === "failed")
+          );
+    
+          if (!hasFailures) {
+            fs.unlinkSync(results.video);
+          }
+        }
+      });
 
       config.env.EMAIL = process.env.EMAIL;
       config.env.PASSWORD = process.env.PASSWORD;
@@ -224,14 +237,15 @@ module.exports = defineConfig({
       return config;
     },
     env: {
-      allure: true,
-      allureResultsPath: "allure-results",
-      allureSkipCommands: "wrap",
-      allureAddVideoOnPass: false,
-      allureSkipAutomaticScreenshots: false, 
-      allureLogCypress: false,
-      allureReuseAfterSpec: false,
-      allureAddVideoOnFail: true,            
+      env: {
+        allure: true,
+        allureResultsPath: "allure-results",
+        allureReuseAfterSpec: true,
+        allureSkipCommands: "wrap",
+        allureAddVideoOnPass: false,
+        allureSkipAutomaticScreenshots: false, 
+        allureLogCypress: false,
+      }     
     },
   },
 });

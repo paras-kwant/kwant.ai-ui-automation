@@ -167,19 +167,20 @@ describe(
           .eq(0)
           .find(".cell-content")
           .eq(4)
+          .should("exist")
           .invoke("text")
           .then((device) => {
-            cy.get(workforceSelector.searchInput).clear().type(device);
-            cy.wait(2000);
-
-            cy.get(workforceSelector.tableRow).each(($row) =>{
+            cy.get(workforceSelector.searchInput)
+              .clear()
+              .type(device, { delay: 50 });   
+    
+            cy.get(workforceSelector.tableRow).each(($row) => {
               cy.wrap($row)
                 .find(".cell-content")
-                .eq(4)
-                .should("contain.text", device)
-                .should("exist");
+                .should("exist")
+                .should("contain.text", device);
             });
-          })
+          });
       }
     );
 

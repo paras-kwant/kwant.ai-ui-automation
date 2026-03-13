@@ -146,10 +146,10 @@ jobs:
 
       - name: Merge Allure Results
         run: |
-          mkdir -p merged-results/allure-results
-          find merged-results/companies -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
-          find merged-results/workers -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
-          find merged-results/insights -type f -name "*.json" -exec cp -n {} merged-results/allure-results/ \;
+            mkdir -p merged-results/allure-results
+            cp -r merged-results/companies/* merged-results/allure-results/ || true
+            cp -r merged-results/workers/* merged-results/allure-results/ || true
+            cp -r merged-results/insights/* merged-results/allure-results/ || true
 
       - name: Generate Allure Report
         run: |
@@ -257,4 +257,4 @@ jobs:
               ]
             }')
 
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URLs"
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
