@@ -41,6 +41,14 @@ jobs:
           name: companies-allure-results
           path: allure-results
 
+      - name: Upload Companies Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: companies-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
   workers-tests:
     name: 👷 Workers UI Tests
     runs-on: ubuntu-latest
@@ -77,6 +85,14 @@ jobs:
         with:
           name: workers-allure-results
           path: allure-results
+
+      - name: Upload Workers Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workers-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
 
   insights-tests:
     name: 📊 Insights/Companies UI Tests
@@ -115,6 +131,14 @@ jobs:
           name: insights-allure-results
           path: allure-results
 
+      - name: Upload Insights Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: insights-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
   merge-reports:
     name: 📊 Merge Allure Reports & Deploy
     needs: [companies-tests, workers-tests, insights-tests]
@@ -144,12 +168,34 @@ jobs:
           name: insights-allure-results
           path: merged-results/insights
 
+      - name: Download Companies Screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: companies-screenshots
+          path: merged-results/screenshots/companies
+        continue-on-error: true
+
+      - name: Download Workers Screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: workers-screenshots
+          path: merged-results/screenshots/workers
+        continue-on-error: true
+
+      - name: Download Insights Screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: insights-screenshots
+          path: merged-results/screenshots/insights
+        continue-on-error: true
+
       - name: Merge Allure Results
         run: |
-            mkdir -p merged-results/allure-results
-            cp -r merged-results/companies/* merged-results/allure-results/ || true
-            cp -r merged-results/workers/* merged-results/allure-results/ || true
-            cp -r merged-results/insights/* merged-results/allure-results/ || true
+          mkdir -p merged-results/allure-results
+          find merged-results/companies -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/workers -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/insights -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/screenshots -type f \( -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
 
       - name: Generate Allure Report
         run: |
