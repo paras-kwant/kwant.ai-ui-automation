@@ -32,15 +32,21 @@ jobs:
           mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/companies/**/*.cy.js" \
-            --browser chrome --headless || echo "⚠️ Companies tests finished with failures"
+            --browser chrome --headless \
+            || echo "⚠️ Companies tests finished with failures"
 
-      - name: Upload Allure Results + Screenshots
+      - name: Upload Companies Allure Results
         uses: actions/upload-artifact@v4
         with:
           name: companies-allure-results
-          path: |
-            allure-results
-            cypress/screenshots
+          path: allure-results
+
+      - name: Upload Companies Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: companies-screenshots
+          path: cypress/screenshots
           if-no-files-found: ignore
 
   workers-tests:
@@ -71,15 +77,21 @@ jobs:
           mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/workers/**/*.cy.js" \
-            --browser chrome --headless || echo "⚠️ Workers tests finished with failures"
+            --browser chrome --headless \
+            || echo "⚠️ Workers tests finished with failures"
 
-      - name: Upload Allure Results + Screenshots
+      - name: Upload Workers Allure Results
         uses: actions/upload-artifact@v4
         with:
           name: workers-allure-results
-          path: |
-            allure-results
-            cypress/screenshots
+          path: allure-results
+
+      - name: Upload Workers Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workers-screenshots
+          path: cypress/screenshots
           if-no-files-found: ignore
 
   insights-tests:
@@ -110,15 +122,21 @@ jobs:
           mkdir -p allure-results
           npx cypress run \
             --spec "cypress/e2e/insights/companies/**/*.cy.js" \
-            --browser chrome --headless || echo "⚠️ Insights/Companies tests finished with failures"
+            --browser chrome --headless \
+            || echo "⚠️ Insights/Companies tests finished with failures"
 
-      - name: Upload Allure Results + Screenshots
+      - name: Upload Insights Allure Results
         uses: actions/upload-artifact@v4
         with:
           name: insights-allure-results
-          path: |
-            allure-results
-            cypress/screenshots
+          path: allure-results
+
+      - name: Upload Insights Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: insights-screenshots
+          path: cypress/screenshots
           if-no-files-found: ignore
 
   merge-reports:
@@ -150,12 +168,34 @@ jobs:
           name: insights-allure-results
           path: merged-results/insights
 
+      - name: Download Companies Screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: companies-screenshots
+          path: merged-results/screenshots/companies
+        continue-on-error: true
+
+      - name: Download Workers Screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: workers-screenshots
+          path: merged-results/screenshots/workers
+        continue-on-error: true
+
+      - name: Download Insights Screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: insights-screenshots
+          path: merged-results/screenshots/insights
+        continue-on-error: true
+
       - name: Merge Allure Results
         run: |
           mkdir -p merged-results/allure-results
-          cp -r merged-results/companies/* merged-results/allure-results/
-          cp -r merged-results/workers/* merged-results/allure-results/
-          cp -r merged-results/insights/* merged-results/allure-results/
+          find merged-results/companies -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/workers -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/insights -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/screenshots -type f \( -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
 
       - name: Generate Allure Report
         run: |
