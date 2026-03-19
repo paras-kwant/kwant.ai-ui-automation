@@ -449,7 +449,6 @@ describe(
           { filePath: 'testdata/validintancemacid.csv', mimeType: 'text/csv' },
           { subjectType: 'drag-n-drop', force: true }
         );
-
         cy.get('[type="info"]').contains('1 Beacon will be imported.').should('be.visible');
         cy.wait(5000);
         cy.get('button p').contains('Submit').click();
