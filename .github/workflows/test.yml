@@ -43,7 +43,7 @@ jobs:
           rm -rf allure-results allure-report
           mkdir -p allure-results
           npx cypress run \
-            --spec "cypress/e2e/insights/companies/download.cy.js" \
+            --spec "cypress/e2e/insights/companies/companyProfileView.cy.js" \
             --browser chrome --headless
 
       - name: Debug - Count Allure JSON Files
