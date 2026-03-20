@@ -23,11 +23,14 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 });
 
 // Attach screenshots on failure
-Cypress.on('fail', (error, runnable) => {
-  const screenshotFileName = `${Cypress.spec.name}-${runnable.title} (failed)`;
-  cy.screenshot(screenshotFileName, { capture: 'runner' }).then(() => {
-    const path = `cypress/screenshots/${Cypress.spec.name}/${screenshotFileName}.png`;
-    cy.allure().attachment('Screenshot', path, 'image/png');
-  });
-  throw error;
+afterEach(function () {
+  if (this.currentTest.state === 'failed') {
+    const name = this.currentTest.fullTitle().replace(/\//g, '-');
+    cy.screenshot(name, { capture: 'fullPage' }).then(() => {
+      const filePath = `cypress/screenshots/${Cypress.spec.name}/${name}.png`;
+      cy.readFile(filePath, 'base64').then((img) => {
+        cy.allure().attachment('Screenshot on Failure', img, 'image/png');
+      });
+    });
+  }
 });

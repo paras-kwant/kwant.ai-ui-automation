@@ -9,7 +9,7 @@ const twilio = require("twilio");
 
 module.exports = defineConfig({
   e2e: {
-    screenshotsOnRunFailure: true, 
+    screenshotOnRunFailure: true, 
     viewportWidth: 1440,
     viewportHeight: 900,
     projectId: "qqtmqa",
