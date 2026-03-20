@@ -4,7 +4,7 @@ const fs = require("fs");
 import companiesHelper from '../../../support/helper/companiesHelper';
 import { workforceSelector } from '../../../support/workforceSelector';
 
-describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feature:Companies Module"] }, () => {
+describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:Companies Module"] }, () => {
 
   beforeEach(() => {
     cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
