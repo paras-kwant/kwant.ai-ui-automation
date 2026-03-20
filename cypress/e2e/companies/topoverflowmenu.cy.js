@@ -16,7 +16,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     cy.intercept('GET', '/api/projectConfigs', (req) => {
       authHeaders = {
         'x-auth-token': req.headers['x-auth-token'],
-        'x-auth-project': req.headers['x-auth-project']
+        'x-auth-project': Number(req.headers['x-auth-project'])
       };
     }).as('getConfig');
 

@@ -15,7 +15,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
     cy.wait('@getConfig').then(({ request }) => {
       cy.wrap({
         'x-auth-token': request.headers['x-auth-token'],
-        'x-auth-project': request.headers['x-auth-project']
+        'x-auth-project': Number(request.headers['x-auth-project'])
       }).as('authHeaders');
     });
   });
