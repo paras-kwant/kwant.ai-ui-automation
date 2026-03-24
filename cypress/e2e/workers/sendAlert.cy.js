@@ -141,7 +141,7 @@ describe(
           const { firstName, lastName } = workerData;
           const fullName = `${firstName} ${lastName}`;
           cy.get(workforceSelector.searchInput).clear().type(fullName);
-          cy.get(workforceSelector.tableRow).first().should("be.visible");
+          cy.get(workforceSelector.tableRow).contains(fullName).should("be.visible");
 
           cy.get(".header-checkbox-container [type='checkbox']").eq(0).check({ force: true });
           cy.contains("button p", "Send Alert").click();
