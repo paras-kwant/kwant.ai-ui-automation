@@ -2,8 +2,8 @@
 import companiesHelper from "../../../support/helper/companiesHelper";
 import { workforceSelector } from "../../../support/workforceSelector";
 
-describe('Insights Company - Insights Company Info-card', { 
-  tags: ["Epic:WorkForce", "Feature:Insights Company", "Module:Insights-Company"] 
+describe('Insights Company - Insights Company Info-card', {
+  tags: ["Epic:WorkForce", "Feature:Insights Company", "Module:Insights-Company"]
 }, () => {
 
   beforeEach(() => {
@@ -21,6 +21,9 @@ describe('Insights Company - Insights Company Info-card', {
     });
   });
 
+  // ─────────────────────────────────────────────────────────────
+  // TEST 1: Validate company selection and alert counts against API
+  // ─────────────────────────────────────────────────────────────
   it('Insights-Company - Validate company selection and alert counts against API', {
     tags: ["Story:Company Alerts Validation", "Severity:blocker", "API", "Module:Insights-Company"]
   }, function () {
@@ -158,8 +161,11 @@ describe('Insights Company - Insights Company Info-card', {
         }
       });
     });
-  });
+  }); // ← END: TEST 1
 
+  // ─────────────────────────────────────────────────────────────
+  // TEST 2: Validate companies onsite today count matches API
+  // ─────────────────────────────────────────────────────────────
   it('Insights-Company - Validate companies onsite today count matches API', {
     tags: ["Story:Dashboard Cards Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
@@ -192,291 +198,283 @@ describe('Insights Company - Insights Company Info-card', {
           );
         });
     });
-  });
+  }); // ← END: TEST 2
 
-  it('Insights-Company - Validate most active zones against aggregated floor data', {
-    tags: ["Story:Zone Analytics Validation", "Severity:blocker", "API", "Module:Insights-Company"]
-  }, function () {
-    const planIds = [
-      6149325418,
-      6151004500,
-      5158254942,
-      6284072360,
-      6150982228,
-      6284072433,
-      6284098553
-    ];
-
+  // ─────────────────────────────────────────────────────────────
+  // TEST 3: Validate Most Active Zones (All Company)
+  // ─────────────────────────────────────────────────────────────
+  it('Insights - Validate Most Active Zones', function () {
     const now = new Date();
-    const endDateTime = now.toISOString();
-    const startDateTime = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
+    const endDate = now.toISOString();
+    const startDate = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
+    const projectId = 5007477836;
 
     let uiZones = [];
-    let allPlanDetails = [];
-
-    cy.get('.company-insights-top-stats__item__label')
-      .contains('Most Active Zones Today')
-      .should('be.visible')
-      .and('have.text', 'Most Active Zones Today');
 
     cy.wait(3000);
 
     cy.get('body').then(($body) => {
-      const $zoneItems = $body.find('.zone-list-item');
+      const $zones = $body.find('.zone-list-item');
 
-      if ($zoneItems.length === 0) {
+      if ($zones.length === 0) {
         uiZones = [];
-        cy.log('⚠️ UI: No zones found in the widget');
+        cy.log('⚠️ No zones in UI');
       } else {
-        $zoneItems.each((_, el) => {
-          const name = Cypress.$(el).text().trim();
-          if (name && name !== '-') uiZones.push(name);
+        $zones.each((_, el) => {
+          const text = Cypress.$(el).text().trim();
+          if (text && text !== '-') {
+            uiZones.push(text.toLowerCase());
+          }
         });
-        cy.log(`📋 UI Zones Collected → ${JSON.stringify(uiZones)}`);
       }
+
+      cy.log(`📋 UI Zones → ${JSON.stringify(uiZones)}`);
     });
 
-    cy.wrap(planIds).each((floorId) => {
+    cy.get('@authHeaders').then((headers) => {
       cy.request({
         method: 'POST',
-        url: `https://uat.kwant.ai/api/floorDetail?startDateTime=${startDateTime}&endDateTime=${endDateTime}`,
-        headers: this.authHeaders,
-        body: { floorId, searchCriteriaList: [] },
-        failOnStatusCode: false,
-        timeout: 20000
+        url: 'https://mock.ontargetcloud.com/api/trackByLocationWithFilter?edgeId&groupType=ALL_COMPANY',
+        headers: headers,
+        body: {
+          projectId,
+          startDate,
+          endDate,
+          startDateOnly: startDate.split('T')[0],
+          endDateOnly: endDate.split('T')[0],
+          companyHoursType: "ACTUALHOURFROMHORKER",
+          hourType: "normalized",
+          isEdgeCategory: false,
+          isImportedHour: false,
+          groupId: null
+        }
       }).then((response) => {
-        expect(response.status, `floorDetail API for floor ${floorId} should return 200`).to.eq(200);
-        expect(response.body, `floorDetail response body for floor ${floorId} should be an array`).to.be.an('array');
+        expect(response.status).to.eq(200);
 
-        const workerModule = response.body.find(mod => mod.key === 'worker_detail');
-        expect(workerModule, `worker_detail module should exist for floor ${floorId}`).to.not.be.undefined;
+        const locationMap = {};
 
-        const workersOnFloor = workerModule?.onsite ?? 0;
-
-        cy.request({
-          method: 'GET',
-          url: `https://uat.kwant.ai/api/plan/get/${floorId}?isDataRequestForCurrentlyActivePlan=true`,
-          headers: this.authHeaders,
-          failOnStatusCode: false
-        }).then((planResponse) => {
-          expect(planResponse.status, `plan/get API for floor ${floorId} should return 200`).to.eq(200);
-          expect(planResponse.body, `plan/get response body for floor ${floorId} should be an object`).to.be.an('object');
-
-          const planName = planResponse.body.calibrate?.name ?? 'Unknown';
-          const floorZones = (planResponse.body.zones ?? []).map(zone => zone.name.trim());
-
-          cy.log(`🏢 Plan: ${planName} (${floorId}) → Workers: ${workersOnFloor}`);
-          cy.log(`📍 Zones → ${floorZones.length > 0 ? JSON.stringify(floorZones) : 'No zones'}`);
-
-          allPlanDetails.push({
-            id: floorId,
-            name: planName,
-            workers: workersOnFloor,
-            zones: floorZones.map(z => z.toLowerCase())
+        Object.values(response.body).forEach(arr => {
+          arr.forEach(entry => {
+            const loc = entry.location?.trim().toLowerCase();
+            if (!loc) return;
+            locationMap[loc] = (locationMap[loc] || 0) + (entry.minutes || 0);
           });
         });
+
+        cy.log(`📊 Aggregated Zones → ${JSON.stringify(locationMap)}`);
+
+        const sortedZones = Object.entries(locationMap)
+          .sort((a, b) => b[1] - a[1])
+          .map(([zone]) => zone);
+
+        cy.log(`🏆 API Zones → ${JSON.stringify(sortedZones)}`);
+
+        if (uiZones.length === 0) {
+          expect(sortedZones.length, 'UI empty → API should also be empty').to.eq(0);
+          cy.log('✅ No zones in both UI and API');
+          return;
+        }
+
+        const expectedZones = sortedZones.slice(0, uiZones.length);
+
+        uiZones.forEach((zone, index) => {
+          expect(
+            expectedZones[index],
+            `UI zone "${zone}" should match API rank ${index + 1}`
+          ).to.eq(zone);
+        });
+
+        cy.log('✅ Zones validated successfully');
       });
     });
+  }); // ← END: TEST 3
 
-    cy.then(() => {
-      expect(allPlanDetails, 'All floor data should be collected').to.have.length(planIds.length);
-
-      const topFloor = allPlanDetails
-        .filter(p => p.workers > 0)
-        .sort((a, b) => b.workers - a.workers)[0];
-
-      expect(topFloor, 'There should be at least one active floor with workers').to.not.be.undefined;
-
-      cy.log(`🏆 Top Floor: ${topFloor.name} (${topFloor.id}) → ${topFloor.workers} workers`);
-      cy.log(`📍 Top Floor Zones → ${JSON.stringify(topFloor.zones)}`);
-
-      const firstUiZone = uiZones[0];
-      cy.log(`📋 First UI Zone → "${firstUiZone}"`);
-
-      if (!firstUiZone) {
-        expect(
-          topFloor.zones.length,
-          `UI shows no zones but top floor "${topFloor.name}" has zones: ${JSON.stringify(topFloor.zones)}`
-        ).to.eq(0);
-        cy.log('✅ Both UI and API agree: no active zones');
-      } else {
-        expect(
-          topFloor.zones.includes(firstUiZone.toLowerCase()),
-          `First UI zone "${firstUiZone}" should exist in top floor "${topFloor.name}".\n` +
-          `  Top floor zones: ${JSON.stringify(topFloor.zones)}`
-        ).to.be.true;
-        cy.log(`✅ First UI Zone "${firstUiZone}" validated in top floor "${topFloor.name}"`);
-      }
-    });
-  });
-
+  // ─────────────────────────────────────────────────────────────
+  // TEST 4: Validate most active zones for selected company
+  // ─────────────────────────────────────────────────────────────
   it('Insights-Company - Validate most active zones for selected company', {
     tags: ["Story:Company Zone Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
     cy.intercept('GET', 'https://uat.kwant.ai/api/projectTaskTradesForTracking').as('getCompanyName');
     cy.wait(5000);
-
+  
     let selectedWorker;
     let companyName;
     let uiZones = [];
-
+  
     cy.get(workforceSelector.tableRow).then(($rows) => {
       const matchedRows = Array.from($rows).filter(row =>
         Number(Cypress.$(row).find('.site-label').text().trim()) >= 1
       );
       expect(matchedRows.length).to.be.gte(2, 'There should be at least two rows with label >=1');
-
-      selectedWorker = matchedRows[1];
+  
+      selectedWorker = matchedRows[3];
       cy.wrap(selectedWorker).find('input[type="checkbox"]').check({ force: true });
       cy.wait(3000);
+  
 
       cy.get('body').then(($body) => {
         const $zoneItems = $body.find('.zone-list-item');
-
+  
         if ($zoneItems.length === 0) {
           uiZones = [];
           cy.log('UI: No zone-list-item elements found — treating as "-"');
         } else {
-          const zoneText = $zoneItems.text().trim();
-          if (zoneText === '-' || zoneText === '') {
-            uiZones = [];
-            cy.log('UI: Zone shows "-" (no active zones)');
+          $zoneItems.each((index, el) => {
+            if (index >= 2) return false; // Only grab first 2 zones
+            const name = Cypress.$(el).text().trim();
+            if (name && name !== '-') {
+              uiZones.push(name.toLowerCase());
+            }
+          });
+  
+          if (uiZones.length === 0) {
+            cy.log('UI: Zones show "-" (no active zones)');
           } else {
-            $zoneItems.each((_, el) => {
-              const name = Cypress.$(el).text().trim();
-              if (name && name !== '-') uiZones.push(name);
-            });
-            cy.log(`UI Zones → ${JSON.stringify(uiZones)}`);
+            cy.log(`UI Zone #1 (Most Active)     → "${uiZones[0]}"`);
+            cy.log(`UI Zone #2 (2nd Most Active) → "${uiZones[1] ?? 'N/A'}"`);
           }
         }
       });
-
+  
       cy.wrap(selectedWorker).find('.personal-info-content__title').invoke('text').then((text) => {
         companyName = text.trim();
         cy.log(`Selected company name: ${companyName}`);
-
+  
         cy.get('.onsite-selected-container .personal-info-content__title')
           .contains(companyName)
           .should('be.visible');
-
+  
         cy.wait(2000);
         cy.wrap(selectedWorker).find('.site-label').click();
-
+  
         cy.wait('@getCompanyName').then(({ response }) => {
           expect(response.statusCode).to.eq(200);
-
+  
           const companies = response.body || [];
           const matchedCompany = companies.find(
             company => company.name.trim().toLowerCase() === companyName.toLowerCase()
           );
-
+  
           if (!matchedCompany) {
             cy.log(`⚠️ No company match found for: "${companyName}"`);
             cy.log(`Available names: ${companies.map(c => c.name).join(', ')}`);
           } else {
             cy.log(`✅ Matched company: "${matchedCompany.name}" → ID: ${matchedCompany.id}`);
           }
-
+  
           expect(matchedCompany, `Company "${companyName}" should exist in API response`).to.not.be.undefined;
-
+  
           const companyId = matchedCompany.id;
           cy.log(`Company ID: ${companyId}`);
-
-          const planIds = [
-            6149325418,
-            6151004500,
-            5158254942,
-            6284072360,
-            6150982228,
-            6284072433,
-            6284098553
-          ];
-
+  
           const now = new Date();
-          const endDateTime = now.toISOString();
-          const startDateTime = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
           const endDate = now.toISOString().split('T')[0];
           const startDate = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000)
             .toISOString().split('T')[0];
-
-          let maxWorkers = 0;
-          let maxPlanId = null;
-
-          planIds.forEach((floorId) => {
+  
+          // ✅ STEP 2: Call trackByLocationWithFilter — same API that powers the UI
+          cy.get('@authHeaders').then((headers) => {
             cy.request({
               method: 'POST',
-              url: `https://uat.kwant.ai/api/floorDetail?startDateTime=${startDateTime}&endDateTime=${endDateTime}`,
-              headers: this.authHeaders,
+              url: 'https://mock.ontargetcloud.com/api/trackByLocationWithFilter?edgeId&groupType=ALL_COMPANY',
+              headers: headers,
               body: {
-                floorId,
-                searchCriteriaList: [
-                  { filterKey: "projectTaskTradeId", value: [companyId], operation: "in" }
-                ]
-              },
-              failOnStatusCode: false,
-              timeout: 20000
-            }).then((response) => {
-              expect(response.status).to.eq(200);
-
-              const workerModule = response.body.find(mod => mod.key === "worker_detail");
-              const workersOnFloor = workerModule?.onsite ?? 0;
-
-              cy.log(`Floor ${floorId}: Workers → ${workersOnFloor}`);
-
-              if (workersOnFloor > maxWorkers) {
-                maxWorkers = workersOnFloor;
-                maxPlanId = floorId;
-              }
-            });
-          });
-
-          cy.then(() => {
-            cy.log(`Most active floor: ${maxPlanId} (${maxWorkers} workers)`);
-
-            cy.request({
-              method: 'POST',
-              url: `https://uat.kwant.ai/api/insight/company/fetchCompanyInfo`,
-              headers: this.authHeaders,
-              body: {
-                startDate,
-                endDate,
-                searchCriteriaList: [
-                  { filterKey: "projectTaskTradeId", value: [companyId], operation: "in" }
-                ]
+                projectId: 5007477836,
+                startDate: new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+                endDate: now.toISOString(),
+                startDateOnly: startDate,
+                endDateOnly: endDate,
+                companyHoursType: "ACTUALHOURFROMWORKER",
+                hourType: "normalized",
+                isEdgeCategory: false,
+                isImportedHour: false,
+                groupId: null
               },
               failOnStatusCode: false
-            }).then((insightResponse) => {
-              expect(insightResponse.status).to.be.oneOf([200, 201]);
-
-              const data = insightResponse.body;
-              cy.log(`Company Insight Response → ${JSON.stringify(data)}`);
-
-              const apiZones = data.mostActiveZones ?? [];
-              cy.log(`API Zones → ${JSON.stringify(apiZones)}`);
-              cy.log(`UI Zones → ${JSON.stringify(uiZones)}`);
-
+            }).then((response) => {
+              expect(response.status).to.eq(200);
+  
+              cy.log(`Full API Response Keys → ${JSON.stringify(Object.keys(response.body))}`);
+  
+              // ✅ STEP 3: Find the key in response that matches selected company name
+              const responseKeys = Object.keys(response.body);
+              const matchedKey = responseKeys.find(
+                key => key.trim().toLowerCase() === companyName.trim().toLowerCase()
+              );
+  
+              cy.log(`Looking for company key: "${companyName}"`);
+              cy.log(`Matched key in response: "${matchedKey ?? 'NOT FOUND'}"`);
+  
+              if (!matchedKey) {
+                // If company not in API response, UI should also show no zones
+                cy.log(`⚠️ Company "${companyName}" not found in API response`);
+                expect(uiZones.length, 
+                  `Company not in API → UI should show no zones`
+                ).to.eq(0);
+                return;
+              }
+  
+              const companyEntries = response.body[matchedKey]; // Array of worker-zone entries
+  
+              // ✅ STEP 4: Aggregate total minutes per location for this company only
+              const locationMap = {};
+              companyEntries.forEach(entry => {
+                const loc = entry.location?.trim().toLowerCase();
+                if (!loc) return;
+                locationMap[loc] = (locationMap[loc] || 0) + (entry.minutes || 0);
+              });
+  
+              cy.log(`📊 Zone Minutes for "${companyName}" → ${JSON.stringify(locationMap)}`);
+  
+              // ✅ STEP 5: Sort zones by total minutes descending → gives ranked zones
+              const sortedZones = Object.entries(locationMap)
+                .sort((a, b) => b[1] - a[1])
+                .map(([zone]) => zone);
+  
+              const apiZone1 = sortedZones[0]; // Most active zone
+              const apiZone2 = sortedZones[1]; // 2nd most active zone
+  
+              cy.log(`🏆 API Zone #1 (Most Active)    → "${apiZone1 ?? 'N/A'}" (${locationMap[apiZone1] ?? 0} mins)`);
+              cy.log(`🥈 API Zone #2 (2nd Most Active) → "${apiZone2 ?? 'N/A'}" (${locationMap[apiZone2] ?? 0} mins)`);
+              cy.log(`👁 UI Zone #1  → "${uiZones[0] ?? 'N/A'}"`);
+              cy.log(`👁 UI Zone #2  → "${uiZones[1] ?? 'N/A'}"`);
+  
+              // ✅ STEP 6: Validate UI zones against API-calculated zones
               if (uiZones.length === 0) {
-                expect(apiZones.length).to.eq(
-                  0,
-                  `UI shows no active zones ("-") but API returned: ${apiZones.join(', ')}`
-                );
+                expect(sortedZones.length,
+                  `UI shows no active zones but API calculated: ${sortedZones.join(', ')}`
+                ).to.eq(0);
                 cy.log('✅ Both UI and API agree: no active zones');
               } else {
-                uiZones.forEach((zoneName) => {
-                  expect(apiZones.map(z => z.toLowerCase())).to.include(
-                    zoneName.toLowerCase(),
-                    `UI zone "${zoneName}" must exist in API mostActiveZones`
-                  );
-                });
-                cy.log('✅ All UI zones validated against API');
+                // Validate Zone #1
+                expect(
+                  apiZone1,
+                  `UI most active zone "${uiZones[0]}" should match API #1 zone "${apiZone1}"`
+                ).to.eq(uiZones[0]);
+  
+                // Validate Zone #2 only if UI has it
+                if (uiZones[1]) {
+                  expect(
+                    apiZone2,
+                    `UI 2nd most active zone "${uiZones[1]}" should match API #2 zone "${apiZone2}"`
+                  ).to.eq(uiZones[1]);
+                } else {
+                  cy.log('ℹ️ Only 1 zone in UI — skipping 2nd zone validation');
+                }
+  
+                cy.log('✅ Top 2 zones validated successfully between UI and API');
               }
             });
           });
         });
       });
     });
-  });
+  });// ← END: TEST 4
 
+  // ─────────────────────────────────────────────────────────────
+  // TEST 5: Validate time spent in active zones matches API percentage
+  // ─────────────────────────────────────────────────────────────
   it('Insights-Company - Validate time spent in active zones matches API percentage', {
     tags: ["Story:Time in Active Zones Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
@@ -495,6 +493,6 @@ describe('Insights Company - Insights Company Info-card', {
       cy.get('.company-insights-top-stats__item__body')
         .should('contain', expectedValue);
     });
-  });
+  }); // ← END: TEST 5
 
-});
+}); // ← END: describe

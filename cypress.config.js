@@ -224,11 +224,12 @@ module.exports = defineConfig({
     env: {
       allure: true,
       allureResultsPath: "allure-results",
-      allureReuseAfterSpec: true, 
       allureSkipCommands: "wrap",
-      allureAddVideoOnPass: false, 
+      allureAddVideoOnPass: false,
       allureSkipAutomaticScreenshots: false,
       allureLogCypress: false,
+      allureReuseAfterSpec: false,
+      allureAddVideoOnFail: true,
     },
   },
 });

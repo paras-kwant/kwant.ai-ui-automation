@@ -199,4 +199,149 @@ describe("Insights Company - Workforce Dashboard Cards", { tags: ["Epic:WorkForc
 );
 
 
-});
+
+it('Insights-Company - Validate Avg Daily Work Hours graph tooltip content matches backend API data on hover', ()=>{
+  cy.intercept(
+    "POST",
+    "**/api/insight/company/graphWorkforceZoneCategoryHour"
+  ).as("getWorkerHours")
+
+  cy.wait(3000)
+  cy.contains("Avg Daily Work Hours").click()
+
+  cy.wait("@getWorkerHours").then(({ response }) => {
+    const graphData = response.body || []
+    const totalBars = graphData.length
+    cy.log(`Total records from API: ${totalBars}`)
+
+    const validatedDates = new Set()
+
+    const validateTooltip = (tooltipText, matchedData) => {
+      cy.get('[role="dialog"]').within(() => {
+        cy.contains(matchedData.date).should('exist')
+        cy.contains(matchedData.workPhaseTimeHour.toString()).should('exist')
+        if (matchedData.slackTimeHour === 0 || matchedData.slackTimeHour === 0.0) {
+          cy.contains('N/A').should('exist')
+        } else {
+          cy.contains(matchedData.slackTimeHour.toString()).should('exist')
+        }
+      })
+    }
+
+    cy.get('.recharts-rectangle.productive')
+      .should('have.length', totalBars)
+      .then(() => {
+        Cypress._.times(totalBars, (index) => {
+
+          cy.get('.recharts-rectangle.productive')
+            .eq(index)
+            .then(($rect) => {
+              const width = $rect[0].getBoundingClientRect().width
+              const height = $rect[0].getBoundingClientRect().height
+
+              if (width === 0 || height === 0) {
+                cy.log(`⚠️ Skipping index ${index} - zero size`)
+                return
+              }
+
+              // ✅ first try center hover
+              cy.get('.recharts-rectangle.productive')
+                .eq(index)
+                .realHover({ position: 'center' })
+                .wait(400)
+
+              cy.get('[role="dialog"]').then(($tooltip) => {
+                const tooltipText = $tooltip.text()
+
+                if (!tooltipText.includes('Invalid Date')) {
+                  const matchedData = graphData.find(d => tooltipText.includes(d.date))
+                  if (matchedData) {
+                    validatedDates.add(matchedData.date)
+                    cy.log(`✅ [CENTER] Matched: ${matchedData.date} | workPhase: ${matchedData.workPhaseTimeHour} | slack: ${matchedData.slackTimeHour}`)
+                    validateTooltip(tooltipText, matchedData)
+                  } else {
+                    throw new Error(`❌ No API match found for tooltip: "${tooltipText}"`)
+                  }
+                } else {
+                  cy.log(`⚠️ Center hover invalid for index ${index}, retrying with bottom...`)
+
+                  cy.get('.recharts-rectangle.productive')
+                    .eq(index)
+                    .realHover({ position: 'bottom' })
+                    .wait(400)
+
+                  cy.get('[role="dialog"]').then(($tooltipRetry) => {
+                    const retryTooltipText = $tooltipRetry.text()
+                    cy.log(`Retry tooltip text for index ${index + 1}: ${retryTooltipText}`)
+
+                    if (!retryTooltipText.includes('Invalid Date')) {
+                      const matchedData = graphData.find(d => retryTooltipText.includes(d.date))
+                      if (matchedData) {
+                        validatedDates.add(matchedData.date)
+                        cy.log(`✅ [BOTTOM] Matched: ${matchedData.date} | workPhase: ${matchedData.workPhaseTimeHour} | slack: ${matchedData.slackTimeHour}`)
+                        validateTooltip(retryTooltipText, matchedData)
+                      } else {
+                        throw new Error(`❌ No API match found for retry tooltip: "${retryTooltipText}"`)
+                      }
+                    } else {
+                      cy.log(`⚠️ Bottom hover also invalid for index ${index} - skipping`)
+                    }
+                  })
+                }
+              })
+            })
+        })
+
+        cy.then(() => {
+          const allDates = graphData.map(d => d.date)
+          const missedDates = allDates.filter(d => !validatedDates.has(d))
+
+          if (missedDates.length > 0) {
+            missedDates.forEach(date => {
+              const missed = graphData.find(d => d.date === date)
+              cy.log(`❌ MISSED: ${missed.date} | day: ${missed.day} | workPhase: ${missed.workPhaseTimeHour} | slack: ${missed.slackTimeHour}`)
+            })
+            throw new Error(`❌ These dates were never validated: ${missedDates.join(', ')}`)
+          }
+
+          cy.log(`✅ All ${validatedDates.size}/${totalBars} dates validated successfully!`)
+        })
+      })
+  })
+})
+
+
+it('Insights-Company - Verify Workforce Consistency graph is visible', ()=>{
+  cy.wait(3000)
+  cy.contains("Workforce Consistency").click()
+  cy.get('.recharts-cartesian-grid').should('be.visible')
+})
+
+it('Insights-Company - Verify Avg Daily Workers tooltip on hover', ()=>{
+  cy.wait(3000)
+  cy.get('p').contains('Avg Daily Workers').parent().parent().find('svg').eq(1).realHover()
+  cy.contains('Avg. number of daily active workers.').should('be.visible')
+})
+
+it('Insights-Company - Verify Avg Daily Work Hours tooltip on hover', ()=>{
+  cy.wait(3000)
+  cy.get('p').contains('Avg Daily Work Hours').parent().parent().find('svg').eq(1).realHover()
+  cy.contains('Avg. hours each workers puts in daily.').should('be.visible')
+})
+
+it('Insights-Company - Verify Workforce Consistency tooltip on hover', ()=>{
+  cy.wait(3000)
+  cy.get('p').contains('Workforce Consistency').parent().parent().find('svg').eq(1).realHover()
+  cy.contains('Consistency in your workforce based on attendance and repeat workers.').should('be.visible')
+})
+
+
+it('Insights-Company - Verify Workforce Variance dialog is visible on Avg Daily Workers graph hover', () => {
+  cy.get('[name="Workforce Variance"]').first().realHover()
+  cy.get('[role="dialog"]').should('be.visible').within(() => {
+    cy.contains('span', 'Actual Workforce').should('be.visible')
+    cy.contains('span', 'Budgeted Workforce').should('be.visible')
+    cy.contains('span', 'Workforce Variance').should('be.visible')
+  })
+})
+})

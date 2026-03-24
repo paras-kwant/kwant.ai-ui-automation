@@ -53,6 +53,7 @@ class DownloadPage {
   selectFilterOption(filterLabel) {
     cy.get('.filters_header_right_section button').first().click();
     cy.get('button').contains(filterLabel).click();
+    cy.wait(2000)
   }
 
   checkCompanyCheckbox(companyName) {
