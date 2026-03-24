@@ -172,7 +172,7 @@ class DownloadPage {
             this.openDownloadModal();
             this.assertDatesMatch(startDate, endDate);
             this.clickDownloadButton();
-            cy.wait(7000)
+            cy.wait(10000)
             this.waitForDownloadApi();
             cy.wait(1000);
 
