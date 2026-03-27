@@ -198,8 +198,8 @@ describe("WorkForce Companies Module - Search", { tags: ["Epic:WorkForce", "Feat
         cy.get('.label.default__label').contains('Status: 1').should('be.visible');
 
         cy.get(workforceSelector.searchInput).clear().type(name + " ");
-
         cy.wait('@filterApi').its('response.statusCode').should('eq', 200);
+        cy.get(workforceSelector.tableRow).contains(name).should('be.visible')
 
         cy.get("body").then(($body) => {
           if ($body.find(workforceSelector.tableRow).length > 0) {

@@ -3,6 +3,11 @@ import workerHelper from './workerHelper';
 
 const WorkerHelper = {
   visitWorkersPage: () => cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`),
+
+  visitWorkersInsightPage: (projectId) => {
+    const id = projectId || Cypress.env('PROJECT_ID');
+    cy.visit(`/projects/${id}/insights/workers`);
+  },
   
 
 

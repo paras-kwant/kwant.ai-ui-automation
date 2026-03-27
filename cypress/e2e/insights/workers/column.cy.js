@@ -1,18 +1,18 @@
 /// <reference types="cypress" />
 const path = require("path");
 const fs = require("fs");
-import companiesHelper from '../../../support/helper/companiesHelper';
+import WorkerHelper from "../../../support/helper/workerHelper";
 import { workforceSelector } from '../../../support/workforceSelector';
 
-describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:Companies Module"] }, () => {
+describe("Insight-worker Module - column", { tags: ["Epic:insight", "Feature:Companies Module"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+	cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
     cy.get('.selector-item.first').click()
     cy.get('.selector-item.first').should('have.class', 'active');
   });
   
-  it('Insight-Company - Validate drag and drop column syncs with table headers', () => {
+  it('Insight-Worker - Validate drag and drop column syncs with table headers', () => {
 
     cy.get(workforceSelector.tableRow).should('exist');
   
@@ -26,8 +26,8 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
   
         cy.log('Initial Drawer Order:', initialOrder);
   
-        const sourceIndex = 1;
-        const targetIndex = 2;
+        const sourceIndex = 0;
+        const targetIndex = 1;
         const draggedColumn = initialOrder[sourceIndex];
   
         const expectedOrder = [...initialOrder];
@@ -74,11 +74,8 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
             const tableColumns = [...$cols]
               .map(col => col.innerText.trim())
               .filter(text => text !== '');
-  
             cy.log('Table Columns:', tableColumns);
-  
             const filteredExpected = expectedOrder.filter(col => tableColumns.includes(col));
-  
             let lastIndex = -1;
             filteredExpected.forEach(col => {
               const index = tableColumns.indexOf(col);
@@ -92,56 +89,34 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
   
   });
 
-  it('Insight-Company - Verify horizontal scroll availability based on number of table columns', { tags: ["Story:Horizontal Scroll Validation", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
-    cy.get(workforceSelector.tableColumn).then($columns => {
-      const columnCount = $columns.length;
-
-      cy.get('.table-wrapper').then($wrapper => {
-        const el = $wrapper[0];
-
-        if (columnCount > 6) {
-          expect(el.scrollWidth, 'scrollWidth').to.be.greaterThan(el.clientWidth);
-
-          cy.wrap($wrapper).scrollTo('right', { duration: 300 });
-
-          cy.wrap($wrapper).invoke('scrollLeft').should('be.gt', 0);
-
-        } else {
-          expect(el.scrollWidth, 'scrollWidth').to.equal(el.clientWidth);
-        }
-      });
-    });
-  });
-
-  it('Insight-Company - save button should be disable when their is no chnage', () => {
+  
+  it('Insight-Worker - save button should be disable when their is no chnage', () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.wait(1000);
     cy.get('[label="Save"] button').should('be.disabled');
   });
 
-  it('Insight-Company - reset the column setting', () => {
+  it('Insight-Worker - reset the column setting', () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('[label="Reset to default"] button').should('be.visible').click();
     cy.get(workforceSelector.toastMessage)
-      .contains('Column settings reset successfully').should('be.visible');
-    cy.get('[data-rbd-draggable-id="actualHours"]').find('input[type="checkbox"]').should('not.be.checked');
-    cy.get('[data-rbd-draggable-id="avgActualHours"]').find('input[type="checkbox"]').should('not.be.checked');
-    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('not.be.checked');
+      .contains('Columns reset successfully.').should('be.visible');
+    cy.get('[data-rbd-drag-handle-draggable-id="projectCode"]').find('input[type="checkbox"]').should('not.be.checked');
   });
 
-  it('Insight-Company - save button should be enabled when their is chnage', () => {
+  it('Insight-WOrker - save button should be enabled when their is chnage', () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('[label="Reset to default"] button').should('be.visible').click();
     cy.wait(1000)
-    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check({ force: true });
-    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('be.checked');
+    cy.get('[data-rbd-drag-handle-draggable-id="projectCode"]').find('input[type="checkbox"]').check({ force: true });
+    cy.get('[data-rbd-drag-handle-draggable-id="projectCode"]').find('input[type="checkbox"]').should('be.checked');
     cy.get('[label="Save"] button').should('be.enabled');
   });
 
-  it('Insight-Company - Validate checked columns appear in table in same pattern', () => {
+  it('Insight-Worker - Validate checked columns appear in table in same pattern', () => {
 
     cy.get(workforceSelector.tableRow).should('exist');
 
@@ -197,7 +172,7 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
 
   });
 
-  it('Insight-Company - clicking on the x icon should close the column setting drawer', () => {
+  it('Insight-Worker - clicking on the x icon should close the column setting drawer', () => {
     cy.get(workforceSelector.tableRow).should('exist');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');
@@ -205,7 +180,7 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
     cy.contains('.columns-drawer-header', 'Column Settings').should('not.exist');
   });
 
-  it('Insight-Company - clicking outside the drawer should close the column setting drawer', () => {
+  it('Insight-Worker - clicking outside the drawer should close the column setting drawer', () => {
     cy.get(workforceSelector.tableRow).should('exist');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');

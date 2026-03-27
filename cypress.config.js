@@ -16,7 +16,7 @@ module.exports = defineConfig({
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
-    defaultCommandTimeout: 30000,
+    defaultCommandTimeout: 10000,
     requestTimeout: 30000,
     responseTimeout: 30000,
     pageLoadTimeout: 30000,

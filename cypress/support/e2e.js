@@ -18,15 +18,15 @@ Cypress.on('uncaught:exception', (err) => {
   return true;
 });
 
-afterEach(function () {
-  if (this.currentTest?.state === 'failed') {
-    const screenshotName = `FAILED -- ${this.currentTest.fullTitle()}`;
+// afterEach(function () {
+//   if (this.currentTest?.state === 'failed') {
+//     const screenshotName = `FAILED -- ${this.currentTest.fullTitle()}`;
 
-    cy.wait(1000);
-    cy.screenshot(screenshotName, {
-      capture: 'fullPage',
-      overwrite: true,
-      disableTimersAndAnimations: true,
-    });
-  }
-});
+//     cy.wait(1000);
+//     cy.screenshot(screenshotName, {
+//       capture: 'fullPage',
+//       overwrite: true,
+//       disableTimersAndAnimations: true,
+//     });
+//   }
+// });

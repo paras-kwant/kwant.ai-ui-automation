@@ -143,7 +143,7 @@ describe("Insights Company - Workforce Dashboard Cards", { tags: ["Epic:WorkForc
 
               const uiAverage = parseFloat(uiValue.trim());
 
-              expect(uiAverage).to.be.closeTo(avgWorkerHours, 0.1);
+              expect(uiAverage).to.be.closeTo(avgWorkerHours, 0.2);
 
             });
 

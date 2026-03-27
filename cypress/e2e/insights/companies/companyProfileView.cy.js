@@ -308,4 +308,63 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
     });
   });
 
+
+  it("Insight-Company - Verify Company Row Status Colors Match Expected Values", () => {
+    cy.intercept("GET", "**/projectTaskTrade/detail/*").as("getDetail");
+  
+    cy.get(workforceSelector.tableRow).eq(1).as("row");
+  
+    cy.get("@row")
+      .find(".row_status_tooltip_container")
+      .invoke("text")
+      .then((tooltipText) => {
+        const uiText = tooltipText.toLowerCase();
+        cy.wrap(uiText).as("uiText");
+      });
+  
+    cy.get("@row").find('input[type="checkbox"]').check({ force: true });
+    cy.contains("button", "Full Profile").click();
+  
+    cy.wait("@getDetail").then((interception) => {
+      const companyId = interception.request.url.split("/").pop();
+  
+      cy.get("@authHeaders").then((authHeaders) => {
+        cy.request({
+          method: "GET",
+          url: `https://uat.kwant.ai/api/projectTaskTrade/detail/${companyId}`,
+          headers: authHeaders,
+        }).then((apiResp) => {
+          const workers = apiResp.body.workers;
+  
+          cy.get("@uiText").then((uiText) => {
+  
+            const hasFlagged =
+              workers.flaggedWorker > 0 || workers.unauthorizedWorker > 0;
+  
+            const hasSafety = workers.totalSafetyAlerts > 0;
+  
+            if (uiText.includes("flagged") || uiText.includes("unauthorized")) {
+              expect(hasFlagged, "API should have flagged/unauthorized").to.be.true;
+            }
+  
+            else if (
+              uiText.includes("fatigue") ||
+              uiText.includes("safety") ||
+              uiText.includes("sos") ||
+              uiText.includes("fall")
+            ) {
+              expect(hasSafety, "API should have safety alerts").to.be.true;
+            }
+
+            else {
+              expect(hasFlagged, "No flagged workers expected").to.be.false;
+              expect(hasSafety, "No safety alerts expected").to.be.false;
+            }
+  
+          });
+        });
+      });
+    });
+  });
+
 });
