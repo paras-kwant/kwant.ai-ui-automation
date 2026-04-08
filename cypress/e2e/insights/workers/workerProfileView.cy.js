@@ -17,7 +17,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   // Company Selection Display
   // ─────────────────────────────────────────────────────────────────────────
 
-  it('Insights-Company - Verify selected company name appears in onsite selection panel', {
+  it('Insights-Worker - Verify selected company name appears in onsite selection panel', {
     tags: ["Story:Company Selection Display", "Severity:critical", "UI", "Module:Insights-Company"]
   }, () => {
     companyProfilePage.selectRandomCompanyRow();
@@ -31,7 +31,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   // Full Profile Opens
   // ─────────────────────────────────────────────────────────────────────────
 
-  it('Insights-Company - Verify company full profile opens with correct details', {
+  it('Insights-Worker - Verify company full profile opens with correct details', {
     tags: ["Story:Open Company Profile", "Severity:critical", "UI", "Module:Insights-Company"]
   }, () => {
     companyProfilePage.selectRandomCompanyRow();
@@ -46,7 +46,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   // General Details vs API
   // ─────────────────────────────────────────────────────────────────────────
 
-  it('Insights-Company - Validate company general details match API data', () => {
+  it('Insights-Worker - Validate company general details match API data', () => {
     companyProfilePage.interceptGetWorker();
     companyProfilePage.selectRandomCompanyRow();
 
@@ -70,7 +70,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   // Status Colors vs API
   // ─────────────────────────────────────────────────────────────────────────
 
-  it('Insight-Company - Verify Company Row Status Colors Match Expected Values', () => {
+  it('Insight-Worker - Verify Company Row Status Colors Match Expected Values', () => {
     companyProfilePage.interceptGetWorker();
     companyProfilePage.selectRandomRowForStatus();
 
@@ -91,7 +91,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   // Documents vs API
   // ─────────────────────────────────────────────────────────────────────────
 
-  it('Insights-Company - Validate document records with strict API matching', {
+  it('Insights-Worker - Validate document records with strict API matching', {
     tags: ["Story:Document Verification", "Severity:blocker", "API", "Module:Insights-Company"]
   }, () => {
     companyProfilePage.interceptGetWorker();
