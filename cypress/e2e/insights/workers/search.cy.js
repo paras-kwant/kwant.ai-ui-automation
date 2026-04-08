@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { searchPage } from "../../../pages/insights/companies/search";
+import { searchPage } from "../../../pages/insights/workers/search";
 import WorkerHelper from "../../../support/helper/workerHelper";
 import { workforceSelector } from "../../../support/workforceSelector";
 
@@ -9,7 +9,7 @@ describe("Insight Worker - Search ", { tags: ["Epic:WorkForce", "Feature:Search"
 
   beforeEach(() => {
     cy.intercept("POST", "/api/empinsight/work_table*").as("workersApi");
-    cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
+    cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('500526306'));
 
     cy.wait("@workersApi").then((interception) => {
       const body = interception.response.body;

@@ -132,11 +132,13 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
   });
 
   it('Insight-Company - save button should be enabled when their is chnage', () => {
+    cy.get('[type="success"]').should('not.exist')
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('[label="Reset to default"] button').should('be.visible').click();
     cy.wait(1000)
-    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check({ force: true });
+    cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').check();
+    cy.wait(1000)
     cy.get('[data-rbd-draggable-id="varianceHours"]').find('input[type="checkbox"]').should('be.checked');
     cy.get('[label="Save"] button').should('be.enabled');
   });

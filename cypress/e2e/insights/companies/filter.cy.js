@@ -1030,5 +1030,38 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
         });
       });
   });
+  it('Insights - Companies - Verify sorting functionality', { tags: ["Story:Sorting Functionality", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
+		cy.contains(workforceSelector.tableColumn, 'Company Name').realHover();
 
+		cy.get('[class*="sorting-icon"]').eq(0).click();
+		cy.wait(3000);
+
+		cy.get('[class*="personal-info-content__title"]').should('have.length.at.least', 1);
+
+		cy.get('[class*="personal-info-content__title"]').then(($cells) => {
+			const names = $cells.map((_, cell) => cell.textContent.trim()).get();
+
+			console.log('Z-A Order:', names);
+
+			for (let i = 0; i < names.length - 1; i++) {
+				const current = names[i];
+				const next = names[i + 1];
+
+				const normalizedCurrent = current.toLowerCase().replace(/[^a-z0-9]/g, '');
+				const normalizedNext = next.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+				const currentStartsWithNum = /^\d/.test(normalizedCurrent);
+				const nextStartsWithNum = /^\d/.test(normalizedNext);
+
+				if (!currentStartsWithNum && nextStartsWithNum) {
+					continue;
+				} else if (currentStartsWithNum && !nextStartsWithNum) {
+					throw new Error(`Position ${i}: Letter "${next}" should come before number "${current}"`);
+				} else {
+					const isCorrectOrder = normalizedCurrent >= normalizedNext;
+					expect(isCorrectOrder, `Position ${i}: "${current}" (normalized: "${normalizedCurrent}") should come after "${next}" (normalized: "${normalizedNext}")`).to.be.true;
+				}
+			}
+		});
 });
+})

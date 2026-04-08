@@ -14,6 +14,19 @@ Cypress.Commands.add('login', () => {
   });
 });
 
+Cypress.Commands.add('captureAuthHeaders', () => {
+  let authHeaders = {};
+
+  cy.intercept('GET', '/api/projectConfigs', (req) => {
+    authHeaders = {
+      'x-auth-token': req.headers['x-auth-token'],
+      'x-auth-project': req.headers['x-auth-project']
+    };
+  }).as('getConfig');
+
+  return cy.wrap(authHeaders);
+});
+
 
 // ✅ Just login + navigate. Nothing else.
 // Usage in every spec beforeEach:
@@ -72,7 +85,9 @@ Cypress.Commands.add(
 
 
 Cypress.Commands.add('getTotalWorkers', () => {
-  return cy.get('.workforce-footer, .workers-footer')
+  // return cy.get('.workforce-footer, .workers-footer')
+  return cy.get('.table_footer, .workforce-footer, .table_section_footer')
+  
     .should('be.visible')
     .invoke('text')
     .then((text) => {
@@ -118,6 +133,11 @@ Cypress.Commands.add('getWorkerField', (label) => {
 });
 
 
+Cypress.Commands.add("validateEmptyTable", ()=>{
+  return cy.get('.empty-body').contains('No Results Found').should('be.visible');
+})
+
+
 Cypress.Commands.add("cleanUI", () => {
   cy.wait(1000);
 
@@ -158,4 +178,9 @@ Cypress.Commands.add("cleanUI", () => {
       cy.get(workforceSelector.searchInput).first().clear();
     }
   });
+
+  
+
+
+
 });
