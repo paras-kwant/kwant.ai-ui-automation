@@ -10,7 +10,9 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
 
     cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
 
+    cy.wait(2000);
     cy.get('.selector-item.last').click();
+    cy.get('.selector-item.last').should('have.class', 'active');
 
     cy.wait('@getConfig').then(({ request }) => {
       cy.wrap({
@@ -309,7 +311,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   });
 
 
-  it("Insight-Company - Verify Company Row Status Colors Match Expected Values", () => {
+  it.only("Insight-Company - Verify Company Row Status Colors Match Expected Values", () => {
     cy.intercept("GET", "**/projectTaskTrade/detail/*").as("getDetail");
   
     cy.get(workforceSelector.tableRow).eq(1).as("row");

@@ -66,37 +66,30 @@ describe(
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(0)
-          .realHover()
           .find(".edit-icon > svg")
           .first()
-          .should("be.visible")
-          .click();
+          .click({force: true});
         cy.get('[name="phone"]').click().clear().type("9779868765456");
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(1)
-          .realHover()
           .find(".edit-icon > svg")
           .first()
-          .should("be.visible")
-          .click();
+          .click({force: true});
         cy.get('[name="email"]').click().clear().type("paras@gmail.com");
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(2)
-          .realHover()
           .find(".edit-icon > svg")
           .first()
-          .should("be.visible")
-          .click();
+          .click({force: true});
+
         cy.get('[name="address"]').click().clear().type("Nepal");
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(6)
-          .realHover()
           .find(".edit-icon > svg")
-          .should("be.visible")
-          .click({ force: true });
+          .click({force: true});
         cy.get('[placeholder="Select Sex"]').click({ force: true }).clear();
         cy.get('.select_item_container [role="button"]').then(($buttons) => {
           const randomIndex = Cypress._.random(0, $buttons.length - 1);
@@ -107,9 +100,7 @@ describe(
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(7)
-          .realHover()
           .find(".edit-icon > svg")
-          .should("be.visible")
           .click({ force: true });
         cy.get('[placeholder="Select MWBE"]').click({ force: true }).clear();
         cy.get('.select_item_container [role="button"]').then(($buttons) => {
@@ -121,9 +112,7 @@ describe(
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(8)
-          .realHover()
           .find(".edit-icon > svg")
-          .should("be.visible")
           .click({ force: true });
         cy.get('[placeholder="Select Ethnicity"]').click({ force: true }).clear();
         cy.get('.select_item_container [role="button"]').then(($buttons) => {

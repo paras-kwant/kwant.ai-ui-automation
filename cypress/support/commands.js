@@ -86,7 +86,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add('getTotalWorkers', () => {
   // return cy.get('.workforce-footer, .workers-footer')
-  return cy.get('.table_footer, .workforce-footer, .table_section_footer')
+  return cy.get('.table_footer, .workforce-footer, .table_section_footer, .workers-footer')
   
     .should('be.visible')
     .invoke('text')
