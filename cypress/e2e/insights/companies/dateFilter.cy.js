@@ -17,7 +17,7 @@ const getEnabledDays = () =>
 describe("Insights-Company Module - Calendar & Download Validation", { tags: ["Module:Insights-Company"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
   });
 
   it('Insights-Company - Calendar options visible', {

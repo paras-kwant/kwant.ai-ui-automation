@@ -21,9 +21,7 @@ describe('Insights Company - Insights Company Info-card', {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────
-  // TEST 1: Validate company selection and alert counts against API
-  // ─────────────────────────────────────────────────────────────
+ 
   it('Insights-Company - Validate company selection and alert counts against API', {
     tags: ["Story:Company Alerts Validation", "Severity:blocker", "API", "Module:Insights-Company"]
   }, function () {
@@ -163,9 +161,7 @@ describe('Insights Company - Insights Company Info-card', {
     });
   }); // ← END: TEST 1
 
-  // ─────────────────────────────────────────────────────────────
-  // TEST 2: Validate companies onsite today count matches API
-  // ─────────────────────────────────────────────────────────────
+
   it('Insights-Company - Validate companies onsite today count matches API', {
     tags: ["Story:Dashboard Cards Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
@@ -206,31 +202,38 @@ describe('Insights Company - Insights Company Info-card', {
   it('Insights - Validate Most Active Zones', function () {
     const now = new Date();
     const endDate = now.toISOString();
-    const startDate = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
+    
+    // ✅ match UI → last 1 day
+    const startDate = new Date(
+      now.getTime() - 24 * 60 * 60 * 1000
+    ).toISOString();
+  
     const projectId = 5007477836;
-
+  
     let uiZones = [];
-
-    cy.wait(3000);
-
+  cy.wait(10000)
+  
+    // ✅ Get UI zones
     cy.get('body').then(($body) => {
       const $zones = $body.find('.zone-list-item');
-
+  
       if ($zones.length === 0) {
         uiZones = [];
         cy.log('⚠️ No zones in UI');
       } else {
         $zones.each((_, el) => {
-          const text = Cypress.$(el).text().trim();
+          const text = Cypress.$(el).text().trim().toLowerCase();
+  
           if (text && text !== '-') {
-            uiZones.push(text.toLowerCase());
+            uiZones.push(text);
           }
         });
       }
-
+  
       cy.log(`📋 UI Zones → ${JSON.stringify(uiZones)}`);
     });
-
+  
+    // ✅ API call
     cy.get('@authHeaders').then((headers) => {
       cy.request({
         method: 'POST',
@@ -250,49 +253,63 @@ describe('Insights Company - Insights Company Info-card', {
         }
       }).then((response) => {
         expect(response.status).to.eq(200);
-
+  
         const locationMap = {};
-
-        Object.values(response.body).forEach(arr => {
-          arr.forEach(entry => {
+  
+        // ✅ SAFE aggregation
+        Object.values(response.body).forEach((arr) => {
+          if (!Array.isArray(arr)) return;
+  
+          arr.forEach((entry) => {
             const loc = entry.location?.trim().toLowerCase();
+            const minutes = Number(entry.minutes) || 0;
+  
             if (!loc) return;
-            locationMap[loc] = (locationMap[loc] || 0) + (entry.minutes || 0);
+  
+            locationMap[loc] = (locationMap[loc] || 0) + minutes;
           });
         });
-
+  
         cy.log(`📊 Aggregated Zones → ${JSON.stringify(locationMap)}`);
-
+  
         const sortedZones = Object.entries(locationMap)
           .sort((a, b) => b[1] - a[1])
           .map(([zone]) => zone);
-
+  
         cy.log(`🏆 API Zones → ${JSON.stringify(sortedZones)}`);
-
+  
+        // ✅ HANDLE EMPTY CASE
         if (uiZones.length === 0) {
           expect(sortedZones.length, 'UI empty → API should also be empty').to.eq(0);
           cy.log('✅ No zones in both UI and API');
           return;
         }
-
+  
+        // ❗ IMPORTANT FIX: ensure API has enough data
+        expect(
+          sortedZones.length,
+          'API should return zones when UI has zones'
+        ).to.be.greaterThan(0);
+  
         const expectedZones = sortedZones.slice(0, uiZones.length);
-
+  
+        // ✅ FINAL VALIDATION
         uiZones.forEach((zone, index) => {
           expect(
             expectedZones[index],
             `UI zone "${zone}" should match API rank ${index + 1}`
           ).to.eq(zone);
         });
-
+  
         cy.log('✅ Zones validated successfully');
       });
     });
-  }); // ← END: TEST 3
+  });// ← END: TEST 3
 
   // ─────────────────────────────────────────────────────────────
   // TEST 4: Validate most active zones for selected company
   // ─────────────────────────────────────────────────────────────
-  it('Insights-Company - Validate most active zones for selected company', {
+  it.only('Insights-Company - Validate most active zones for selected company', {
     tags: ["Story:Company Zone Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
     cy.intercept('GET', 'https://uat.kwant.ai/api/projectTaskTradesForTracking').as('getCompanyName');
@@ -310,7 +327,7 @@ describe('Insights Company - Insights Company Info-card', {
   
       selectedWorker = matchedRows[3];
       cy.wrap(selectedWorker).find('input[type="checkbox"]').check({ force: true });
-      cy.wait(3000);
+      cy.wait(5000);
   
 
       cy.get('body').then(($body) => {
@@ -346,7 +363,15 @@ describe('Insights Company - Insights Company Info-card', {
           .should('be.visible');
   
         cy.wait(2000);
-        cy.wrap(selectedWorker).find('.site-label').click();
+        cy.wrap(selectedWorker)
+        .find('.site-label')
+        .scrollIntoView()
+        .should('be.visible')
+        .trigger('mousemove')
+        .wait(150)
+        .trigger('mouseover')
+        .wait(150)
+        .click();
   
         cy.wait('@getCompanyName').then(({ response }) => {
           expect(response.statusCode).to.eq(200);

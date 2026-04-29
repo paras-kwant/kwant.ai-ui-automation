@@ -1,7 +1,7 @@
 // cypress/pages/workforce/addWorkerPage.js
 import { addWorkerSelector } from '../../selector/addWorker.js';
 import { workforceSelector } from '../../support/workforceSelector';
-import { generateWorkerData } from '../../fixtures/workerData.js';
+import { generateWorkerData } from '../../fixtures/generateData.js';
 
 class addworkerPage {
   

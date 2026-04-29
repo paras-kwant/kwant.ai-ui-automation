@@ -6,7 +6,7 @@ import { workforceSelector } from "../../../support/workforceSelector";
 describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Feature:Download", "Module:Insights-Company"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
   });
 
   it('Insights-Company - Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', { tags: ["Story:Download Default Date Range Matches Insight Page", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {

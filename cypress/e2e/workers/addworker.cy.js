@@ -2,7 +2,7 @@
 const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
-import { generateWorkerData } from '../../fixtures/workerData.js';
+import { generateWorkerData } from '../../fixtures/generateData.js';
 import workerHelper from '../../support/helper/workerHelper.js';
 import { addWorkerSelector } from "../../selector/addWorker.js";
 import addworkerPage from '../../pages/workforce/addworkerPage.js';

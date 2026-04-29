@@ -28,8 +28,10 @@ describe("Worker Module - Documents Page",
         expect(texts).to.include(header);
       });
     });
+    cy.wait(1000)
     
-    cy.get(workforceSelector.licencesTab).click();
+    cy.contains("Licences").click();
+    cy.contains('Licences').click()
     workforceSelector.AddLicenceButton().should("be.visible");
 
     const headerLicences = ["Type", "Expiry Date", "Credential ID", "Actions"];
@@ -223,13 +225,13 @@ describe("Worker Module - Documents Page",
       cy.get('[placeholder="Expiry Date"]')
         .invoke("val")
         .then((expiryDate) => {
-          cy.fixture("file.pdf", "base64").then((fileContent) => {
+          cy.fixture("aaron.png", "base64").then((fileContent) => {
             cy.get(workforceSelector.dragAndDrop).attachFile(
-              { fileContent, fileName: "file.pdf", mimeType: "application/pdf" },
+              { fileContent, fileName: "aaron.png", mimeType: "application/pdf" },
               { subjectType: "drag-n-drop" }
             );
           });
-          cy.get('iframe[src^="blob:https://uat.kwant.ai"]').should('exist')
+          cy.get('img[src^="blob:"]').should('exist')
           cy.wait(1000)
 
           cy.get(workforceSelector.submitButton).click();
@@ -274,13 +276,13 @@ cy.get(workforceSelector.documentPage)
       cy.get('[placeholder="Expiry Date"]')
         .invoke("val")
         .then((expiryDate) => {
-          cy.fixture("file.pdf", "base64").then((fileContent) => {
+          cy.fixture("aaron.png", "base64").then((fileContent) => {
             cy.get(workforceSelector.dragAndDrop).attachFile(
-              { fileContent, fileName: "file.pdf", mimeType: "application/pdf" },
+              { fileContent, fileName: "aaron.png", mimeType: "application/pdf" },
               { subjectType: "drag-n-drop" }
             );
           });
-          cy.get('iframe[src^="blob:https://uat.kwant.ai"]').should('exist')
+          cy.get('img[src^="blob:"]').should('exist')
           cy.wait(1000)
 
           cy.get(workforceSelector.submitButton).click();
@@ -513,9 +515,10 @@ cy.get(workforceSelector.documentPage)
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
       cy.get(workforceSelector.documentPage).click();
 
-      cy.get(workforceSelector.licencesTab).click();
+      cy.contains("Licences").click();
       workforceSelector.AddLicenceButton().click({ force: true });
       cy.get('[name="documentType"]').click();
+      cy.get('[placeholder="Select Document Name"]').type("Training");
       cy.get('[role="button"]').contains("Training").click();
       cy.get('[name="credentialId"]').type(credID);
 
@@ -526,9 +529,9 @@ cy.get(workforceSelector.documentPage)
       cy.get('[placeholder="Expiry Date"]')
         .invoke("val")
         .then((expiryDate) => {
-          cy.fixture("file.pdf", "base64").then((fileContent) => {
+          cy.fixture("aaron.png", "base64").then((fileContent) => {
             cy.get(workforceSelector.dragAndDrop).attachFile(
-              { fileContent, fileName: "file.pdf", mimeType: "application/pdf" },
+              { fileContent, fileName: "aaron.png", mimeType: "application/pdf" },
               { subjectType: "drag-n-drop" }
             );
           });
@@ -560,7 +563,7 @@ cy.get(workforceSelector.documentPage)
       cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
       cy.get(workforceSelector.documentPage).click();
 
-      cy.get(workforceSelector.licencesTab).click();
+      cy.contains("Licences").click();
 
       cy.get(workforceSelector.documentTableRow)
         .eq(0)
@@ -628,7 +631,7 @@ cy.get(workforceSelector.documentPage)
       cy.get(workforceSelector.documentPage)
         .find('svg path[fill="#DF4242"]')
         .should("exist");
-      cy.get(workforceSelector.licencesTab).click();
+      cy.contains("Licences").click();
 
       cy.get(workforceSelector.documentTableRow)
         .eq(0)
@@ -845,19 +848,20 @@ cy.get(workforceSelector.documentPage)
       .eq(0)
       .click({ force: true });
   
-      cy.get('iframe', { timeout: 30000 })
-      .filter('[src*="s3"], [src*="cloudfront"]')
-      .should('have.length.greaterThan', 0)
-      .first()
-      .invoke('attr', 'src')
-      .then((src) => {
-        const fileName = decodeURIComponent(src.split('/').pop());
-        cy.log(`Expected filename from URL: ${fileName}`);
+      cy.get('section img[src*="amazonaws.com"]')
+  .first()
+  .invoke('attr', 'src')
+  .then((src) => {
+    expect(src).to.exist;
+
+    const fileName = src.split('/').pop().split('?')[0]; // removes query params if any
+    cy.log(`Filename from URL: ${fileName}`);
 		cy.get('.sc-aXZVg.cjAzbF button')
   .eq(0)
   .scrollIntoView()  // scrolls vertically to bring it into view
   .click();  
   cy.get('p').contains('Download').click()
+  cy.wait(5000)
   
         const downloadsFolder = Cypress.config('downloadsFolder');
         const filePath = path.join(downloadsFolder, fileName);
@@ -879,13 +883,13 @@ cy.get(workforceSelector.documentPage)
     cy.get(workforceSelector.documentPage).click();
     cy.get(workforceSelector.documentTableRow).eq(0).click();
     cy.get(workforceSelector.removeButton).click()
-    cy.fixture("document.jpg", "base64").then((fileContent) => {
+    cy.fixture("aaron.png", "base64").then((fileContent) => {
       cy.get(workforceSelector.dragAndDrop).attachFile(
-        { fileContent, fileName: "document.jpg", mimeType: "image/jpeg" },
+        { fileContent, fileName: "aaron.png", mimeType: "image/jpeg" },
         { subjectType: "drag-n-drop" }
       );
     });
-    cy.get('img[src^="blob:https://uat.kwant.ai"]')
+    cy.get('img[src^="blob:"]')
       .scrollIntoView()
 
 

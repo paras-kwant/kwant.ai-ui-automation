@@ -1,8 +1,6 @@
 /// <reference types="cypress" />
 import { workforceSelector } from "../../support/workforceSelector.js";
-import workerHelper from "../../support/helper/workerHelper.js";
 import companiesHelper from "../../support/helper/companiesHelper.js";
-import { generateCompanyData } from "../../fixtures/workerData.js";
 
 describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce", "Feature:OverflowMenu", "Module:WorkForce-Company"] }, () => {
   let authHeaders = {};

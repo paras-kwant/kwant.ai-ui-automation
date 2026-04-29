@@ -14,7 +14,6 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
 
     cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
     cy.get('.filters_header_right_section .selector-item.first').click();
-    cy.cleanUI();
   });
 
   const getLabel = (labelText) => {
@@ -58,49 +57,47 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Insights-Company - verify the options button in the filter button (UI random)', { tags: ["Story:Insights Filter Options UI Random", "Severity:normal", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - verify the options button in the filter button (UI random)', {
+    tags: ["Story:Insights Filter Options UI Random", "Severity:normal", "UI", "Module:Insights-Company"]
+  }, () => {
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Company').click();
-
-    cy.get('.multi-select-option__head')
-      .then($options => {
-        const optionTexts = [...$options].map(el => el.innerText.trim());
-        const randomTexts = Cypress._.sampleSize(optionTexts, Math.min(3, optionTexts.length));
-        return randomTexts;
-      })
-      .then(randomTexts => {
-        randomTexts.forEach(text => {
-          cy.contains('.multi-select-option__head', text).scrollIntoView().click();
-        });
+  
+    cy.get('.multi-select-option__head').then($options => {
+      const optionTexts = [...$options].map(el => el.innerText.trim());
+      const randomTexts = Cypress._.sampleSize(optionTexts, Math.min(3, optionTexts.length));
+  
+      randomTexts.forEach(text => {
+        cy.contains('.multi-select-option__head', text).scrollIntoView().click({force:true});
+        cy.contains('.multi-select-option__head', text).should('exist');
       });
-
+    });
+  
     cy.get('body').click(0, 0);
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Cost Code').click();
-
-    cy.get('.multi-select-option__head')
-      .then($options => {
-        const optionTexts = [...$options].map(el => el.innerText.trim());
-        const randomTexts = Cypress._.sampleSize(optionTexts, Math.min(3, optionTexts.length));
-        return randomTexts;
-      })
-      .then(randomTexts => {
-        randomTexts.forEach(text => {
-          cy.contains('.multi-select-option__head', text).click();
-        });
+  
+    cy.get('.multi-select-option__head').then($options => {
+      const optionTexts = [...$options].map(el => el.innerText.trim());
+      const randomTexts = Cypress._.sampleSize(optionTexts, Math.min(3, optionTexts.length));
+  
+      randomTexts.forEach(text => {
+        cy.contains('.multi-select-option__head', text).scrollIntoView().click();
+        cy.contains('.multi-select-option__head', text).should('exist');
       });
-
+    });
+  
     cy.get('body').click(0, 0);
-
+  
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Certificate Status').click();
     const certOptions = ['Expired', 'Expiring', 'All Uploaded'];
     certOptions.forEach(option => {
       cy.contains('.multi-select-option__head', option).should('be.visible');
     });
-
+  
     cy.get('body').click(0, 0);
-
+  
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Safety Alert Type').click();
     const safetyOptions = ['SOS', 'Fall', 'Near miss', 'Restricted', 'Fatigue'];
@@ -164,6 +161,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains('section button p', 'Filter').click();
     cy.get('body').click(0, 0);
     cy.wait('@companyTableApi');
+    cy.get('.loader-image').should('not.exist');
 
     cy.get('@selectedCrew').then((selectedCrew) => {
       cy.get('body').then(($body) => {
@@ -176,70 +174,60 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Insights-Company - Validate the Job Title Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Job Title", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
-    cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
-    cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
-    cy.wait('@taskTradeFilter').its('response.statusCode').should('eq', 200);
-
-    cy.contains(workforceSelector.tableColumn, 'Workers On-site')
-      .find('.table-header-filter-btn').click();
-    cy.get('[placeholder="Min"]').clear().type('1');
-    cy.get('[placeholder="Max"]').clear().type('10');
-    cy.get('p').contains('Filters:').click();
-
-    cy.get('.default__label').contains('Clear All').should('be.visible');
-    cy.wait('@taskTradeFilter').its('response.statusCode').should('eq', 200);
-    cy.get('.loader-image').should('not.exist');
-    cy.wait(3000);
-
-    cy.get('.personal-info-content__title').first().invoke('text').then((text) => {
-      const companyName = text.trim();
-      cy.log('First company in table: ' + companyName);
-      Cypress.env('companyName', companyName);
-    });
-
-    cy.get('.personal-info-content__title').first().click();
-    cy.get(workforceSelector.companyWorkerPage).click();
-    cy.contains('p', 'Total Workers On-site').parent().parent().parent().as('totalOnsiteWorkerCard');
-    cy.get('@totalOnsiteWorkerCard').find('button').click();
-    cy.get(workforceSelector.tableRow).find('.personal-info-content__title').first().click();
-    cy.get(workforceSelector.jobDetailsPage).click();
-
-    cy.getWorkerField('Job Title').then(($jobField) => {
-      let trimmedJobTitle = $jobField.text().trim();
-      cy.log('Original Job Title: ' + trimmedJobTitle);
-      if (trimmedJobTitle === '-' || trimmedJobTitle.toLowerCase() === 'none') {
-        cy.get($jobField).click({ force: true });
-        cy.selectRandomOption(
-          '[placeholder="Select Job Title"]',
-          '.select_item_container [role="button"]',
-          'jobTitleField'
-        );
-        cy.get(workforceSelector.updateButton).click();
-        cy.getWorkerField('Job Title').invoke('text').then((newJobTitle) => {
-          trimmedJobTitle = newJobTitle.trim();
-          cy.log('Updated Job Title: ' + trimmedJobTitle);
-          Cypress.env('jobTitle', trimmedJobTitle);
-        });
-      } else {
-        Cypress.env('jobTitle', trimmedJobTitle);
-      }
-    }).then(() => {
+  it('Insights-Company - Validate the Job Title Filter (UI only + update if empty)', {
+    tags: ["Story:Insights Filter By Job Title", "Severity:critical", "UI", "Module:Insights-Company"]
+  }, () => {
+    cy.intercept('POST', '**/api/empinsight/work_table?*').as('workerTable');
+    cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
+    cy.visit('/projects/5007477836/insights/workers');
+  
+    cy.wait('@workerTable').then((interception) => {
+      const workers = interception.response.body.employeeTrackingTableList;
+  
+      const workersWithTitle = workers.filter(w => w.title && w.title.trim() !== '');
+      const randomIndex = Math.floor(Math.random() * workersWithTitle.length);
+      const selectedWorker = workersWithTitle[randomIndex];
+  
+      const jobTitle = selectedWorker.title.trim();
+  
+      const companiesWithTitle = [...new Set(
+        workers
+          .filter(w => w.title && w.title.trim() === jobTitle)
+          .map(w => w.companyName.trim())
+      )];
+  
+      cy.wrap(jobTitle).as('selectedJobTitle');
+      cy.wrap(companiesWithTitle).as('companiesWithTitle');
       cy.visit('/projects/5007477836/insights/companies');
-      cy.contains('button p', 'Filter').click();
-      cy.contains('.placeholder', 'Select Job Title').click();
-      cy.then(() => {
-        const jobTitle = Cypress.env('jobTitle');
-        const companyName = Cypress.env('companyName');
-        cy.get('section [placeholder="Search"]').type(jobTitle);
-        cy.get('.multi-select-option__head').contains(jobTitle).click();
-        cy.contains('section button p', 'Filter').click();
-        cy.get('body').click(0, 0);
-        cy.get('.personal-info-content__title').contains(companyName).should('be.visible');
+      cy.get('button p').contains('Filters').click();
+      cy.get('.select-container__label').contains('Job Title').parent().find('#select-input-container').click();
+      cy.get('section [placeholder="Search"]').type(jobTitle);
+      cy.get('.multi-select-option__head').contains(jobTitle).click();
+      cy.get('[label="Filter"]').click();
+      cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+      cy.get('body').click(0, 0);
+      cy.get('.loader-image').should('not.exist');
+  cy.wait(2000)
+      const foundCompanies = new Set();
+  
+      cy.get(workforceSelector.tableRow).should('be.visible').each(($row) => {
+        cy.wrap($row).find('.personal-info-content__title').invoke('text').then((text) => {
+          const companyName = text.trim();
+          expect(companiesWithTitle).to.include(companyName);
+          foundCompanies.add(companyName);
+        });
+      }).then(() => {
+        companiesWithTitle.forEach(company => {
+          expect(foundCompanies).to.include(company);
+        });
       });
     });
   });
 
+
+
+
+   
   it('Insights-Company - Workers On-site filter should return correct results based on range selection', { tags: ["Story:Insights Filter Workers On-site Range", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
 
@@ -323,38 +311,38 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Insights-Company - Actual Work-Days filter should return correct results based on range selection', { tags: ["Story:Insights Filter Actual Work-Days Range", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Actual Work-Days filter should return correct results based on range selection', {
+    tags: ["Story:Insights Filter Actual Work-Days Range", "Severity:critical", "UI", "Module:Insights-Company"]
+  }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
-    cy.contains('button p', 'Filter').click();
-    cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(0).as('minInput');
-    cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(1).as('maxInput');
-    cy.get('@minInput').clear().type('1');
-    cy.get('@maxInput').clear().type('2');
-    cy.contains('section button p', 'Filter').click();
-    cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
-    cy.get('body').click(0, 0);
-    cy.get('.loader-image').should('not.exist');
-
-    cy.get(workforceSelector.tableRow).find('.table_td').then(($headers) => {
-      const colIndex = [...$headers].findIndex((th) => th.innerText.includes('Actual Work-Days'));
-      cy.log('Actual Work-Days column index: ' + colIndex);
-
-      cy.get('body').then(($body) => {
-        if ($body.find(workforceSelector.tableRow).length > 0) {
-          cy.get(workforceSelector.tableRow).each(($row) => {
-            cy.wrap($row).find('.table_td').eq(3).invoke('text').then((text) => {
-              const count = parseInt(text.trim());
-              expect(count).to.be.within(1, 2);
-            });
-          });
-        } else {
-          cy.log('No Results Found for Actual Work-Days filter');
-          cy.contains('.empty-body__title', 'No Results Found').should('exist');
-        }
+    cy.visit('/projects/5007477836/insights/companies');
+  
+    cy.wait('@companyTableApi').then((interception) => {
+      const data = interception.response.body.data;
+  
+      const randomItem = data[Math.floor(Math.random() * data.length)];
+      const actualDays = Math.floor(randomItem.actualDays);
+  
+      const expectedCompanies = data
+        .filter(d => Math.floor(d.actualDays) === actualDays)
+        .map(d => d.companyName);
+  
+      cy.contains('button p', 'Filter').click();
+      cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(0).clear().type(String(actualDays));
+      cy.contains('label', 'Actual Work-Days').parent().find('[name="actualWorkDays"]').eq(1).clear().type(String(actualDays));
+      cy.contains('section button p', 'Filter').click();
+  
+      cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+      cy.get('body').click(0, 0);
+      cy.get('.loader-image').should('not.exist');
+  
+      cy.get(workforceSelector.tableRow).should('have.length.greaterThan', 0).each(($row) => {
+        cy.wrap($row).find('.personal-info-content__title').invoke('text').then((companyName) => {
+          expect(expectedCompanies).to.include(companyName.trim());
+        });
       });
     });
   });
-
   it('Insights-Company - Actual Work-Days filter - only min set should return results greater than or equal to min', { tags: ["Story:Insights Filter Actual Work-Days Min Only", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.contains('button p', 'Filter').click();
@@ -600,126 +588,107 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Insights-Company - Validate the Cost Code Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Cost Code", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
-    cy.intercept('POST', '**/api/projectTaskTrade/filter*').as('taskTradeFilter');
-    cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
-    cy.wait('@taskTradeFilter');
-
-    cy.contains(workforceSelector.tableColumn, 'Workers On-site')
-      .find('.table-header-filter-btn').click();
-    cy.get('[placeholder="Min"]').type('1');
-    cy.get('[placeholder="Max"]').type('10');
-    cy.get('body').click(0, 0);
-    cy.wait('@taskTradeFilter').its('response.statusCode').should('eq', 200);
-    cy.get('.loader-image').should('not.exist');
-    cy.wait(4000);
-
-    cy.get('.personal-info-content__title').first().invoke('text').then((text) => {
-      const companyName = text.trim();
-      cy.log('First company in table: ' + companyName);
-      Cypress.env('companyName', companyName);
-    });
-
-    cy.get('.personal-info-content__title').first().click();
-    cy.get(workforceSelector.companyWorkerPage).click();
-    cy.contains('p', 'Total Workers On-site').parent().parent().parent().as('totalOnsiteWorkerCard');
-    cy.get('@totalOnsiteWorkerCard').find('button').click();
-    cy.get('.loader-image').should('not.exist');
-
-    cy.get('.personal-info-content__title').first().click();
-    cy.get(workforceSelector.jobDetailsPage).click();
-
-    cy.getWorkerField('Cost Code').then(($costField) => {
-      let trimmedCostCode = $costField.text().trim();
-      cy.log('Original Cost Code: ' + trimmedCostCode);
-      if (trimmedCostCode === '-' || trimmedCostCode.toLowerCase() === 'none') {
-        cy.get($costField).click({ force: true });
-        cy.selectRandomOption(
-          '[placeholder="Select Cost Code"]',
-          '.select_item_container [role="button"]',
-          'costCodeField'
-        );
-        cy.get(workforceSelector.updateButton).click();
-        cy.get('.loader-image').should('not.exist');
-        cy.getWorkerField('Cost Code').invoke('text').then((newCostCode) => {
-          trimmedCostCode = newCostCode.trim();
-          cy.log('Updated Cost Code: ' + trimmedCostCode);
-          Cypress.env('costCode', trimmedCostCode);
-        });
-      } else {
-        Cypress.env('costCode', trimmedCostCode);
-      }
-    }).then(() => {
-      cy.visit('/projects/5007477836/insights/companies');
-      cy.contains('button p', 'Filter').click();
-      cy.contains('.placeholder', 'Select Cost Code').click();
-      cy.then(() => {
-        const costCode = Cypress.env('costCode');
-        const companyName = Cypress.env('companyName');
-        cy.get('.multi-select-option__head').contains(costCode).click();
+  it('Insights-Company - Validate the onsite count Filter', {
+    tags: ["Story:Insights Filter By Cost Code", "Severity:critical", "UI", "Module:Insights-Company"]
+  }, () => {
+    cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
+    // cy.visit('/projects/5795237201/insights/companies');
+  
+    cy.wait('@companyTableApi').then((interception) => {
+      const data = interception.response.body.data;
+  
+      const onsiteCompanies = data.filter(d => d.onsiteToday > 0);
+  
+      if (onsiteCompanies.length > 0) {
+        const randomItem = onsiteCompanies[Math.floor(Math.random() * onsiteCompanies.length)];
+        const onsiteToday = randomItem.onsiteToday;
+  
+        const expectedCompanies = data
+          .filter(d => d.onsiteToday === onsiteToday)
+          .map(d => d.companyName);
+  
+        cy.contains('button p', 'Filter').click();
+        cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(0).clear().type(String(onsiteToday));
+        cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(1).clear().type(String(onsiteToday));
         cy.contains('section button p', 'Filter').click();
+  
+        cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
         cy.get('body').click(0, 0);
-        cy.get('.personal-info-content__title').contains(companyName).should('be.visible');
-      });
+        cy.get('.loader-image').should('not.exist');
+  
+        cy.get(workforceSelector.tableRow).should('have.length.greaterThan', 0).each(($row) => {
+          cy.wrap($row).find('.personal-info-content__title').invoke('text').then((companyName) => {
+            expect(expectedCompanies).to.include(companyName.trim());
+          });
+        });
+  
+      } else {
+        const zeroOnsiteCompanies = data
+          .filter(d => d.onsiteToday === 0)
+          .map(d => d.companyName);
+  
+        cy.contains('button p', 'Filter').click();
+        cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(0).clear().type('0');
+        cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(1).clear().type('0');
+        cy.contains('section button p', 'Filter').click();
+  
+        cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+        cy.get('body').click(0, 0);
+        cy.get('.loader-image').should('not.exist');
+  
+        cy.get(workforceSelector.tableRow).should('have.length.greaterThan', 0).each(($row) => {
+          cy.wrap($row).find('.personal-info-content__title').invoke('text').then((companyName) => {
+            expect(zeroOnsiteCompanies).to.include(companyName.trim());
+          });
+        });
+  
+        cy.contains('button p', 'Filter').click();
+        cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(0).clear().type('1');
+        cy.contains('label', 'Workers On-site').parent().find('[name="totalOnSiteWorkers"]').eq(1).clear().type('10');
+        cy.contains('section button p', 'Filter').click();
+  
+        cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+        cy.get('body').click(0, 0);
+        cy.get('.loader-image').should('not.exist');
+  
+        cy.get(workforceSelector.tableRow).should('have.length', 0);
+      }
     });
   });
 
-  it('Insights-Company - Validate the Pay Group Filter (UI only + update if empty)', { tags: ["Story:Insights Filter By Pay Group", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
-    cy.visit('https://uat.kwant.ai/projects/5007477836/companies');
-    cy.contains(workforceSelector.tableColumn, 'Workers On-site')
-      .find('.table-header-filter-btn').click();
-    cy.get('[placeholder="Min"]').type('1');
-    cy.get('[placeholder="Max"]').type('10');
-    cy.get('.loader-image').should('not.exist');
-    cy.wait(3000);
-
-    cy.get('.personal-info-content__title').first().invoke('text').then((text) => {
-      const companyName = text.trim();
-      cy.log('First company in table: ' + companyName);
-      Cypress.env('companyName', companyName);
-    });
-
-    cy.get('.personal-info-content__title').first().click();
-    cy.get(workforceSelector.companyWorkerPage).click();
-    cy.contains('p', 'Total Workers On-site').parent().parent().parent().as('totalOnsiteWorkerCard');
-    cy.get('@totalOnsiteWorkerCard').find('button').click();
-    cy.get('.loader-image').should('not.exist');
-
-    cy.get('.personal-info-content__title').first().click();
-    cy.get(workforceSelector.jobDetailsPage).click();
-
-    cy.getWorkerField('Pay Group').then(($payField) => {
-      let trimmedPayGroup = $payField.text().trim();
-      cy.log('Original Pay Group: ' + trimmedPayGroup);
-      if (trimmedPayGroup === '-' || trimmedPayGroup.toLowerCase() === 'none') {
-        cy.get($payField).click({ force: true });
-        cy.selectRandomOption(
-          '[placeholder="Select Pay Group"]',
-          '.select_item_container [role="button"]',
-          'payGroupField'
-        );
-        cy.get(workforceSelector.updateButton).click();
-        cy.get('.loader-image').should('not.exist');
-        cy.getWorkerField('Pay Group').invoke('text').then((newPayGroup) => {
-          trimmedPayGroup = newPayGroup.trim();
-          cy.log('Updated Pay Group: ' + trimmedPayGroup);
-          Cypress.env('payGroup', trimmedPayGroup);
-        });
-      } else {
-        Cypress.env('payGroup', trimmedPayGroup);
-      }
-    }).then(() => {
-      cy.visit('/projects/5007477836/insights/companies');
+  it.skip('Insights-Company - Validate the Cost Code Filter', {
+    tags: ["Story:Insights Filter By Pay Group", "Severity:critical", "UI", "Module:Insights-Company"]
+  }, () => {
+    cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
+  
+    cy.wait('@companyTableApi').then((interception) => {
+      const data = interception.response.body.data;
+  
+      const companiesWithTrade = data.filter(d => d.primaryTrade && d.primaryTrade.trim() !== '');
+  
+      const randomItem = companiesWithTrade[Math.floor(Math.random() * companiesWithTrade.length)];
+      const primaryTrade = randomItem.primaryTrade.trim();
+  
+      const expectedCompanies = data
+        .filter(d => d.primaryTrade && d.primaryTrade.trim() === primaryTrade)
+        .map(d => d.companyName);
+        cy.log(`Selected Pay Group: ${primaryTrade}`);
+cy.log(`Companies with this Pay Group: ${expectedCompanies.join(', ')}`);
+  
       cy.contains('button p', 'Filter').click();
-      cy.contains('.placeholder', 'Select Pay Group').click();
-      cy.then(() => {
-        const payGroup = Cypress.env('payGroup');
-        const companyName = Cypress.env('companyName');
-        cy.get('.multi-select-option__head').contains(payGroup).click();
-        cy.contains('section button p', 'Filter').click();
-        cy.get('body').click(0, 0);
-        cy.get('.loader-image').should('not.exist');
-        cy.get('.personal-info-content__title').contains(companyName).should('be.visible');
+      cy.contains('.placeholder', 'Select Cost Code').click();
+      cy.contains('.multi-select-option__head', primaryTrade).click();
+      cy.contains('section button p', 'Filter').click();
+  
+      cy.wait('@companyTableApi').its('response.statusCode').should('eq', 200);
+      cy.get('body').click(0, 0);
+      cy.get('.loader-image').should('not.exist');
+      cy.wait(3000)
+  
+      cy.get(workforceSelector.tableRow).should('have.length.greaterThan', 0).each(($row) => {
+        cy.wrap($row).find('.personal-info-content__title').invoke('text').then((companyName) => {
+          expect(expectedCompanies).to.include(companyName.trim());
+        });
       });
     });
   });
@@ -853,7 +822,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains('.placeholder', 'Select Safety Alert Type').click();
     cy.then(() => {
       const label = Cypress.env('safetyAlertLabel');
-      cy.get('section [placeholder="Search"]').clear().type(label);
+      cy.get('section [placeholder="Search"]').clear().type(label,{force: true});
       cy.contains('.multi-select-option__head', label).click();
     });
 

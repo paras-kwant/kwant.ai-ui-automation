@@ -8,7 +8,7 @@ import companiesHelper from '../../../support/helper/companiesHelper';
 describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:Insights", "Feature:Selection", "Module:Insights-Company"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
   });
 
 

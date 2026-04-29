@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { workforceSelector } from "../../support/workforceSelector";
 import workerHelper from '../../support/helper/workerHelper.js';
-import { generateWorkerData } from '../../fixtures/workerData.js';
+import { generateWorkerData } from "../../fixtures/generateData.js";
 
 describe(
   "Worker Onboarding Email Validation",

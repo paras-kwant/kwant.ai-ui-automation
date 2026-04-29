@@ -7,34 +7,32 @@ import { workforceSelector } from '../../support/workforceSelector';
 describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feature:Companies Module"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('500526306'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('5007477836'));
     cy.cleanUI();
   });
   
   it('WorkForce-Company - Validate adding and updating column settings', { tags: ["Story:Update Column Settings", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get('.icon-button button').eq(0).click();
-    cy.get(workforceSelector.tableColumn)
-    .contains('E Mail')
-    .should('not.exist');
-    cy.get('[data-rbd-draggable-id="email"] input[type="checkbox"]')
-      .should('exist')
-      .click();
-  
-    cy.contains('button p', 'Save').click();
-  
+    cy.get('[data-rbd-draggable-id="email"] input[type="checkbox"]').then(($checkbox) => {
+      if ($checkbox.is(':checked')) {
+        cy.wrap($checkbox).uncheck()
+      }
+    });
+    cy.contains('button p', 'Save').click({force: true});
+    cy.get(workforceSelector.tableColumn).contains('E Mail').should('not.exist');
     cy.get(workforceSelector.toastMessage)
       .should('be.visible')
-      .and('contain.text', 'Column settings updated successfully');  
+      .and('contain.text', 'Column settings updated successfully'); 
+      
+      cy.get('.icon-button button').eq(0).click();
+      cy.get('[data-rbd-draggable-id="email"] input[type="checkbox"]').check({ force: true });
+      cy.contains('button p', 'Save').click({force: true});
+      cy.get(workforceSelector.toastMessage)
+      .should('be.visible')
+      .and('contain.text', 'Column settings updated successfully'); 
     cy.get(workforceSelector.tableColumn)
       .contains('E Mail')
       .should('exist');
-
-
-    cy.get('.icon-button button').eq(0).click();
-    cy.get('[data-rbd-draggable-id="email"] input[type="checkbox"]')
-      .should('exist')
-      .click();
-    cy.contains('button p', 'Save').click();
   });
 
   it('WorkForce-Company - Open Add New Column drawer and verify initial UI state', { tags: ["Story:Add Column Drawer UI", "Severity:normal", "UI", "Module:WorkForce-Company"] }, ()=>{

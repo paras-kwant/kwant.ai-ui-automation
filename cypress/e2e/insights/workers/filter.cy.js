@@ -1,7 +1,6 @@
 import { workforceSelector } from "../../../support/workforceSelector";
 import WorkerHelper from "../../../support/helper/workerHelper";
-import filterPage from "../../../pages/insights/workers/filter"
-import filter from "../../../pages/insights/workers/filter";
+import filterPage from "../../../pages/insights/workers/filter";
 
 
 describe('Insight Worker - Filter Functionality', { tags: ["Epic:WorkForce", "Feature:Filter", "Module:Insights-Worker"] }, () => {

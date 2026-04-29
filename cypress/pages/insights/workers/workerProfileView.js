@@ -109,6 +109,7 @@ class CompanyProfilePage {
 
   clickDocumentPage() {
     cy.get(workforceSelector.documentPage).click();
+    cy.wait(1000);
   }
 
   // ─── Profile Assertions ───────────────────────────────────────

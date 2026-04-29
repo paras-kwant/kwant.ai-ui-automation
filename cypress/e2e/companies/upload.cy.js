@@ -3,7 +3,6 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper';
-import { generateWorkerData } from '../../fixtures/workerData.js';
 import companiesHelper from '../../support/helper/companiesHelper.js';
 
 describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", "Feature:FileUpload", "Module:WorkForce-Company"] }, () => {

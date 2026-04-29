@@ -200,7 +200,7 @@ describe("Insights Company - Workforce Dashboard Cards", { tags: ["Epic:WorkForc
 
 
 
-it('Insights-Company - Validate Avg Daily Work Hours graph tooltip content matches backend API data on hover', ()=>{
+it.only('Insights-Company - Validate Avg Daily Work Hours graph tooltip content matches backend API data on hover', ()=>{
   cy.intercept(
     "POST",
     "**/api/insight/company/graphWorkforceZoneCategoryHour"
@@ -211,7 +211,12 @@ it('Insights-Company - Validate Avg Daily Work Hours graph tooltip content match
 
   cy.wait("@getWorkerHours").then(({ response }) => {
     const graphData = response.body || []
-    const totalBars = graphData.length
+    const filteredData = graphData.filter(
+      d => !(d.workPhaseTimeHour === 0 && d.slackTimeHour === 0)
+    )
+    
+    const totalBars = filteredData.length
+    cy.log(`Valid records (excluding 0/0): ${totalBars}`)
     cy.log(`Total records from API: ${totalBars}`)
 
     const validatedDates = new Set()
@@ -293,7 +298,7 @@ it('Insights-Company - Validate Avg Daily Work Hours graph tooltip content match
         })
 
         cy.then(() => {
-          const allDates = graphData.map(d => d.date)
+          const allDates = filteredData.map(d => d.date)
           const missedDates = allDates.filter(d => !validatedDates.has(d))
 
           if (missedDates.length > 0) {

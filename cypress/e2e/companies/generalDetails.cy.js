@@ -2,7 +2,7 @@
 
 import companiesHelper from '../../support/helper/companiesHelper';
 import generalDetailsPage from '/cypress/pages/companies/generalDetails'
-import { generateRandomEmail, generateRandomWorldAddress } from '../../fixtures/workerData';
+import { generateRandomEmail, generateRandomWorldAddress } from '../../fixtures/generateData';
 
 describe("WorkForce Companies Module - General Details", { tags: ["Epic:WorkForce", "Feature:GeneralDetails", "Module:WorkForce-Company"] }, () => {
 

@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper';
-import { generateWorkerData } from '../../fixtures/workerData.js';
+import { generateWorkerData } from '../../fixtures/generateData';
 
 describe(
   "Worker Module - File Upload and Download",

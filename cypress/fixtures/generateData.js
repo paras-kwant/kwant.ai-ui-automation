@@ -1,4 +1,4 @@
-// cypress/fixtures/workerData.js
+
 
 export const generateWorkerData = () => {
   return {

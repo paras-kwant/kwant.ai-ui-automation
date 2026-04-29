@@ -173,16 +173,9 @@ describe(
             cy.get(workforceSelector.searchInput)
               .clear()
               .type(device, { delay: 50 });   
-    
-            cy.get(workforceSelector.tableRow).each(($row) => {
-              cy.wrap($row)
-                .find(".cell-content")
-                .should("exist")
-                .should("contain.text", device);
+              cy.get(workforceSelector.tableRow).find('.cell-content').contains(device);
             });
           });
-      }
-    );
 
     it(
       "Validating search functionality based on Last Seen Location in use",

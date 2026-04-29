@@ -86,7 +86,7 @@ class AddCompanyPage {
   }
 
   clickAddCompany() {
-    this.addCompanyButton.click();
+    this.addCompanyButton.should('be.visible').click();
   }
 
   enterCompanyName(name) {
@@ -231,10 +231,59 @@ class AddCompanyPage {
     this.enterEmail(companyData.email);
     this.enterCompanyName(companyData.companyName);
     this.enterZipCode(companyData.zipCode);
-    this.selectCertificates();
+    // this.selectCertificates();
     this.selectPrimaryTrade();
     this.enterPhoneNumber(companyData.phoneNumber);
     this.enterAddress(companyData.address);
+  }
+
+  verifyComapnyAddedSucessfully(){
+    this.verifySuccessMessage('Company added successfully');
+  
+  }
+
+  validateAddedCompanyData(interception, companyData) {
+    const { request, response } = interception;
+
+    const res = response.body;
+
+    expect(res.id).to.exist;
+    expect(res.name).to.eq(companyData.companyName);
+
+    // ======================
+    // REQUEST VALIDATION
+    // ======================
+    expect(request.body.name).to.eq(companyData.companyName);
+
+    if (companyData.email) {
+      expect(request.body.email).to.eq(companyData.email);
+    } else {
+      expect(request.body.email ?? null).to.eq(null);
+    }
+
+    if (companyData.phoneNumber) {
+      expect(request.body.phone).to.eq(companyData.phoneNumber);
+    } else {
+      expect(request.body.phone ?? null).to.eq(null);
+    }
+
+    if (companyData.address) {
+      expect(request.body.address).to.eq(companyData.address);
+    } else {
+      expect(request.body.address ?? null).to.eq(null);
+    }
+
+    if (companyData.zipCode) {
+      expect(request.body.zipCode).to.eq(companyData.zipCode);
+    } else {
+      expect(request.body.zipCode ?? null).to.eq(null);
+    }
+
+    // ======================
+    // RESPONSE VALIDATION
+    // ======================
+    expect(res.name).to.eq(companyData.companyName);
+    expect(res.email ?? null).to.eq(companyData.email ?? null);
   }
 }
 

@@ -20,7 +20,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
       });
   });
 
-  it('WorkForce-Company - Verify pagination breaks into pages if 100+ workers exist', { tags: ["Story:Pagination Breaks Into Pages", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Verify pagination breaks into pages if 100+ companies exist', { tags: ["Story:Pagination Breaks Into Pages", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
     cy.getTotalWorkers().then((totalValue) => {
       if (totalValue > 100) {
         cy.get('.workforce-footer button')
@@ -34,30 +34,51 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
     });
   });
 
-  it('WorkForce-Company - Verify Next and previous button navigates to respective page', { tags: ["Story:Next Previous Button Navigation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
-    cy.getTotalWorkers().then((totalValue) => {
-      const totalPages = Math.ceil(totalValue / 100);
-
-      if (totalPages > 1) {
-        cy.get('.workforce-footer button:has(svg)').first().should('be.disabled');
-        cy.get('.workforce-footer button:has(svg)').last().should('not.be.disabled');
-
-        cy.get('.workforce-footer button:has(svg)').last().click();
-        cy.wait(1000);
-
-        cy.get('.workforce-footer button:has(svg)').first().should('not.be.disabled');
-        cy.get('.workforce-footer button:has(svg)').last().should('not.be.disabled');
-        cy.get('.workforce-footer button:has(svg)').first().click();
-        cy.wait(1000);
-
-        cy.get('.workforce-footer button:has(svg)').first().should('be.disabled');
-      } else {
-        cy.get('.workforce-footer button:has(svg)').first().should('be.disabled');
-        cy.get('.workforce-footer button:has(svg)').last().should('be.disabled');
-      }
+  it('WorkForce-Company - Verify Next and previous button navigates to respective page', 
+    { tags: ["Story:Next Previous Button Navigation", "Severity:critical", "UI", "Module:WorkForce-Company"] }, 
+    () => {
+    
+      cy.getTotalWorkers().then((totalValue) => {
+        const totalPages = Math.ceil(totalValue / 100);
+    
+        if (totalPages > 1) {
+    
+          // Initial state (Page 1)
+          cy.get('.workforce-footer button:has(svg)').first().should('be.disabled');
+          cy.get('.workforce-footer button:has(svg)').last().should('not.be.disabled');
+    
+          // Intercept BEFORE click
+          cy.intercept('**/workforce**').as('workforceCall');
+    
+          // Click Next
+          cy.get('.workforce-footer button:has(svg)').last().click();
+          cy.wait('@workforceCall');
+    
+          // After going to next page
+          cy.get('.workforce-footer button:has(svg)').first().should('not.be.disabled');
+    
+          // 🔥 FIX: handle last page correctly (104 case)
+          if (totalPages === 2) {
+            cy.get('.workforce-footer button:has(svg)').last().should('be.disabled');
+          } else {
+            cy.get('.workforce-footer button:has(svg)').last().should('not.be.disabled');
+          }
+    
+          // Click Previous
+          cy.get('.workforce-footer button:has(svg)').first().click();
+          cy.wait('@workforceCall');
+    
+          // Back to first page
+          cy.get('.workforce-footer button:has(svg)').first().should('be.disabled');
+          cy.get('.workforce-footer button:has(svg)').last().should('not.be.disabled');
+    
+        } else {
+          cy.get('.workforce-footer button:has(svg)').first().should('be.disabled');
+          cy.get('.workforce-footer button:has(svg)').last().should('be.disabled');
+        }
+      });
+    
     });
-  });
-
   it('WorkForce-Company - Verify ellipsis appears when total pages exceed threshold', { tags: ["Story:Ellipsis Appears On Many Pages", "Severity:normal", "UI", "Module:WorkForce-Company"] }, () => {
     cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
     cy.getTotalWorkers().then((totalValue) => {

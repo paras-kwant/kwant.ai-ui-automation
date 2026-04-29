@@ -167,7 +167,7 @@ describe("Worker Module - Access Control Page Tests",
     accessControlPage.openDeviceEditMode();
 
     cy.get("@assignedDevice").then((device) => {
-      cy.get('[placeholder="Select Device"]').type(device);
+      cy.get('[placeholder="Select Device"]').clear().type(device);
       cy.get('body').then(($body) => {
         const $option = $body
           .find('.select_item_container [role="button"]')

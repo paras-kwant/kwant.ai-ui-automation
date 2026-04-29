@@ -9,9 +9,6 @@ describe("Insight-worker Module - column", { tags: ["Epic:insight", "Feature:Com
     columnSettingsPage.selectFirstSelectorItem();
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Drag & Drop
-  // ─────────────────────────────────────────────────────────────────────────
 
   it('Insight-Worker - Validate drag and drop column syncs with table headers', () => {
 
@@ -52,9 +49,6 @@ describe("Insight-worker Module - column", { tags: ["Epic:insight", "Feature:Com
 
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Save Button State
-  // ─────────────────────────────────────────────────────────────────────────
 
   it('Insight-Worker - save button should be disabled when there is no change', () => {
     columnSettingsPage.assertTableRowsVisible();
@@ -73,9 +67,6 @@ describe("Insight-worker Module - column", { tags: ["Epic:insight", "Feature:Com
     columnSettingsPage.assertSaveEnabled();
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Reset
-  // ─────────────────────────────────────────────────────────────────────────
 
   it('Insight-Worker - reset the column setting', () => {
     columnSettingsPage.assertTableRowsVisible();
@@ -85,9 +76,6 @@ describe("Insight-worker Module - column", { tags: ["Epic:insight", "Feature:Com
     columnSettingsPage.assertColumnUnchecked('projectCode');
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Checked Columns vs Table Headers
-  // ─────────────────────────────────────────────────────────────────────────
 
   it('Insight-Worker - Validate checked columns appear in table in same pattern', () => {
 
@@ -114,9 +102,6 @@ describe("Insight-worker Module - column", { tags: ["Epic:insight", "Feature:Com
 
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Drawer Close Behaviours
-  // ─────────────────────────────────────────────────────────────────────────
 
   it('Insight-Worker - clicking on the x icon should close the column setting drawer', () => {
     columnSettingsPage.assertTableRowsExist();

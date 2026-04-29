@@ -52,15 +52,15 @@ describe(
       }
     );
 
-    it(
+    it.only(
       'Verify Safety Audit Alert Filters (All, Resolved, Unresolved) Functionality',
       { tags: ["Story:Safety Audit Alert Filter All Resolved Unresolved", "Severity:critical", "UI", "Module:Workforce-Worker"] },
       () => {
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
         cy.get(workforceSelector.SafetyAuditPage).click();
 
-        cy.get('section [data-testid="table_tr"] .sc-cvalOF.kKTzpl').should('not.exist');
-        cy.get('section [data-testid="table_tr"] .sc-cvalOF.dvyqIw').should('exist');
+        cy.get('section [data-testid="table_tr"] .sc-behkuB.hmAOOL').should('not.exist');
+        cy.get('section [data-testid="table_tr"] .sc-behkuB.ewwrfi').should('exist');
 
         cy.get('.filter-alert-select-container [label="Unresolved"]').should('be.visible').click();
         cy.contains('.alert-type-label', 'All').click();
@@ -68,11 +68,11 @@ describe(
 
         cy.get('.filter-alert-select-container [label="All"]').should('be.visible').click();
         cy.contains('.alert-type-label', 'Resolved').click();
-        cy.get('section [data-testid="table_tr"] .sc-cvalOF.kKTzpl').should('not.exist');
+        cy.get('section [data-testid="table_tr"] .sc-behkuB.ewwrfi').should('not.exist');
         cy.wait(3000);
 
         cy.get('body').then(($body) => {
-          if ($body.find('section [data-testid="table_tr"] .sc-cvalOF.kKTzpl').length === 0) {
+          if ($body.find('section [data-testid="table_tr"] .sc-behkuB.ewwrfi').length === 0) {
             cy.get('.empty-body__title').contains('No safety notifications yet!').should('be.visible');
           }
         });

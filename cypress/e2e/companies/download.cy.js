@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper';
-import { generateWorkerData } from '../../fixtures/workerData.js';
+import { generateCompanyData } from '../../fixtures/generateData.js';
 import companiesHelper from '../../support/helper/companiesHelper.js';
 
 describe("WorkForce Companies Module - Download CSV", { tags: ["Epic:WorkForce", "Feature:Companies Download", "Module:WorkForce-Company"] }, () => {

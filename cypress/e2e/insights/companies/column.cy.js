@@ -7,7 +7,7 @@ import { workforceSelector } from '../../../support/workforceSelector';
 describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:Companies Module"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
     cy.get('.selector-item.first').click()
     cy.get('.selector-item.first').should('have.class', 'active');
   });

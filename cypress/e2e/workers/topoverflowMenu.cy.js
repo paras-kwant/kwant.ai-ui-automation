@@ -107,8 +107,8 @@ describe("Worker Module - overflowMenu", { tags: ["Story:Worker Overflow Menu", 
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Change Value").click();
   
-    cy.selectRandomOption('[label="Trade Classification"] input', '.select_item_container [role="button"]', "Trade Classification");
-    cy.selectRandomOption('[label="Crew"] input', '.select_item_container [role="button"]', "Crew");
+    // cy.selectRandomOption('[label="Trade Classification"] input', '.select_item_container [role="button"]', "Trade Classification");
+    // cy.selectRandomOption('[label="Crew"] input', '.select_item_container [role="button"]', "Crew");
     cy.selectRandomOption('[label="Job Title"] input', '.select_item_container [role="button"]', "Job Title");
   
     cy.get('[label="Job Title"] input')

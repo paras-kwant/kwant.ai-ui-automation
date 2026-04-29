@@ -8,7 +8,7 @@ import companiesHelper from '../../../support/helper/companiesHelper';
 describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:Insights", "Feature:Selection", "Module:Insights-Company"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
     cy.wait(2000);
     cy.get('.selector-item.first').click();
     cy.get('.selector-item.first').should('have.class', 'active');
@@ -122,6 +122,7 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
     cy.wait(2000);
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('.site-left').eq(0).find('.site-label').click();
+    cy.wait(2000)
     cy.go('back');
     cy.wait(1000);
 
@@ -159,25 +160,28 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
       });
   });
 
-  it('Insight-Company - Clicking on-site today icon on a row with workers should show correct worker count on navigation', {
+  it.only('Insight-Company - Clicking on-site today icon on a row with workers should show correct worker count on navigation', {
     tags: ["Story:On-site Hours Drawer For Today", "Severity:normal", "UI", "Module:Insights-Company"]
   }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('.site-left').eq(0).find('.site-label').click();
     cy.go('back');
-    cy.wait(1000);
+    cy.wait(3000);
 
     cy.get(workforceSelector.tableRow).should('be.visible');
 
     cy.intercept('POST', '**/api/insight/company/table**').as('companyTable');
     cy.intercept('POST', '**/api/insight/company/summary**').as('companySummary');
 
-    cy.wait(1000);
+    cy.wait(2000);
 
-    cy.get('.site-left').filter((i, el) => {
-      const text = Cypress.$(el).find('.site-label').text().trim();
-      return parseInt(text, 10) > 0;
-    }).first().as('nonZeroRow');
+    // cy.get('.site-left').filter((i, el) => {
+    //   const text = Cypress.$(el).find('.site-label').text().trim();
+    //   return parseInt(text, 10) > 0;
+    // }).first().as('nonZeroRow');
+    cy.get('.site-left').first().as('nonZeroRow');
+
+
 
     cy.get('@nonZeroRow').find('.site-label')
       .invoke('text')

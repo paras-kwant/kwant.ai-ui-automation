@@ -1,5 +1,4 @@
 import { workforceSelector } from '../workforceSelector';
-import workerHelper from './workerHelper';
 
 const WorkerHelper = {
   visitWorkersPage: () => cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/workers`),

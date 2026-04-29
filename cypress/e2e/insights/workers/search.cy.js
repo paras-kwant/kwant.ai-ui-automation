@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
-import { searchPage } from "../../../pages/insights/workers/search";
-import WorkerHelper from "../../../support/helper/workerHelper";
+import { searchPage } from "../../../pages/insights/workers/search";;
 import { workforceSelector } from "../../../support/workforceSelector";
+import WorkerHelper from "../../../support/helper/workerHelper";
 
 describe("Insight Worker - Search ", { tags: ["Epic:WorkForce", "Feature:Search", "Module:Insights-Worker"] }, () => {
   let workerNames = [];

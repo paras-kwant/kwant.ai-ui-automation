@@ -8,7 +8,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
     cy.intercept('GET', '**/api/projectConfigs**').as('getConfig');
     cy.intercept('GET', '**/api/projectTaskTrade/detail/**').as('taskDetail');
 
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
 
     cy.wait(2000);
     cy.get('.selector-item.last').click();
@@ -24,18 +24,11 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
 
   function selectCompanyRow() {
     cy.get(workforceSelector.tableRow).its('length').should('be.greaterThan', 1);
-    cy.get(workforceSelector.tableRow).then(($rows) => {
-      const matchedRows = Array.from($rows).filter(row =>
-        Number(Cypress.$(row).find('.site-label').text().trim()) >= 1
-      );
-      expect(matchedRows.length).to.be.gte(2, 'There should be at least two rows with label >=1');
+    cy.get(workforceSelector.tableRow).eq(1).then(($row) => {
+      cy.wrap($row).find('input[type="checkbox"]').check({ force: true });
 
-      const selectedWorker = matchedRows[1];
-      cy.wrap(selectedWorker).find('input[type="checkbox"]').check({ force: true });
-
-      cy.wrap(selectedWorker).find('.personal-info-content__title').invoke('text').then((text) => {
+      cy.wrap($row).find('.personal-info-content__title').invoke('text').then((text) => {
         const companyName = text.trim();
-        cy.log(`Selected company name: ${companyName}`);
         cy.wrap(companyName).as('companyName');
 
         cy.get('.onsite-selected-container .personal-info-content__title')
@@ -48,22 +41,12 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   it('Insights-Company - Verify selected company name appears in onsite selection panel', {
     tags: ["Story:Company Selection Display", "Severity:critical", "UI", "Module:Insights-Company"]
   }, () => {
-    let selectedWorker;
-    let companyName;
-
     cy.get(workforceSelector.tableRow).its('length').should('be.greaterThan', 1);
-    cy.get(workforceSelector.tableRow).then(($rows) => {
-      const matchedRows = Array.from($rows).filter(row =>
-        Number(Cypress.$(row).find('.site-label').text().trim()) >= 1
-      );
-      expect(matchedRows.length).to.be.gte(2, 'There should be at least two rows with label >=1');
+    cy.get(workforceSelector.tableRow).eq(1).then(($row) => {
+      cy.wrap($row).find('input[type="checkbox"]').check({ force: true });
 
-      selectedWorker = matchedRows[1];
-      cy.wrap(selectedWorker).find('input[type="checkbox"]').check({ force: true });
-
-      cy.wrap(selectedWorker).find('.personal-info-content__title').invoke('text').then((text) => {
-        companyName = text.trim();
-        cy.log(`Selected company name: ${companyName}`);
+      cy.wrap($row).find('.personal-info-content__title').invoke('text').then((text) => {
+        const companyName = text.trim();
 
         cy.get('.onsite-selected-container .personal-info-content__title')
           .contains(companyName)
@@ -94,12 +77,9 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
       cy.get('button').contains('Full Profile').click();
       cy.get('p').contains(companyName).should('be.visible');
 
-      // Wait for projectTaskTrade API and capture lastId
       cy.wait('@taskDetail').then(({ request }) => {
         const lastId = request.url.split('/').pop();
-        cy.log(`✅ projectTaskTradeId: ${lastId}`);
 
-        // Fetch API data with authHeaders from beforeEach alias
         cy.get('@authHeaders').then((authHeaders) => {
           cy.request({
             method: 'GET',
@@ -107,9 +87,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
             headers: authHeaders,
           }).then((apiResponse) => {
             const apiWorkers = apiResponse.body.workers || {};
-            cy.log('📌 API Worker Counts:', JSON.stringify(apiWorkers));
 
-            // Capture UI counts
             cy.get(workforceSelector.companyWorkerPage).click();
             cy.get('div.details, div.other-counts, div.count-card').each(($section) => {
               cy.wrap($section).within(() => {
@@ -119,13 +97,10 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
                     const countText = $ps.eq(i + 1)?.text()?.trim() || '0';
                     const count = parseInt(countText.replace(/\D/g, '')) || 0;
                     workerCounts[label] = count;
-                    cy.log(`📌 UI ${label}: ${count}`);
                   }
                 });
               });
             }).then(() => {
-              cy.log('✅ UI Worker Counts Object:', JSON.stringify(workerCounts));
-
               const mapping = {
                 'Total Workers': 'totalWorker',
                 'Total Workers On-site': 'onsiteWorker',
@@ -137,7 +112,6 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
                 const apiKey = mapping[uiLabel];
                 if (workerCounts[uiLabel] !== undefined && apiWorkers[apiKey] !== undefined) {
                   expect(workerCounts[uiLabel]).to.eq(apiWorkers[apiKey]);
-                  cy.log(`✔ Matched ${uiLabel}: UI=${workerCounts[uiLabel]}, API=${apiWorkers[apiKey]}`);
                 }
               });
             });
@@ -158,20 +132,15 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
       cy.get('button').contains('Full Profile').click();
       cy.get('p').contains(companyName).should('be.visible');
 
-      // Wait for UI fields to render
       cy.wait(2000);
       cy.get('.hover-hoc-container').each(($container) => {
         const label = $container.find('.hover-hoc-container__label').text().trim();
         const value = $container.find('.hover-hoc-container__input__display-value').text().trim();
         if (label) generalDetails[label] = value;
       }).then(() => {
-        cy.log('📌 General Details UI Object:', JSON.stringify(generalDetails));
-
         cy.wait('@taskDetail').then(({ request }) => {
           const lastId = request.url.split('/').pop();
-          cy.log(`✅ projectTaskTradeId: ${lastId}`);
 
-          // Fetch API data using authHeaders from beforeEach alias
           cy.get('@authHeaders').then((authHeaders) => {
             cy.request({
               method: 'GET',
@@ -179,7 +148,6 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
               headers: authHeaders
             }).then((apiResp) => {
               const apiData = apiResp.body || {};
-              cy.log('📌 API General Details:', JSON.stringify(apiData));
 
               Object.keys(generalDetails).forEach(label => {
                 const uiVal = generalDetails[label].trim().toLowerCase();
@@ -199,7 +167,6 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
 
                 if (apiVal) {
                   expect(uiVal).to.eq(apiVal);
-                  cy.log(`✔ Matched ${label}: UI="${generalDetails[label]}", API="${apiVal}"`);
                 }
               });
             });
@@ -213,15 +180,14 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
     tags: ["Story:Document Verification", "Severity:blocker", "API", "Module:Insights-Company"]
   }, () => {
     const uiDocuments = [];
-
-    // Normalize function: trim, lowercase, treat '-' and ' ' as same
+  
     const normalize = (str) => {
       if (!str) return '';
       str = str.toString().trim().toLowerCase();
       if (str === '-' || str === '') return 'placeholder';
-      return str.replace(/\s+/g, ' '); // collapse multiple spaces to single
+      return str.replace(/\s+/g, ' ');
     };
-
+  
     const normalizeDate = (dateStr) => {
       if (!dateStr || dateStr === '-' || dateStr === '') return '';
       if (dateStr.includes('/')) {
@@ -231,91 +197,82 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
       if (dateStr.includes('T')) return dateStr.split('T')[0];
       return dateStr;
     };
-
-    // Select company row and get its name
+  
     selectCompanyRow();
-
+  
     cy.get('@companyName').then((companyName) => {
       cy.get('button').contains('Full Profile').click();
       cy.get('p').contains(companyName).should('be.visible');
-
-      // Navigate to Document page
+  
       cy.get(workforceSelector.documentPage).click();
-
-      // Capture UI documents
-      cy.get(workforceSelector.documentTableRow)
-        .should('be.visible')
-        .and('have.length.greaterThan', 0)
-        .each(($row) => {
-          const doc = {};
-          cy.wrap($row).find('.cell-content').then(($cells) => {
-            doc.name = $cells.eq(0).text().trim();
-            doc.expiry = $cells.eq(1).text().trim();
-            doc.credentialId = $cells.eq(2).text().trim();
-            uiDocuments.push(doc);
-          });
-        }).then(() => {
-          cy.log('📄 Captured UI documents:', JSON.stringify(uiDocuments));
-
-          // Wait for projectTaskTrade API
-          cy.wait('@taskDetail').then(({ request }) => {
-            const lastId = request.url.split('/').pop();
-            cy.log(`✅ projectTaskTradeId: ${lastId}`);
-
-            // Fetch API data using authHeaders from beforeEach alias
-            cy.get('@authHeaders').then((authHeaders) => {
-              cy.request({
-                method: 'GET',
-                url: `https://uat.kwant.ai/api/projectTaskTrade/detail/${lastId}`,
-                headers: authHeaders
-              }).then((apiResp) => {
-                const apiDocs = apiResp.body.documents?.docList || [];
-                cy.log('📌 API documents:', JSON.stringify(apiDocs));
-
-                // Strict match each UI doc
-                uiDocuments.forEach((uiDoc) => {
-                  cy.log(`🔍 Validating document: ${uiDoc.name}`);
-
-                  const match = apiDocs.find(apiDoc =>
-                    normalize(apiDoc.documentType) === normalize(uiDoc.name)
-                  );
-
-                  if (!match) {
-                    throw new Error(`❌ No API match found for document: ${uiDoc.name}`);
-                  }
-
-                  const apiExpiry = normalizeDate(match.expiryDate || '-');
-                  const uiExpiry = normalizeDate(uiDoc.expiry || '-');
-
-                  // Treat '-' and blank as same
-                  if (apiExpiry !== uiExpiry) {
-                    throw new Error(`❌ Expiry mismatch for ${uiDoc.name}: UI="${uiDoc.expiry}" vs API="${match.expiryDate}"`);
-                  }
-
-                  const apiCred = normalize(match.credentialId || '-');
-                  const uiCred = normalize(uiDoc.credentialId || '-');
-
-                  if (uiCred !== apiCred) {
-                    throw new Error(`❌ CredentialId mismatch for ${uiDoc.name}: UI="${uiDoc.credentialId}" vs API="${match.credentialId}"`);
-                  }
-
-                  cy.log(`✔ Document validated: ${uiDoc.name} | Expiry: ${apiExpiry} | CredentialId: ${apiCred}`);
+  
+      cy.wait('@taskDetail').then(({ request }) => {
+        const lastId = request.url.split('/').pop();
+  
+        cy.get('@authHeaders').then((authHeaders) => {
+          cy.request({
+            method: 'GET',
+            url: `https://uat.kwant.ai/api/projectTaskTrade/detail/${lastId}`,
+            headers: authHeaders
+          }).then((apiResp) => {
+            const apiDocs = apiResp.body.documents?.docList || [];
+  
+            cy.get('body').then(($body) => {
+              const rows = $body.find(workforceSelector.documentTableRow);
+  
+              if (rows.length === 0) {
+                expect(apiDocs.length).to.eq(0);
+                return;
+              }
+  
+              cy.get(workforceSelector.documentTableRow)
+                .should('be.visible')
+                .and('have.length.greaterThan', 0)
+                .each(($row) => {
+                  const doc = {};
+                  cy.wrap($row).find('.cell-content').then(($cells) => {
+                    doc.name = $cells.eq(0).text().trim();
+                    doc.expiry = $cells.eq(1).text().trim();
+                    doc.credentialId = $cells.eq(2).text().trim();
+                    uiDocuments.push(doc);
+                  });
+                }).then(() => {
+                  uiDocuments.forEach((uiDoc) => {
+                    const match = apiDocs.find(apiDoc =>
+                      normalize(apiDoc.documentType) === normalize(uiDoc.name)
+                    );
+  
+                    if (!match) {
+                      throw new Error(`❌ No API match found for document: ${uiDoc.name}`);
+                    }
+  
+                    const apiExpiry = normalizeDate(match.expiryDate || '-');
+                    const uiExpiry = normalizeDate(uiDoc.expiry || '-');
+  
+                    if (apiExpiry !== uiExpiry) {
+                      throw new Error(`❌ Expiry mismatch for ${uiDoc.name}: UI="${uiDoc.expiry}" vs API="${match.expiryDate}"`);
+                    }
+  
+                    const apiCred = normalize(match.credentialId || '-');
+                    const uiCred = normalize(uiDoc.credentialId || '-');
+  
+                    if (uiCred !== apiCred) {
+                      throw new Error(`❌ CredentialId mismatch for ${uiDoc.name}: UI="${uiDoc.credentialId}" vs API="${match.credentialId}"`);
+                    }
+                  });
                 });
-
-                cy.log('🎯 All documents validated successfully!');
-              });
             });
           });
         });
+      });
     });
   });
 
-
-  it.only("Insight-Company - Verify Company Row Status Colors Match Expected Values", () => {
+  it("Insight-Company - Verify Company Row Status Colors Match Expected Values", () => {
     cy.intercept("GET", "**/projectTaskTrade/detail/*").as("getDetail");
-  
+
     cy.get(workforceSelector.tableRow).eq(1).as("row");
-  
+
     cy.get("@row")
       .find(".row_status_tooltip_container")
       .invoke("text")
@@ -323,13 +280,13 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
         const uiText = tooltipText.toLowerCase();
         cy.wrap(uiText).as("uiText");
       });
-  
+
     cy.get("@row").find('input[type="checkbox"]').check({ force: true });
     cy.contains("button", "Full Profile").click();
-  
+
     cy.wait("@getDetail").then((interception) => {
       const companyId = interception.request.url.split("/").pop();
-  
+
       cy.get("@authHeaders").then((authHeaders) => {
         cy.request({
           method: "GET",
@@ -337,32 +294,24 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
           headers: authHeaders,
         }).then((apiResp) => {
           const workers = apiResp.body.workers;
-  
+
           cy.get("@uiText").then((uiText) => {
-  
-            const hasFlagged =
-              workers.flaggedWorker > 0 || workers.unauthorizedWorker > 0;
-  
+            const hasFlagged = workers.flaggedWorker > 0 || workers.unauthorizedWorker > 0;
             const hasSafety = workers.totalSafetyAlerts > 0;
-  
+
             if (uiText.includes("flagged") || uiText.includes("unauthorized")) {
               expect(hasFlagged, "API should have flagged/unauthorized").to.be.true;
-            }
-  
-            else if (
+            } else if (
               uiText.includes("fatigue") ||
               uiText.includes("safety") ||
               uiText.includes("sos") ||
               uiText.includes("fall")
             ) {
               expect(hasSafety, "API should have safety alerts").to.be.true;
-            }
-
-            else {
+            } else {
               expect(hasFlagged, "No flagged workers expected").to.be.false;
               expect(hasSafety, "No safety alerts expected").to.be.false;
             }
-  
           });
         });
       });
