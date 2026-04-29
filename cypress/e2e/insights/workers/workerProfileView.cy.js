@@ -3,7 +3,7 @@
 import companyProfilePage from '../../../pages/insights/workers/workerProfileView'
 import { workforceSelector } from '../../../support/workforceSelector';
 
-describe("Insights Worker - Worker Profile View", { tags: ["Epic:WorkForce", "Feature:WorkforceDashboard", "Module:Insights-Company"] }, () => {
+describe("Insights Worker - Worker Profile View", { tags: ["Epic:WorkForce", "Feature:WorkforceDashboard"] }, () => {
 
   beforeEach(() => {
     companyProfilePage.interceptGetConfig();

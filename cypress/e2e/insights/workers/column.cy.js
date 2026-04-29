@@ -2,7 +2,7 @@
 
 import columnSettingsPage from '../../../pages/insights/workers/column';
 
-describe("Insight-worker Module - column", { tags: ["Epic:insight", "Feature:Companies Module"] }, () => {
+describe("Insight-worker Module - column", () => {
 
   beforeEach(() => {
     columnSettingsPage.visit('500526306');
