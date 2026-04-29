@@ -1,6 +1,8 @@
 name: Cypress UI Tests Parallel with Allure
 
 on:
+  schedule:
+    - cron: '45 2 * * *'
   workflow_dispatch:
 
 jobs:
