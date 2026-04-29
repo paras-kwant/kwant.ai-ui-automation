@@ -51,6 +51,7 @@ jobs:
           path: cypress/screenshots
           if-no-files-found: ignore
 
+
   workers-tests:
     name: 👷 Workers UI Tests
     runs-on: ubuntu-latest
@@ -95,6 +96,7 @@ jobs:
           name: workers-screenshots
           path: cypress/screenshots
           if-no-files-found: ignore
+
 
   insights-tests:
     name: 📊 Insights/Companies UI Tests
@@ -141,9 +143,56 @@ jobs:
           path: cypress/screenshots
           if-no-files-found: ignore
 
+
+  auth-tests:
+    name: 🔐 Auth UI Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      EMAIL: ${{ secrets.EMAIL }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
+      TERM: xterm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+
+      - name: Run Auth Cypress Tests
+        run: |
+          mkdir -p allure-results
+          npx cypress run \
+            --spec "cypress/e2e/auth/**/*.cy.js" \
+            --browser chrome --headless \
+            || echo "⚠️ Auth tests finished with failures"
+
+      - name: Upload Auth Allure Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-allure-results
+          path: allure-results
+
+      - name: Upload Auth Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+
   merge-reports:
     name: 📊 Merge Allure Reports & Deploy
-    needs: [companies-tests, workers-tests, insights-tests]
+    needs: [companies-tests, workers-tests, insights-tests, auth-tests]
     runs-on: ubuntu-latest
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -169,6 +218,10 @@ jobs:
         with:
           name: insights-allure-results
           path: merged-results/insights
+      - uses: actions/download-artifact@v4
+        with:
+          name: auth-allure-results
+          path: merged-results/auth
 
       - name: Download Companies Screenshots
         uses: actions/download-artifact@v4
@@ -191,12 +244,20 @@ jobs:
           path: merged-results/screenshots/insights
         continue-on-error: true
 
+      - name: Download Auth Screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: auth-screenshots
+          path: merged-results/screenshots/auth
+        continue-on-error: true
+
       - name: Merge Allure Results
         run: |
           mkdir -p merged-results/allure-results
           find merged-results/companies -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
           find merged-results/workers -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
           find merged-results/insights -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
+          find merged-results/auth -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
           find merged-results/screenshots -type f \( -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \;
 
       - name: Generate Allure Report
