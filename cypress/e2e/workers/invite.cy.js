@@ -28,8 +28,18 @@ describe(
         });
       }
 
-      cy.cleanUI();
     });
+    beforeEach(() => {
+      cy.get(".icon-button button").first().click();
+      cy.contains('button p', "Reset to default").click();
+      cy.wait(5000);
+      cy.get('[data-rbd-draggable-id="status"] [type="checkbox"]').scrollIntoView().check();
+      cy.get('button p').contains('Save').click({force: true});
+
+
+
+
+    })
 
     it(
       "Send Onboarding Invite - No Worker Selected",
@@ -124,74 +134,89 @@ describe(
       { tags: ["Story:Onboarding Invite Accept Invitation Link", "Severity:critical", "UI", "Module:Workforce-Worker"] },
       () => {
         cy.get('.personal-info-content__title').should('be.visible');
-
+    
         cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
           const { firstName, lastName } = workerData;
           const fullName = `${firstName} ${lastName}`;
-
+    
           cy.get(workforceSelector.searchInput).clear().type(fullName);
           cy.get('.personal-info-content__title').contains(fullName).should('be.visible');
-
+    
           cy.get('.header-checkbox-container [type="checkbox"]').eq(0).check({ force: true });
-
+    
           cy.contains("button p", "Send Onboarding Invite").click();
           cy.log('📧 Checking email...');
           cy.wait(5000);
-
+    
           cy.task('getMostRecentEmail').then((email) => {
             if (!email) throw new Error('❌ NO EMAIL RECEIVED');
-
+    
             const body = email.body
               .replace(/=\r\n/g, '')
               .replace(/\r\n/g, ' ')
               .replace(/\s+/g, ' ');
-
+    
             const lowerBody = body.toLowerCase();
             const subject = email.subject.toLowerCase();
-
+    
             cy.log(`📧 Email: ${email.subject}`);
             cy.log(email.body.substring(0, 300));
-
+    
             expect(lowerBody || subject).to.include('onboarding');
             expect(lowerBody).to.satisfy(b => b.includes('invite') || b.includes('invitation'));
             cy.log('✅ Email content validated!');
-
+    
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             const links = body.match(urlRegex);
-
+    
             if (!links || links.length === 0) {
               throw new Error('❌ No link found in email body');
             }
-
+    
             let onboardingLink = links.find(link =>
               link.includes('onboarding') || link.includes('accept')
             );
-
+    
             if (!onboardingLink) {
               throw new Error('❌ No onboarding invitation link found');
             }
-
+    
             onboardingLink = onboardingLink
               .replace(/=3D/g, '=')
               .replace(/["'>]/g, '')
               .replace(/\s/g, '')
               .trim();
-
+    
             cy.log(`🔗 Invitation link: ${onboardingLink}`);
-
+    
+            // Visit the onboarding link
             cy.visit(onboardingLink);
-            cy.contains('button', 'Accept Work Invite')
-              .scrollIntoView()
+    
+            // Wait for page to fully load and URL to settle
+            cy.url().should('include', 'onboarding');
+    
+            // Wait for any loaders/spinners to disappear
+            cy.get('[class*="loading"], [class*="spinner"]', { timeout: 10000 })
+              .should('not.exist');
+    
+            // Re-query button after page settles to avoid detached DOM
+            cy.contains('button', 'Accept Work Invite', { timeout: 15000 })
               .should('be.visible')
-              .click();
-
-            cy.get('.onboarding-title').contains('What is your contact number?').should('be.visible');
+              .and('not.be.disabled')
+              .then(($btn) => {
+                cy.wrap($btn).scrollIntoView();
+                cy.wrap($btn).click();
+              });
+    
+            cy.get('.onboarding-title')
+              .contains('What is your contact number?')
+              .should('be.visible');
+    
             cy.log('🎉 Worker successfully accepted the onboarding invitation!');
           });
         });
       }
     );
-
     it(
       "Send onboarding invite - Worker with no email",
       { tags: ["Story:Onboarding Invite Worker Without Email Shows Error", "Severity:critical", "UI", "Module:Workforce-Worker"] },
