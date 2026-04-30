@@ -172,7 +172,7 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 			cy.contains('Avg. daily check-in time of a worker.').should('be.visible')
 		  })
 
-		  it('Insight-Worker validate Average daily work hour', () => {
+		  it('Insight-Worker validate Average daily work hour Graphs', () => {
 			cy.intercept('POST', '**/api/empinsight/graph/avgWorkHour*').as('workerTable');
 		
 		

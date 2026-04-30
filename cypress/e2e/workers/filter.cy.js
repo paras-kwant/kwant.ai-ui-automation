@@ -27,7 +27,7 @@ describe(
         cy.get('[data-rbd-draggable-id="ethnicity"] [type="checkbox"]').click();
         cy.get('[data-rbd-draggable-id="sex"] [type="checkbox"]').click();
         cy.get('[data-rbd-draggable-id="status"] [type="checkbox"]').click();
-        // cy.get('[data-rbd-draggable-id="boolean_test"] [type="checkbox"]').click();
+        cy.get('[data-rbd-draggable-id="boolean_test"] [type="checkbox"]').click();
         cy.get('button p').contains('Save').should('be.visible').click();
         columnsConfigured = true;
       }
