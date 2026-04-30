@@ -66,10 +66,14 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
         cy.get('@totalWorkersCard').find('button').click();
 
         cy.url().should('include', '/workers');
+                cy.get(workforceSelector.tableRow).should('be.visible');
+cy.get('body').realMouseMove(800, 400)
+cy.wait(200)
 
         cy.get('.filter-tag-container')
           .eq(0)
-          .should('be.visible').realHover();
+          .should('be.visible').scrollIntoView({ duration: 0 })
+  .realHover({ position: 'center', scrollBehavior: false });
 
         cy.get('@companyName').then((companyName) => {
           cy.get('.label.default__label')
@@ -243,9 +247,13 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
           cy.get('@totalSafteyAlerts').find('button').click();
   
           const labels = ['SOS', 'Fall', 'Near miss', 'Restricted', 'Fatigue', 'Unsafe'];
+                  cy.get(workforceSelector.tableRow).should('be.visible');
+cy.get('body').realMouseMove(800, 400)
+cy.wait(200)
 
           cy.get('.filter-tag').first().each(($tag) => {
-            cy.wrap($tag).realHover();
+            cy.wrap($tag).scrollIntoView({ duration: 0 })
+  .realHover({ position: 'center', scrollBehavior: false });
           
             labels.forEach((label) => {
               cy.get('body').then(($body) => {
@@ -283,7 +291,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
             });
   
             expect(companyIndex).to.be.greaterThan(-1);
-  
+
             cy.get('@companyName').then((companyName) => {
   
               cy.get(workforceSelector.tableRow).each(($row) => {
@@ -296,7 +304,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
                     expect(company.trim()).to.contain(companyName);
                   });
 
-                  cy.get(workforceSelector.tableRow).click({force: true});
+                  cy.get(workforceSelector.tableRow).first().click({force: true});
                   cy.get(workforceSelector.SafetyAuditPage).click()
                   const alerts = ['SOS', 'Fall', 'Near miss', 'Restricted', 'Fatigue', 'Unsafe'];
 
@@ -374,11 +382,19 @@ cy.get(workforceSelector.documentTableRow).each(($row) => {
 
         cy.get('@flaggedWorkersCard').find('button').click();
         cy.url().should('include', '/workers');
+                cy.get(workforceSelector.tableRow).should('be.visible');
+cy.get('body').realMouseMove(800, 400)
+cy.wait(200)
 
-        cy.get('.filter-tag-container').eq(0).should('be.visible').realHover();
+        cy.get('.filter-tag-container').eq(0).should('be.visible').scrollIntoView({ duration: 0 })
+  .realHover({ position: 'center', scrollBehavior: false });
         cy.get('.label.default__label').contains('Flagged').should('be.visible');
+                cy.get(workforceSelector.tableRow).should('be.visible');
+cy.get('body').realMouseMove(800, 400)
+cy.wait(200)
 
-        cy.get('.filter-tag-container').eq(1).should('be.visible').realHover();
+        cy.get('.filter-tag-container').eq(1).should('be.visible').scrollIntoView({ duration: 0 })
+  .realHover({ position: 'center', scrollBehavior: false });
         cy.get('@companyName').then((companyName) => {
           cy.get('.label.default__label').contains(companyName).should('be.visible');
         });
@@ -603,11 +619,18 @@ cy.get(workforceSelector.documentTableRow).each(($row) => {
 
         cy.get('@totalWorkersOnSiteCard').find('button').click();
         cy.url().should('include', '/workers');
+                cy.get(workforceSelector.tableRow).should('be.visible');
+cy.get('body').realMouseMove(800, 400)
+cy.wait(200)
 
-        cy.get('.filter-tag-container').eq(0).should('be.visible').realHover();
+        cy.get('.filter-tag-container').eq(0).should('be.visible').scrollIntoView({ duration: 0 })
+  .realHover({ position: 'center', scrollBehavior: false });
         cy.get('.label.default__label').contains('On-site').should('be.visible');
-
-        cy.get('.filter-tag-container').eq(1).should('be.visible').realHover();
+                cy.get(workforceSelector.tableRow).should('be.visible');
+cy.get('body').realMouseMove(800, 400)
+cy.wait(200)
+        cy.get('.filter-tag-container').eq(1).should('be.visible').scrollIntoView({ duration: 0 })
+  .realHover({ position: 'center', scrollBehavior: false });
         cy.get('@companyName').then((companyName) => {
           cy.get('.label.default__label').contains(companyName).should('be.visible');
         });
