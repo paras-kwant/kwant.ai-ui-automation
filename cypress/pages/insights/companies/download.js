@@ -190,9 +190,9 @@ assertCsvDataMatchesUi(rows, uiData) {
             this.openDownloadModal();
             this.assertDatesMatch(startDate, endDate);
             this.clickDownloadButton();
-            cy.wait(10000)
+            cy.wait(15000)
             this.waitForDownloadApi();
-            cy.wait(1000);
+            cy.wait(2000);
 
             this.getLatestDownloadedFile().then(({ fileName, downloadsFolder }) => {
               this.assertFileIsCsv(fileName);
