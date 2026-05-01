@@ -1,11 +1,7 @@
 name: Debug Single Cypress Spec with Allure
 
 on:
-  # push: # Trigger the workflow on push events
-  #   branches:
-  #     - main # Specify the branch(es) to trigger the workflow
-  #     - develop # Add other branches if needed
-  workflow_dispatch: # Allow manual triggering of the workflow
+  workflow_dispatch: # manual trigger only
 
 jobs:
   single-spec-debug:
@@ -26,9 +22,11 @@ jobs:
       TERM: xterm
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -38,16 +36,18 @@ jobs:
       - name: Install Allure CLI
         run: npm install -g allure-commandline
 
-      - name: Run ONLY document.cy.js
+      - name: Clean Allure results
         run: |
           rm -rf allure-results allure-report
           mkdir -p allure-results
-          npx cypress run \
 
-            --spec "cypress/e2e/companies/workerStepper.cy.js"" \
-            --browser chrome --headless
+      - name: Run ONLY workerStepper spec
+        run: |
+          npx cypress run \
+            --spec "cypress/e2e/companies/workerStepper.cy.js" \
+            --browser chrome \
+            --headless
 
       - name: Debug - Count Allure JSON Files
         run: |
-          ls -l allure-results/*.json | wc -l
-
+          ls -l allure-results/*.json | wc -l || echo "No allure results found"

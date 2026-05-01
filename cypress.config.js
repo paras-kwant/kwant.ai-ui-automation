@@ -7,6 +7,8 @@ const allureWriter = require("@shelex/cypress-allure-plugin/writer");
 const Imap = require("imap-simple");
 const twilio = require("twilio");
 
+
+
 module.exports = defineConfig({
   e2e: {
     screenshotOnRunFailure: true, 
@@ -25,8 +27,8 @@ module.exports = defineConfig({
     downloadsFolder: path.join(__dirname, "cypress", "downloads"),
     testIsolation: false,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
-
     setupNodeEvents(on, config) {
+      require('@cypress/grep/src/plugin')(config)
 
       if (!process.env.CI) {
         on("before:run", () => {
@@ -230,6 +232,8 @@ module.exports = defineConfig({
       allureLogCypress: false,
       allureReuseAfterSpec: false,
       allureAddVideoOnFail: true,
+      grepFilterSpecs: true,
+      grepOmitFiltered: true,
     },
   },
 });
