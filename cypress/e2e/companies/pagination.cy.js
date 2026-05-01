@@ -47,8 +47,7 @@ describe("WorkForce Companies Module - Pagination", { tags: ["Epic:WorkForce", "
           cy.get('.workforce-footer button:has(svg)').first().should('be.disabled');
           cy.get('.workforce-footer button:has(svg)').last().should('not.be.disabled');
     
-          // Intercept BEFORE click
-          cy.intercept('**/workforce**').as('workforceCall');
+          cy.intercept('**/api/projectTaskTrade/filter?**').as('workforceCall');
     
           // Click Next
           cy.get('.workforce-footer button:has(svg)').last().click();
