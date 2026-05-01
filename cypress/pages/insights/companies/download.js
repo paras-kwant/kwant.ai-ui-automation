@@ -87,11 +87,12 @@ class DownloadPage {
     const companies = interception?.response?.body?.data || [];
     const uiData = {};
     companies.forEach((c) => {
-      uiData[c.companyName] = c.actualDays;
+      // normalize here too so both sides match
+      const name = c.companyName?.trim().replace(/\s+/g, ' ');
+      if (name) uiData[name] = c.actualDays;
     });
     return uiData;
   }
-
   // ─── Assertions ──────────────────────────────────────────────────────────────
 
   assertDatesMatch(startDate, endDate) {
@@ -117,25 +118,41 @@ class DownloadPage {
     cy.get('.empty-body__title').should('contain.text', 'No Results Found');
   }
 
-  assertCsvDataMatchesUi(rows, uiData) {
-    const headers = rows[1].map((h) => h?.toString().trim());
-    const companyNameIdx = headers.indexOf('Company Name');
-    const dataRows = rows.slice(2).filter((r) => r.length > 0);
+ // In download.js — replace assertCsvDataMatchesUi
 
-    const csvData = {};
-    dataRows.forEach((row) => {
-      const name = row[companyNameIdx]?.toString().trim();
-      if (name) csvData[name] = (csvData[name] || 0) + 1;
-    });
+assertCsvDataMatchesUi(rows, uiData) {
+  // Log the raw rows to confirm structure
+  cy.log('Row 0 (title?): ' + JSON.stringify(rows[0]));
+  cy.log('Row 1 (headers?): ' + JSON.stringify(rows[1]));
+  cy.log('Row 2 (first data?): ' + JSON.stringify(rows[2]));
 
-    cy.log('CSV Data: ' + JSON.stringify(csvData));
+  const headers = rows[1].map((h) => h?.toString().trim());
+  const companyNameIdx = headers.indexOf('Company Name');
 
-    Object.entries(uiData).forEach(([companyName, actualDays]) => {
-      expect(csvData[companyName]).to.equal(actualDays,
-        `${companyName}: CSV rows (${csvData[companyName]}) should match Actual Worker-Days (${actualDays})`
-      );
-    });
-  }
+  // Guard: if header not found at all
+  expect(companyNameIdx, 'Company Name column should exist in CSV').to.be.greaterThan(-1);
+
+  const dataRows = rows.slice(2).filter((r) => r.length > 0);
+
+  const csvData = {};
+  dataRows.forEach((row) => {
+    // normalize: trim + collapse internal multiple spaces
+    const name = row[companyNameIdx]?.toString().trim().replace(/\s+/g, ' ');
+    if (name) csvData[name] = (csvData[name] || 0) + 1;
+  });
+
+  cy.log('CSV Data (normalized): ' + JSON.stringify(csvData));
+  cy.log('UI Data: ' + JSON.stringify(uiData));
+
+  Object.entries(uiData).forEach(([companyName, actualDays]) => {
+    // normalize API name the same way
+    const normalizedName = companyName.trim().replace(/\s+/g, ' ');
+    expect(csvData[normalizedName]).to.equal(
+      actualDays,
+      `${normalizedName}: CSV rows (${csvData[normalizedName]}) should match Actual Worker-Days (${actualDays})`
+    );
+  });
+}
 
   assertOnlySelectedCompanyInCsv(rows, selectedCompany) {
     const headers = rows[1].map((h) => h?.toString().trim());
