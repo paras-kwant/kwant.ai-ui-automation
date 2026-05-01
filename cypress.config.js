@@ -28,7 +28,6 @@ module.exports = defineConfig({
     testIsolation: false,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
     setupNodeEvents(on, config) {
-      require('@cypress/grep/src/plugin')(config)
 
       if (!process.env.CI) {
         on("before:run", () => {
