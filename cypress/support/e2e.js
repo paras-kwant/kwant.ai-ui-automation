@@ -2,8 +2,6 @@ import './commands';
 import 'cypress-file-upload';
 import '@shelex/cypress-allure-plugin';
 import "cypress-real-events/support";
-import registerCypressGrep from '@cypress/grep/src/support'
-registerCypressGrep()
 
 Cypress.on('uncaught:exception', (err) => {
   if (typeof err === 'object') {
