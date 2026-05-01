@@ -6,7 +6,7 @@ describe('Sign Up', () => {
     cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('94049707'));
   })
 
-  it('should send invite and navigate to sign up page', () => {
+  it('should send invite and navigate to sign up page',{tags:'@smoke'}, () => {
     cy.on("uncaught:exception", () => false);
 
     cy.get('[data-testid="settings-button"]').click()
