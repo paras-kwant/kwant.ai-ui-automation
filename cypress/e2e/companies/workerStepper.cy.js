@@ -41,7 +41,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
         cy.wrap(companyName.trim()).as('companyName');
       });
 
-    cy.get('@activeCompanyRow').first().click();
+    cy.get('@activeCompanyRow').first().click({force:true});
     cy.wait(1000);
     cy.get(workforceSelector.companyWorkerPage).click();
 
@@ -220,7 +220,7 @@ cy.wait(200)
           cy.wrap(companyName.trim()).as('companyName');
         });
   
-      cy.get('@activeCompanyRow').click();
+      cy.get('@activeCompanyRow').click({force:true});
   
       cy.get(workforceSelector.companyWorkerPage).click();
   
@@ -359,7 +359,7 @@ cy.get(workforceSelector.documentTableRow).each(($row) => {
         cy.wrap(companyName.trim()).as('companyName');
       });
 
-    cy.get('@activeCompanyRow').first().click();
+    cy.get('@activeCompanyRow').first().click({force:true});
     cy.get(workforceSelector.companyWorkerPage).click();
 
     cy.contains('p', 'Flagged Workers On-site')
@@ -488,7 +488,7 @@ cy.wait(200)
       .invoke('text')
       .then((companyName) => {
         cy.wrap(companyName.trim()).as('companyName');
-    cy.get('@activeCompanyRow').first().click();
+    cy.get('@activeCompanyRow').first().click({force:true});
 
     cy.get(workforceSelector.companyWorkerPage).click();
 
@@ -596,7 +596,7 @@ cy.wait(200)
       .then((companyName) => {
         cy.wrap(companyName.trim()).as('companyName');
 
-    cy.get('@activeCompanyRow').first().click();
+    cy.get('@activeCompanyRow').first().click({force:true});
     cy.get(workforceSelector.companyWorkerPage).click();
 
     cy.contains('p', 'Total Workers On-site')
