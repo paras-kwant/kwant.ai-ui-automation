@@ -5,7 +5,7 @@ import WorkerHelper from "../../../support/helper/workerHelper";
 
 describe("Insights Workers - Favourite Page", { tags: ["Epic:WorkForce", "Feature:Favorites", "Module:Insights-Workers"] }, () => {
   beforeEach(() => {
-    cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('500526306'));
+    cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
   });
 
   it("Insights-Workers - Insight Workers Verify remove worker from Favorite", { tags: ["Story:Insights Workers Remove From Favorite", "Severity:critical", "UI", "Module:Insights-Workers"] }, () => {
