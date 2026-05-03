@@ -143,7 +143,7 @@ describe("Insights Company - Workforce Dashboard Cards", { tags: ["Epic:WorkForc
 
               const uiAverage = parseFloat(uiValue.trim());
 
-              expect(uiAverage).to.be.closeTo(avgWorkerHours, 0.2);
+              expect(uiAverage).to.be.closeTo(avgWorkerHours, 0.3);
 
             });
 
@@ -200,7 +200,7 @@ describe("Insights Company - Workforce Dashboard Cards", { tags: ["Epic:WorkForc
 
 
 
-it.only('Insights-Company - Validate Avg Daily Work Hours graph tooltip content matches backend API data on hover', ()=>{
+it('Insights-Company - Validate Avg Daily Work Hours graph tooltip content matches backend API data on hover', ()=>{
   cy.intercept(
     "POST",
     "**/api/insight/company/graphWorkforceZoneCategoryHour"

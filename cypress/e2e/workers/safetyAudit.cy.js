@@ -52,7 +52,7 @@ describe(
       }
     );
 
-    it.only(
+    it(
       'Verify Safety Audit Alert Filters (All, Resolved, Unresolved) Functionality',
       { tags: ["Story:Safety Audit Alert Filter All Resolved Unresolved", "Severity:critical", "UI", "Module:Workforce-Worker"] },
       () => {

@@ -5,7 +5,7 @@ import paginationPage from '../../../pages/insights/workers/pagination';
 describe("Insights-Workers Module - Pagination", { tags: ["Epic:WorkForce", "Feature:Pagination", "Module:WorkForce-Company"] }, () => {
 
   beforeEach(() => {
-    paginationPage.visit('500526306');
+    paginationPage.visit('5007477836');
     paginationPage.switchToCardLayout();
   });
 

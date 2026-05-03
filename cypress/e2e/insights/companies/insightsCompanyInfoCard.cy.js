@@ -309,7 +309,7 @@ describe('Insights Company - Insights Company Info-card', {
   // ─────────────────────────────────────────────────────────────
   // TEST 4: Validate most active zones for selected company
   // ─────────────────────────────────────────────────────────────
-  it.only('Insights-Company - Validate most active zones for selected company', {
+  it('Insights-Company - Validate most active zones for selected company', {
     tags: ["Story:Company Zone Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
     cy.intercept('GET', 'https://uat.kwant.ai/api/projectTaskTradesForTracking').as('getCompanyName');

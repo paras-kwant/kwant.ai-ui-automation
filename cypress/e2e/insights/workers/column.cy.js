@@ -5,7 +5,7 @@ import columnSettingsPage from '../../../pages/insights/workers/column';
 describe("Insight-worker Module - column", () => {
 
   beforeEach(() => {
-    columnSettingsPage.visit('500526306');
+    columnSettingsPage.visit('5007477836');
     columnSettingsPage.selectFirstSelectorItem();
   });
 

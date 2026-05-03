@@ -13,7 +13,7 @@ class ColumnSettingsPage {
 
   selectFirstSelectorItem() {
     cy.get('.loader-image').should('not.exist');
-    cy.get('.selector-item.first').click();
+    cy.get('.selector-item.first').should('be.visible').click();
     cy.get('.selector-item.first').should('have.class', 'active');
   }
 
@@ -102,11 +102,12 @@ class ColumnSettingsPage {
 
   getColumnCheckbox(draggableId) {
     return cy.get(`[data-rbd-drag-handle-draggable-id="${draggableId}"]`)
-      .find('input[type="checkbox"]');
+    .find('input[type="checkbox"]');
   }
 
   checkColumn(draggableId) {
-    this.getColumnCheckbox(draggableId).check({ force: true });
+    cy.wait(1000)
+    this.getColumnCheckbox(draggableId).should('exist').check({ force: true });
   }
 
   assertColumnChecked(draggableId) {

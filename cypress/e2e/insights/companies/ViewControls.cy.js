@@ -160,7 +160,7 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
       });
   });
 
-  it.only('Insight-Company - Clicking on-site today icon on a row with workers should show correct worker count on navigation', {
+  it('Insight-Company - Clicking on-site today icon on a row with workers should show correct worker count on navigation', {
     tags: ["Story:On-site Hours Drawer For Today", "Severity:normal", "UI", "Module:Insights-Company"]
   }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');

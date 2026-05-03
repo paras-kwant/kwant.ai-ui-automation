@@ -10,7 +10,7 @@ describe('Insight-Worker Insight Worker Info Card', () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTable');
 
 	cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
-    cy.get('.selector-item.last').click()
+    cy.get('.selector-item.last').should('be.visible').click()
 	cy.wait('@getConfig').then(({ request }) => {
       cy.wrap({
         'x-auth-token': request.headers['x-auth-token'],
@@ -65,11 +65,11 @@ describe('Insight-Worker Insight Worker Info Card', () => {
 	cy.intercept('POST', '**/api/empinsight/work_table*').as('workerTable');
 
 	cy.get(workforceSelector.tableRow)
-	  .eq(7)
+	  .eq(2)
 	  .should('be.visible');
   
 	cy.get(workforceSelector.tableRow)
-	  .eq(7)
+	  .eq(2)
 	  .find('input[type="checkbox"]').as('workerCheckbox')
 	  .check({ force: true });
 	  cy.wait(2000)
@@ -92,7 +92,7 @@ describe('Insight-Worker Insight Worker Info Card', () => {
 	});
   
 	cy.get(workforceSelector.tableRow)
-	  .eq(7)
+	  .eq(2)
 	  .find('.personal-info-content__title')
 	  .invoke('text')
 	  .then((text) => {

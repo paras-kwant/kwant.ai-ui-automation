@@ -10,6 +10,7 @@ describe("Insight-Company Module - Send Alert Functionality", { tags: ["Epic:Wor
     cy.intercept('GET', '**/api/projectConfigs**').as('getConfig');
 
     cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5007477836'));
+    cy.get('.selector-item.last').click();
 
     cy.wait('@getConfig').then(({ request }) => {
       cy.wrap({
@@ -18,9 +19,6 @@ describe("Insight-Company Module - Send Alert Functionality", { tags: ["Epic:Wor
       }).as('authHeaders');
     });
   });
-  before(()=>{
-    cy.get('.selector-item.last').click();
-  })
 
   it(
     "Insight-Company - Send General Communication and Verify Remaining Alerts & Twilio SMS",

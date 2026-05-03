@@ -153,19 +153,23 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
           .filter(col => !excludedKeys.includes(col.key))
           .map(col => col.displayName);
   
-        expectedLabels.forEach(label => {
-  
-          cy.get('body').then(($body) => {
-  
-            const exists =
-              $body.find(`.hover-hoc-container__label:contains("${label}")`).length > 0 ||
-              $body.find(`label:contains("${label}")`).length > 0;
-  
-            expect(exists, `Missing label in UI: ${label}`).to.be.true;
-  
+          const selectors = [
+            '.hover-hoc-container__label',
+            'label',
+            '.toggle-label'
+          ];
+          
+          expectedLabels.forEach(label => {
+            cy.get('body').then(($body) => {
+          
+              const exists = selectors.some(selector =>
+                $body.find(`${selector}:contains("${label}")`).length > 0
+              );
+          
+              expect(exists, `Missing label in UI: ${label}`).to.be.true;
+          
+            });
           });
-  
-        });
   
       }); 
   });
