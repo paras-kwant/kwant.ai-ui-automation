@@ -5,19 +5,35 @@ import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
 import workerHelper from '../../support/helper/workerHelper.js';
 import "../../support/commands";
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+
 
 describe(
   "Worker Module - Personal Details Page",
   { tags: ["Epic:WorkForce", "Feature:PersonalDetails", "Module:Workforce-Worker"] },
   () => {
+    before(()=>{
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
+      cy.get(workforceSelector.tableRow).first().should('be.visible').click({force: true});
+      cy.get(workforceSelector.fieldSettingPage).click();
+      cy.get('[type="checkbox"]').then(($checkboxes) => {
+        const anyChecked = [...$checkboxes].some(cb => cb.checked);
+      
+        if (anyChecked) {
+          cy.wrap($checkboxes).uncheck({ force: true });
+        }
+      });
+      cy.wait(1000);
+      cy.get('button p').contains('Update').click({force: true});
+    })
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(
       "should verify all UI elements and labels in the Personal Details drawer",
-      { tags: ["Story:Personal Details Drawer UI Verification", "Severity:normal", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Personal Details Drawer UI Verification", "Severity:normal", "UI", ] },
       () => {
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
         cy.get(workforceSelector.personalDetailsPage).click();
@@ -59,17 +75,18 @@ describe(
 
     it(
       "should allow editing and saving all editable fields in the Personal Details section",
-      { tags: ["Story:Personal Details Edit And Save Fields", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Personal Details Edit And Save Fields", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
         cy.get(workforceSelector.personalDetailsPage).click();
+        cy.contains("Personal Details").should("be.visible");
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(0)
           .find(".edit-icon > svg")
           .first()
           .click({force: true});
-        cy.get('[name="phone"]').click().clear().type("9779868765456");
+        cy.get('[name="phone"]').click({force:true}).clear().type("9779868765456");
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(1)

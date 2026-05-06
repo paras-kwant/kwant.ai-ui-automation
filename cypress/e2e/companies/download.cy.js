@@ -34,7 +34,7 @@ describe("WorkForce Companies Module - Download CSV", { tags: ["Epic:WorkForce",
 			});
 	});
 
-	it('WorkForce-Company - Should verify downloaded Company CSV content matches UI Company list', { tags: ["Story:Verify CSV Matches UI List", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Should verify downloaded Company CSV content matches UI Company list', { tags: ["Story:Verify CSV Matches UI List", "Severity:critical", "UI", "@smoke"] }, () => {
 		const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
 		cy.wait(4000);
 

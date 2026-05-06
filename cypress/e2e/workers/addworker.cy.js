@@ -6,13 +6,30 @@ import { generateWorkerData } from '../../fixtures/generateData.js';
 import workerHelper from '../../support/helper/workerHelper.js';
 import { addWorkerSelector } from "../../selector/addWorker.js";
 import addworkerPage from '../../pages/workforce/addworkerPage.js';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+import { env } from 'process';
 
 describe("Worker Module - Add Worker Tests", 
   { tags: ["Epic:WorkForce", "Feature:Add Worker", "Module:Workforce-Worker"] },
 () => {
+  before(()=>{
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
+    cy.get(workforceSelector.tableRow).first().should('be.visible').click({force: true});
+    cy.get(workforceSelector.fieldSettingPage).click();
+    cy.get('[type="checkbox"]').then(($checkboxes) => {
+      const anyChecked = [...$checkboxes].some(cb => cb.checked);
+    
+      if (anyChecked) {
+        cy.wrap($checkboxes).uncheck({ force: true });
+      }
+    });
+    cy.wait(1000);
+    cy.get('button p').contains('Update').click({force: true});
+  })
+
 
   beforeEach(() => {
-    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     addworkerPage.openAddWorkerForm();
   });
 
@@ -108,8 +125,7 @@ describe("Worker Module - Add Worker Tests",
       });
   });
 
-  it('Should add worker with only mandatory fields', 
-    { tags: ["Story:Add Worker Mandatory Fields", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+  it('Should add worker with only mandatory fields', {tags: ['@smoke'] },
   () => {
     let workerId;
     let requestPayload;
@@ -189,8 +205,7 @@ describe("Worker Module - Add Worker Tests",
     cy.get('.upload-avatar img').should('have.attr', 'src').and('match', /^blob:/);
   });
 
-  it('Should add worker with all fields filled', 
-    { tags: ["Story:Add Worker Full Details", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+  it('Should add worker with all fields filled', {tags: ['@smoke'] }, 
   () => {
     const workerData = generateWorkerData();
     let workerId;
@@ -224,7 +239,7 @@ describe("Worker Module - Add Worker Tests",
     addWorkerSelector.addMoreDetail().click();
     addWorkerSelector.jobTitleInput().type('worker');
     cy.selectRandomOption('[name="professionName"]', '.select_item_container [role="button"]');
-    addWorkerSelector.employeeIdInput().type('123456');
+    // addWorkerSelector.employeeIdInput().type('123456');
     cy.selectRandomOption('[name="crewName"]', '.select_item_container [role="button"]');
     addWorkerSelector.dollarPerManHour().type('30');
     cy.selectRandomOption('[name="payGroup"]', '.select_item_container [role="button"]');

@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import workerHelper from '../../support/helper/workerHelper.js';
 import { workforceSelector } from '../../support/workforceSelector';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
 
 describe(
   "Worker Module - Favorites",
@@ -8,12 +9,12 @@ describe(
   () => {
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(
       'Verify remove worker page from Favorite',
-      { tags: ["Story:Remove Favorite", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Remove Favorite", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.get(workforceSelector.tableRow).should('be.visible');
         cy.get('body').then(($body) => {
@@ -40,7 +41,7 @@ describe(
 
     it(
       'Verify adding worker page as favourite',
-      { tags: ["Story:Add Favorite", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Add Favorite", "Severity:critical", "UI", "@smoke"] },
       () => {
 
         cy.get(workforceSelector.tableRow).should('be.visible');

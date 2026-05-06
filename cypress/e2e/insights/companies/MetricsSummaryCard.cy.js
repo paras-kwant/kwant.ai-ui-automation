@@ -17,7 +17,7 @@ describe("Insights Company - Workforce Dashboard Cards", { tags: ["Epic:WorkForc
 		"Story:Insights Company Workforce Dashboard Cards Accurate Data",
 		"Severity:critical",
 		"UI",
-		"Module:Insights-Company",
+		"@smoke",
 	  ],
 	},
 	() => {
@@ -316,7 +316,7 @@ it('Insights-Company - Validate Avg Daily Work Hours graph tooltip content match
 })
 
 
-it('Insights-Company - Verify Workforce Consistency graph is visible', ()=>{
+it('Insights-Company - Verify Workforce Consistency graph is visible',{tags:'@smoke'}, ()=>{
   cy.wait(3000)
   cy.contains("Workforce Consistency").click()
   cy.get('.recharts-cartesian-grid').should('be.visible')
@@ -341,7 +341,7 @@ it('Insights-Company - Verify Workforce Consistency tooltip on hover', ()=>{
 })
 
 
-it('Insights-Company - Verify Workforce Variance dialog is visible on Avg Daily Workers graph hover', () => {
+it('Insights-Company - Verify Workforce Variance dialog is visible on Avg Daily Workers graph hover',{tags:"@smoke"}, () => {
   cy.get('[name="Workforce Variance"]').first().realHover()
   cy.get('[role="dialog"]').should('be.visible').within(() => {
     cy.contains('span', 'Actual Workforce').should('be.visible')

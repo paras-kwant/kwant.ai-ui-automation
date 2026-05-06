@@ -35,7 +35,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
     cy.get("p").contains("View Alerts History").should("not.exist");
   });
 
-  it("WorkForce-Company - Enforces maximum character limit for General Communication messages", { tags: ["Story:Max Character Limit General Communication", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Enforces maximum character limit for General Communication messages", { tags: ["Story:Max Character Limit General Communication", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('No Info Company');
     cy.get(workforceSelector.tableRow).contains('No Info Company').should('be.visible')
     cy.get(".header-checkbox-container [type='checkbox']").first().check({ force: true });
@@ -83,7 +83,7 @@ describe("WorkForce Companies Module- Alerts & SMS Communication Flow (UI + Twil
       });
   });
 
-  it("WorkForce-Company - Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", { tags: ["Story:Send General Communication And Verify Twilio SMS", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Sending a General Communication Message and verifying Remaining Alerts & Twilio SMS", { tags: ["Story:Send General Communication And Verify Twilio SMS", "Severity:critical", "UI", "@smoke"] }, () => {
     const randomText = Math.random().toString(36).substring(2, 12);
 
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs');

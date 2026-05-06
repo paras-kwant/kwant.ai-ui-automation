@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper.js';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
 
 describe(
   "Worker Module - Field Settings",
@@ -10,12 +11,12 @@ describe(
   () => {
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(
       "Validates the UI of the Field Settings drawer",
-      { tags: ["Story:Field Settings UI", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Field Settings UI", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.readFile("cypress/fixtures/createdWorker.json").then(({ firstName, lastName }) => {
           const fullName = `${firstName} ${lastName}`;
@@ -34,7 +35,7 @@ describe(
 
     it(
       "Applies a random field setting and verifies it in Personal Details",
-      { tags: ["Story:Apply Random Field", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Apply Random Field", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.readFile("cypress/fixtures/createdWorker.json").then(({ firstName, lastName }) => {
           const fullName = `${firstName} ${lastName}`;
@@ -240,7 +241,7 @@ describe(
 
     it(
       "X clicking should collapse the Field Settings drawer",
-      { tags: ["Story:Close Drawer", "Severity:normal", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Close Drawer", "Severity:normal", "UI", "@smoke"] },
       () => {
         cy.readFile("cypress/fixtures/createdWorker.json").then(({ firstName, lastName }) => {
           const fullName = `${firstName} ${lastName}`;

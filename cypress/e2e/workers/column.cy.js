@@ -3,6 +3,8 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper.js';
+import { env } from 'process';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
 
 describe(
   "Worker Module - Column",
@@ -10,7 +12,7 @@ describe(
   () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     cy.cleanUI();
   });
 
@@ -21,14 +23,13 @@ describe(
     cy.get('body').click('bottomLeft');
   });
 
-  // Reusable helper to get clean column names from the table
   const getCleanColumns = ($cols) =>
     [...$cols]
       .map((el) => el.innerText.trim())
       .filter((text) => text !== '' && !text.includes('\n'));
 
   it('Validate adding and updating column settings', 
-    { tags: ["Story:Add/Update Columns", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    { tags: ['@smoke'] },
     () => {
       const expectedColumns = [
         'S.No', 'Name', 'Company Name', 'Job Title',
@@ -132,7 +133,7 @@ describe(
   });
 
   it('Verify Column settings reset functionality', 
-    { tags: ["Story:Reset Columns", "Severity:normal", "UI", "Module:Workforce-Worker"] },
+    { tags: ['@smoke'] },
     () => {
       const expectedDefaultColumns = [
         'S.No', 'Name', 'Company Name', 'Job Title',
@@ -255,7 +256,7 @@ describe(
   });
 
   it('Turn on all columns and verify they appear in the table', 
-    { tags: ["Story:Enable All Columns", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    { tags: ['@smoke'] },
     () => {
       cy.get('.icon-button button').eq(0).click();
       cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');

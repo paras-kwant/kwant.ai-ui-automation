@@ -9,7 +9,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
   });
 
-  it('Insights-Company - Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', { tags: ["Story:Download Default Date Range Matches Insight Page", "Severity:critical", "UI", "Module:Insights-Company"] }, () => {
+  it('Insights-Company - Verify by default the start date and end date displayed on the download page is same as the one displayed on insight company page.', { tags: ["Story:Download Default Date Range Matches Insight Page", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table?**').as('getCompanyTableData');
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.wait('@getCompanyTableData').its('response.statusCode').should('eq', 200);
@@ -95,7 +95,7 @@ describe("Insights Company Module - Download", { tags: ["Epic:WorkForce", "Featu
     });
   });
 
-  it('Insights-Company - download for Today',            { tags: ["Story:Download Report For Today", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Today'); });
+  it('Insights-Company - download for Today',            { tags: ["Story:Download Report For Today", "Severity:normal", "UI", "@smoke"] }, () => { downloadPage.runDownloadTestForFilter('Today'); });
   it('Insights-Company - download for Current Week',     { tags: ["Story:Download Report For Current Week", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Current Week'); });
   it('Insights-Company - download for Last 7 Days',      { tags: ["Story:Download Report For Last 7 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 7 Days'); });
   it('Insights-Company - download for Last 30 days',     { tags: ["Story:Download Report For Last 30 Days", "Severity:normal", "UI", "Module:Insights-Company"] }, () => { downloadPage.runDownloadTestForFilter('Last 30 days'); });

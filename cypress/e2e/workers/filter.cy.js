@@ -6,6 +6,7 @@ import "../../support/commands";
 import { log, table } from "console";
 import workerHelper from '../../support/helper/workerHelper.js';
 import filterPage from '../../pages/workforce/filter.js';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
 
 describe(
   "Worker Module - Filter",
@@ -14,7 +15,7 @@ describe(
     let columnsConfigured = false;
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
 
       if (!columnsConfigured) {
         cy.get(".icon-button button").first().click();
@@ -27,7 +28,7 @@ describe(
         cy.get('[data-rbd-draggable-id="ethnicity"] [type="checkbox"]').click();
         cy.get('[data-rbd-draggable-id="sex"] [type="checkbox"]').click();
         cy.get('[data-rbd-draggable-id="status"] [type="checkbox"]').click();
-        cy.get('[data-rbd-draggable-id="boolean_test"] [type="checkbox"]').click();
+        // cy.get('[data-rbd-draggable-id="boolean_test"] [type="checkbox"]').click();
         cy.get('button p').contains('Save').should('be.visible').click();
         columnsConfigured = true;
       }
@@ -35,7 +36,7 @@ describe(
 
     it(
       "Verify the table header filter - name",
-      { tags: ["Story:Filter By Name Header", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Filter By Name Header", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
         cy.reload();
@@ -313,8 +314,8 @@ describe(
     );
 
     it(
-      'Verify Toast Message for Empty Filter Results',
-      { tags: ["Story:Filter Empty Results Shows No Results", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      'Verify Empty table state for Empty Filter Results',
+      { tags: ["Story:Filter Empty Results Shows No Results", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.get(".table-header-filter-btn").eq(0).click();
         cy.get(workforceSelector.searchInput).eq(1).type("NonExistentWorkerName");
@@ -483,7 +484,7 @@ describe(
 
     it(
       "Verify the table header filter icon (funnel icon) is visible",
-      { tags: ["Story:Filter Funnel Icon Visible On Headers", "Severity:normal", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Filter Funnel Icon Visible On Headers", "Severity:normal", "UI", "@smoke"] },
       () => {
         cy.get(workforceSelector.tableColumn).each(($el, index) => {
           if (index >= 3) {
@@ -532,7 +533,7 @@ describe(
 
     it(
       "Verify red dot indicator appears on filter icon when filter is applied",
-      { tags: ["Story:Filter Red Dot Indicator On Active Filter", "Severity:normal", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Filter Red Dot Indicator On Active Filter", "Severity:normal", "UI", "@smoke"] },
       () => {
         cy.contains(workforceSelector.tableColumn, "Company").find(".table-header-filter-btn").click({ force: true });
 

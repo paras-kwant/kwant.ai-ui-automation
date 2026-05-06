@@ -4,6 +4,8 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper.js';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+
 
 describe(
   "Workforce Worker Module - Selection Functionality",
@@ -11,12 +13,12 @@ describe(
   () => {
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(
       'should display correct total worker count when selecting all workers via header checkbox',
-      { tags: ["Story:Select All Workers Header", "Severity:critical", "Module:Workforce-Worker"] },
+      { tags: ["Story:Select All Workers Header", "Severity:critical", "@smoke"] },
       () => {
         cy.get(workforceSelector.tableRow).should('be.visible');
 
@@ -77,7 +79,7 @@ describe(
 
     it(
       'should display correct total worker count when selecting all workers from action menu',
-      { tags: ["Story:Select All Workers Action Menu", "Severity:critical", "Module:Workforce-Worker"] },
+      { tags: ["Story:Select All Workers Action Menu", "Severity:critical", "@smoke"] },
       () => {
         cy.get(workforceSelector.tableRow)
           .should('be.visible');

@@ -4,6 +4,8 @@ const fs = require("fs");
 import { throttle } from 'rxjs';
 import { workforceSelector } from '../../support/workforceSelector';
 import workerHelper from '../../support/helper/workerHelper.js';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+
 
 describe(
   "Worker Module - Pagination",
@@ -11,7 +13,7 @@ describe(
   () => {
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(

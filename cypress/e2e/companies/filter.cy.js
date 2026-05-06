@@ -11,7 +11,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		cy.cleanUI();
 	});
 
-	it("WorkForce-Company - Verify Company Name filter dropdown can be opened", { tags: ["Story:Open Company Name Filter Dropdown", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify Company Name filter dropdown can be opened", { tags: ["Story:Open Company Name Filter Dropdown", "Severity:critical", "UI", "@smoke"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Company Name').find('.table-header-filter-btn').click();
 	});
 
@@ -483,7 +483,7 @@ describe("WorkForce Companies Module - Filter", { tags: ["Epic:WorkForce", "Feat
 		});
 	});
 
-	it('WorkForce-Company - Verify filtering by Total Worker filter', { tags: ["Story:Filter By Total Workers", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it('WorkForce-Company - Verify filtering by Total Worker filter', { tags: ["Story:Filter By Total Workers", "Severity:critical", "UI", "@smoke"] }, () => {
 		cy.contains(workforceSelector.tableColumn, 'Total Workers')
 			.find('.table-header-filter-btn')
 			.click();

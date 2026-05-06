@@ -1,3 +1,5 @@
+
+
 /// <reference types="cypress" />
 import companiesHelper from "../../../support/helper/companiesHelper";
 import { workforceSelector } from "../../../support/workforceSelector";
@@ -163,7 +165,7 @@ describe('Insights Company - Insights Company Info-card', {
 
 
   it('Insights-Company - Validate companies onsite today count matches API', {
-    tags: ["Story:Dashboard Cards Validation", "Severity:critical", "API", "Module:Insights-Company"]
+    tags: ["Story:Dashboard Cards Validation", "Severity:critical", "API", "@smoke"]
   }, function () {
     const dashboardLabel = ".company-insights-top-stats__item .company-insights-top-stats__item__label";
     const dashboardCountSelector = ".total-onsite-count";
@@ -199,7 +201,7 @@ describe('Insights Company - Insights Company Info-card', {
   // ─────────────────────────────────────────────────────────────
   // TEST 3: Validate Most Active Zones (All Company)
   // ─────────────────────────────────────────────────────────────
-  it('Insights - Validate Most Active Zones', function () {
+  it('Insights - Validate Most Active Zones',{tags:"@smoke"}, function () {
     const now = new Date();
     const endDate = now.toISOString();
     
