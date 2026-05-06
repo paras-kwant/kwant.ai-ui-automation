@@ -6,6 +6,20 @@ import { generateCompanyData} from '../../fixtures/generateData';
 
 describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", "Feature:Companies Module", "Module:WorkForce-Company"] }, () => {
 
+  before(()=>{
+    cy.get(workforceSelector.tableRow).first()
+    cy.get(workforceSelector.fieldSettingPage).click();
+    cy.get('[type="checkbox"]').then(($checkboxes) => {
+      const anyChecked = [...$checkboxes].some(cb => cb.checked);
+    
+      if (anyChecked) {
+        cy.wrap($checkboxes).uncheck({ force: true });
+      }
+    });
+    cy.wait(1000);
+    cy.get('button p').click({force})
+  })
+
   beforeEach(() => {
     cy.loginAndVisit(() => companiesHelper.visitCompaniesPage('4441501293'));   
   }) 
