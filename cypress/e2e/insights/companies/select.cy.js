@@ -13,7 +13,7 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
 
 
   it('Insights-Company | Verify selected worker count updates when a single worker is selected', { 
-    tags: ["Story:Single Worker Selection Count", "Severity:critical", "UI", "Module:Insights-Company"] 
+    tags: ["Story:Single Worker Selection Count", "Severity:critical", "UI", "@smoke"] 
   }, () => {
 
     cy.get('[type="checkbox"]')
@@ -45,7 +45,7 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
 
 
   it('Insights-Company | Verify selected worker count label disappears when the worker is unchecked', { 
-    tags: ["Story:Unselect Worker Removes Count", "Severity:critical", "UI", "Module:Insights-Company"] 
+    tags: ["Story:Unselect Worker Removes Count", "Severity:critical", "UI", "@smoke"] 
   }, () => {
 
     cy.get(workforceSelector.tableRow)

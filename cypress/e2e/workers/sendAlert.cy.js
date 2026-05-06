@@ -1,18 +1,20 @@
 /// <reference types="cypress" />
 import { workforceSelector } from "../../support/workforceSelector.js";
 import workerHelper from "../../support/helper/workerHelper.js";
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+
 
 describe(
   "Worker Alerts & SMS Communication Flow (UI + Twilio Integration)",
   { tags: ["Epic:WorkForce", "Feature:Alerts & SMS", "Module:Workforce-Worker"] },
   () => {
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(
       "Sending Alert to Worker with Missing Contact Information",
-      { tags: ["Story:Send Alert Missing Contact", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Send Alert Missing Contact", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.get(workforceSelector.tableRow).first().should("be.visible");
 
@@ -135,7 +137,7 @@ describe(
 
     it(
       "Sending an Alert Message with Template",
-      { tags: ["Story:Send Alert Using Template", "Severity:normal", "Module:Workforce-Worker"] },
+      { tags: ["Story:Send Alert Using Template", "Severity:normal", "@smoke"] },
       () => {
         cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
           const { firstName, lastName } = workerData;
@@ -149,7 +151,8 @@ describe(
           cy.get('[role="button"]').contains("Alert").click();
           cy.get('[placeholder="Select Template"]').click();
           cy.get('body').should('be.visible');
-          cy.get('[role="button"]').contains('Hello everyone').click();
+          // cy.get('[role="button"]').contains('Hello everyone').click();
+          cy.get('section [role="button"]').first().click();
           cy.get("textarea").invoke("val").should("have.length.greaterThan", 0);
           cy.get(workforceSelector.sendAlertButton).click();
           cy.get(workforceSelector.toastMessage).should("contain.text", "Alert sent to 1 worker(s).");

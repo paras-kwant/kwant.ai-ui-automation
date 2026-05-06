@@ -80,7 +80,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     });
   });
 
-  it("WorkForce-Company - Should not delete a company which has workers, then cleanup", { tags: ["Story:Delete Company With Workers Blocked", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should not delete a company which has workers, then cleanup", { tags: ["Story:Delete Company With Workers Blocked", "Severity:critical", "UI", "@smoke"] }, () => {
     const companyName = `deleteTestWithWorkers_${Date.now()}`;
 
     createCompany({
@@ -320,7 +320,7 @@ describe("WorkForce Companies Module - overflow menu", { tags: ["Epic:WorkForce"
     cy.get(workforceSelector.toastMessage).contains("successfully deleted");
   });
 
-  it("WorkForce-Company - Should merge 3 companies with workers and validate all workers are present", { tags: ["Story:Merge Companies With Workers And Validate", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should merge 3 companies with workers and validate all workers are present", { tags: ["Story:Merge Companies With Workers And Validate", "Severity:critical", "UI", "@smoke"] }, () => {
     const timestamp = Date.now();
     const company1Name = `merge3WorkerTest_${timestamp}_1`;
     const company2Name = `merge3WorkerTest_${timestamp}_2`;

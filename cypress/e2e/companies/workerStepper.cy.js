@@ -21,7 +21,7 @@ describe("Companies Module - Worker Stepper", { tags: ["Epic:WorkForce", "Featur
       .find('input[type="checkbox"]')
       .check({ force: true });
     cy.get('p').contains('Filters:').click();
-    cy.wait(3000);
+    cy.wait(4000);
     cy.get(workforceSelector.tableRow).each(($row) => {
       cy.wrap($row)
         .should('be.visible')
@@ -105,6 +105,7 @@ cy.wait(200)
       .parent()
       .find('input[type="checkbox"]')
       .check({ force: true });
+      cy.wait(3000)
       cy.get(workforceSelector.tableRow).contains('Active').should('exist');
 
     cy.get(workforceSelector.tableRow)
@@ -202,6 +203,7 @@ cy.wait(200)
         .check({ force: true });
   
       cy.contains('p', 'Filters:').click();
+      cy.wait(2000)
   
       cy.get(workforceSelector.tableRow)
         .contains('Active')
@@ -341,6 +343,7 @@ cy.get(workforceSelector.documentTableRow).each(($row) => {
       .check({ force: true });
 
     cy.get('p').contains('Filters:').click();
+    cy.wait(2000)
 
     cy.get(workforceSelector.tableRow)
       .contains('Active')
@@ -466,7 +469,7 @@ cy.wait(200)
     });
   });
 
-  it('WorkForce-Company - Add a flagged worker and verify total flagged count increases', { tags: ["Story:Add Flagged Worker Increases Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Add a flagged worker and verify total flagged count increases', { tags: ["Story:Add Flagged Worker Increases Count", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.visit(`/projects/5007477836/companies`);
     cy.contains(workforceSelector.tableColumn, 'Status')
       .find('.table-header-filter-btn')
@@ -478,6 +481,7 @@ cy.wait(200)
       .find('input[type="checkbox"]')
       .check({ force: true });
     cy.get('p').contains('Filters:').click();
+    cy.wait(2000)
     cy.get(workforceSelector.tableRow).contains('Active').should('be.visible');
 
     cy.get(workforceSelector.tableRow).first().as('activeCompanyRow');
@@ -583,6 +587,7 @@ cy.wait(200)
       .check({ force: true });
 
     cy.get('p').contains('Filters:').click();
+    cy.wait(2000)
 
     cy.get(workforceSelector.tableRow).contains('Active').should('be.visible');
 

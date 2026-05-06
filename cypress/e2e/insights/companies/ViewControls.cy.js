@@ -161,7 +161,7 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
   });
 
   it('Insight-Company - Clicking on-site today icon on a row with workers should show correct worker count on navigation', {
-    tags: ["Story:On-site Hours Drawer For Today", "Severity:normal", "UI", "Module:Insights-Company"]
+    tags: ["Story:On-site Hours Drawer For Today", "Severity:normal", "UI", "@smoke"]
   }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('.site-left').eq(0).find('.site-label').click();
@@ -215,7 +215,7 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
   });
 
   it('Insight-Company - Switching to list layout should hide stat cards and switching back should show them', {
-    tags: ["Story:Table Layout Switch", "Severity:normal", "UI", "Module:Insights-Company"]
+    tags: ["Story:Table Layout Switch", "Severity:normal", "UI", "@smoke"]
   }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('.selector-item.first').click();

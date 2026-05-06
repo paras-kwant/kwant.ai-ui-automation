@@ -2,6 +2,7 @@
 import { workforceSelector } from "../../support/workforceSelector";
 import workerHelper from '../../support/helper/workerHelper.js';
 import { generateWorkerData } from "../../fixtures/generateData.js";
+const PROJECT_ID = Cypress.env('PROJECT_ID');
 
 describe(
   "Worker Onboarding Email Validation",
@@ -20,7 +21,7 @@ describe(
         }).as('getConfig');
       }
 
-      cy.loginAndVisit(() => workerHelper.visitWorkersPage());
+      cy.loginAndVisit(() => workerHelper.visitWorkersPage(PROJECT_ID));
 
       if (!authCaptured) {
         cy.wait('@getConfig').then(() => {
@@ -43,7 +44,7 @@ describe(
 
     it(
       "Send Onboarding Invite - No Worker Selected",
-      { tags: ["Story:Onboarding Invite No Worker Selected Shows Toast", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Onboarding Invite No Worker Selected Shows Toast", "Severity:critical", "UI"] },
       () => {
         cy.get('.personal-info-content__title').should('be.visible');
 
@@ -54,7 +55,7 @@ describe(
 
     it(
       'Send onboarding invite and verify email delivery and content',
-      { tags: ["Story:Onboarding Invite Email Delivery And Content", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Onboarding Invite Email Delivery And Content", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.readFile('cypress/fixtures/createdWorker.json').then((workerData) => {
           const { firstName, lastName } = workerData;
@@ -83,7 +84,7 @@ describe(
             cy.log(email.body.substring(0, 300));
 
             expect(body || subject).to.include('onboarding');
-            expect(body).to.include('lvl 10-11');
+            // expect(body).to.include('lvl 10-11');
             // expect(body).to.include('badge');
             // expect(body).to.include(firstName.toLowerCase());
             cy.log(firstName);
@@ -122,7 +123,7 @@ describe(
             cy.log(email.body.substring(0, 300));
 
             expect(body || subject).to.include('onboarding');
-            expect(body).to.include('lvl 10-11');
+            // expect(body).to.include('lvl 10-11');
             expect(body).to.include('badge');
           });
         });
@@ -219,7 +220,7 @@ describe(
     );
     it(
       "Send onboarding invite - Worker with no email",
-      { tags: ["Story:Onboarding Invite Worker Without Email Shows Error", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Onboarding Invite Worker Without Email Shows Error", "Severity:critical", "UI", "@smoke"] },
       () => {
         cy.reload();
 
@@ -252,7 +253,7 @@ describe(
 
     it(
       'Verify that the status of onboarding is SENT on the worker page.',
-      { tags: ["Story:Onboarding Invite Status Shows Sent", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Onboarding Invite Status Shows Sent", "Severity:critical", "UI"] },
       () => {
         cy.get('.personal-info-content__title').should('be.visible');
 

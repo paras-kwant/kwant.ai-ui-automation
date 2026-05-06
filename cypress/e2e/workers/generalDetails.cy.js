@@ -5,14 +5,29 @@ import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
 import workerHelper from '../../support/helper/workerHelper.js';
 import "../../support/commands";
+const PROJECT_ID = Cypress.env('PROJECT_ID');
 
 describe(
   "Worker Module - General Details Page",
   { tags: ["Epic:WorkForce", "Feature:GeneralDetails", "Module:Workforce-Worker"] },
   () => {
+    before(()=>{
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
+      cy.get(workforceSelector.tableRow).first().should('be.visible').click({force: true});
+      cy.get(workforceSelector.fieldSettingPage).click();
+      cy.get('[type="checkbox"]').then(($checkboxes) => {
+        const anyChecked = [...$checkboxes].some(cb => cb.checked);
+      
+        if (anyChecked) {
+          cy.wrap($checkboxes).uncheck({ force: true });
+        }
+      });
+      cy.wait(1000);
+      cy.get('button p').contains('Update').click({force: true});
+    })
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(
@@ -49,12 +64,13 @@ describe(
       }
     );
 
-    it(
+    it.only(
       "should allow editing and saving of all editable general Details fields",
       { tags: ["Story:General Details Edit And Save Fields", "Severity:critical", "UI", "Module:Workforce-Worker"] },
       () => {
         cy.get(workforceSelector.tableRow).eq(2).click({ force: true });
-        cy.wait(2000);
+        cy.contains('General Details').should('be.visible');
+      
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(0)

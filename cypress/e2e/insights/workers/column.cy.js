@@ -68,7 +68,7 @@ describe("Insight-worker Module - column", () => {
   });
 
 
-  it('Insight-Worker - reset the column setting', () => {
+  it('Insight-Worker - reset the column setting',{tags:"@smoke"}, () => {
     columnSettingsPage.assertTableRowsVisible();
     columnSettingsPage.openColumnDrawer();
     columnSettingsPage.clickReset();
@@ -103,7 +103,7 @@ describe("Insight-worker Module - column", () => {
   });
 
 
-  it('Insight-Worker - clicking on the x icon should close the column setting drawer', () => {
+  it('Insight-Worker - clicking on the x icon should close the column setting drawer',{tags:'@smoke'}, () => {
     columnSettingsPage.assertTableRowsExist();
     columnSettingsPage.openColumnDrawer();
     columnSettingsPage.assertDrawerVisible();

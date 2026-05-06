@@ -39,7 +39,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   }
 
   it('Insights-Company - Verify selected company name appears in onsite selection panel', {
-    tags: ["Story:Company Selection Display", "Severity:critical", "UI", "Module:Insights-Company"]
+    tags: ["Story:Company Selection Display", "Severity:critical", "UI", "@smoke"]
   }, () => {
     cy.get(workforceSelector.tableRow).its('length').should('be.greaterThan', 1);
     cy.get(workforceSelector.tableRow).eq(1).then(($row) => {
@@ -56,7 +56,7 @@ describe("Insights Company - Company Profile View", { tags: ["Epic:WorkForce", "
   });
 
   it('Insights-Company - Verify company full profile opens with correct details', {
-    tags: ["Story:Open Company Profile", "Severity:critical", "UI", "Module:Insights-Company"]
+    tags: ["Story:Open Company Profile", "Severity:critical", "UI", "@smoke"]
   }, () => {
     selectCompanyRow();
 

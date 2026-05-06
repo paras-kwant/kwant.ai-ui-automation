@@ -13,7 +13,7 @@ describe(
     });
 
 
-    it('Insight-Worker - Clicking Last Update button should refresh table and return 200', {
+    it('Insight-Worker - Clicking Last Update button should refresh table and return 200',{tags:'@smoke'}, {
       tags: ["Story:Unselect Worker Removes Count", "Severity:critical", "UI", "Module:Insights-Worker"]
     }, () => {
       insightsWorkerPage.interceptWorkerTableAPI();
@@ -38,7 +38,7 @@ describe(
 
 
     it('Insight-Worker - Clicking previous week arrow should shift date range back by 7 days', {
-      tags: ["Story:Worker Insight Date Filter", "Severity:normal", "UI", "Module:Insights-Worker"]
+      tags: ["Story:Worker Insight Date Filter", "Severity:normal", "UI", "@smoke"]
     }, () => {
       insightsWorkerPage.interceptWorkerTableAPI();
 
@@ -65,7 +65,7 @@ describe(
     });
 
     it('Insight-Worker - Clicking next week arrow should shift date range forward by 7 days', {
-      tags: ["Story:Worker Insight Date Filter", "Severity:normal", "UI", "Module:Insights-Worker"]
+      tags: ["Story:Worker Insight Date Filter", "Severity:normal", "UI", "@smoke"]
     }, () => {
       insightsWorkerPage.interceptWorkerTableAPI();
 

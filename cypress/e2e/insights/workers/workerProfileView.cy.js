@@ -38,7 +38,7 @@ describe("Insights Worker - Worker Profile View", { tags: ["Epic:WorkForce", "Fe
   });
 
 
-  it('Insights-Worker - Validate company general details match API data', () => {
+  it('Insights-Worker - Validate company general details match API data',{tags:'@smoke'}, () => {
     companyProfilePage.interceptGetWorker();
     companyProfilePage.selectRandomCompanyRow();
 
@@ -101,7 +101,7 @@ describe("Insights Worker - Worker Profile View", { tags: ["Epic:WorkForce", "Fe
       });
     });
   });
-  it("Verify Worker Row Status Colors for all rows except first", () => {
+  it("Verify Worker Row Status Colors for all rows except first",{tags:'@smoke'}, () => {
     cy.wait(3000);
     cy.get(workforceSelector.tableRow).then(($rows) => {
       const totalRows = $rows.length;

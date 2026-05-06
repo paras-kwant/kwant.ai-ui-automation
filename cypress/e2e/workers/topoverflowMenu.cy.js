@@ -3,13 +3,15 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
 import workerHelper from '../../support/helper/workerHelper.js';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+
 
 describe("Worker Module - overflowMenu", { tags: ["Story:Worker Overflow Menu", "Severity:normal", "Module:Workforce-Worker"] }, () => {
   beforeEach(() => {
-    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
   });
 
-  it("Validate the options in overflow menu", { tags: ["Story:Search By Name", "Severity:normal", "Module:Workforce-Worker"] }, () => {
+  it("Validate the options in overflow menu", { tags: ["Story:Search By Name", "Severity:normal", "@smoke"] }, () => {
     cy.get(workforceSelector.tableRow).should("be.visible");
     cy.get(workforceSelector.overflowMenu).click();
     cy.contains(".dropdown-option", "Delete").should("not.exist");
@@ -91,7 +93,7 @@ describe("Worker Module - overflowMenu", { tags: ["Story:Worker Overflow Menu", 
     });
   });
 
-  it("Validate the Change Value for multiple user using select feature", { tags: ["Story:Change Multiple Values", "Severity:normal", "Module:Workforce-Worker"] }, () => {
+  it("Validate the Change Value for multiple user using select feature", { tags: ["Story:Change Multiple Values", "Severity:normal", "@smoke"] }, () => {
     cy.get(workforceSelector.tableRow).should("be.visible");
 
     cy.get(workforceSelector.tableRow)
@@ -184,7 +186,7 @@ describe("Worker Module - overflowMenu", { tags: ["Story:Worker Overflow Menu", 
       .should("be.visible");
   });
 
-  it("Verify workers data is downloaded based on applied search filter", { tags: ["Story:Download Filtered Worker", "Severity:normal", "Module:Workforce-Worker"] }, () => {
+  it("Verify workers data is downloaded based on applied search filter", { tags: ["Story:Download Filtered Worker", "Severity:normal", "@smoke"] }, () => {
     cy.get(workforceSelector.tableRow).should("be.visible");
     const FILE_NAME = "Ontarget-Employee-Report.csv";
     const DOWNLOADS_FOLDER = Cypress.config("downloadsFolder");
@@ -250,7 +252,7 @@ describe("Worker Module - overflowMenu", { tags: ["Story:Worker Overflow Menu", 
       });
   });
 
-  it("Verify the deletion functionality for the selected user.", { tags: ["Story:Delete Worker", "Severity:normal", "Module:Workforce-Worker"] }, () => {
+  it("Verify the deletion functionality for the selected user.", { tags: ["Story:Delete Worker", "Severity:normal", "@smoke"] }, () => {
     cy.get(workforceSelector.tableRow).should("be.visible");
     cy.readFile("cypress/fixtures/createdWorker.json").then(({ firstName, lastName }) => {
       cy.get(workforceSelector.searchInput).clear().type(`${lastName}`);
