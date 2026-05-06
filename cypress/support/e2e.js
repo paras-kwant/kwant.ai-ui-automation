@@ -5,6 +5,9 @@ import "cypress-real-events/support";
 import registerCypressGrep from '@cypress/grep/src/support'
 registerCypressGrep()
 
+
+registerCypressGrep()
+
 Cypress.on('uncaught:exception', (err) => {
   if (typeof err === 'object') {
     console.warn('Ignored uncaught object error:', err);
