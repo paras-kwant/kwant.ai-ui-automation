@@ -5,7 +5,10 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 	beforeEach(() => {
 			cy.intercept('GET', '**/api/projectConfigs**').as('getConfig');
 			cy.intercept('POST', '**/api/insight/company/table*').as('companyTable');
-			cy.intercept('POST', '**/api/empinsight/graph/avgWorkHour*').as('workerTable');
+			cy.intercept('POST', '**/api/empinsight/graph/avgWorkHour*').as('averageWorkHourTable');
+			cy.intercept('POST', '**/api/empinsight/graph/overtime*').as('overtimeTable');
+			cy.intercept('POST', '**/api/empinsight/work_table*').as('workTable');
+
 		
 			cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
 
@@ -22,7 +25,7 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 		it('Insight-Worker validate Average daily work hour',{tags:'@smoke'}, () => {
 		  
 		  
-			cy.wait('@workerTable').then((interception) => {
+			cy.wait('@averageWorkHourTable').then((interception) => {
 			  expect(interception.response.statusCode).to.eq(200);
 		  
 			  const data = interception.response.body || [];
@@ -65,8 +68,6 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 		  });;	
 
 		  it('Insight-Worker Validate Average Daily Overtime Hour', () => {
-			cy.intercept('POST', '**/api/empinsight/graph/overtime*').as('overtimeTable');
-//			cy.get('.site-left').first().click();////
 			cy.wait('@overtimeTable').then((interception) => {
 				expect(interception.response.statusCode).to.eq(200);
 				const data = interception.response.body || [];
@@ -103,7 +104,6 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 
 		})
 		it('Insight-Worker Validate Average Check-in Time (Fixed Logic)', () => {
-			cy.intercept('POST', '**/api/empinsight/work_table*').as('workTable');
 		
 			cy.wait('@workTable').then((interception) => {
 				expect(interception.response.statusCode).to.eq(200);
@@ -153,30 +153,26 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 		});
 
 		  it('Insight-Worker - Verify Avg Daily Work hours tooltip on hover', ()=>{
-//			cy.get('.site-left').first().click();////
 			cy.wait(3000)
 			cy.get('p').contains('Avg Daily Work Hours').parent().parent().find('svg').eq(1).realHover()
 			cy.contains('Avg. hours each workers puts in daily.').should('be.visible')
 		  })
 		  it('Insights-Worker - Verify Avg Daily Overtime Hours tooltip on hover', ()=>{
-//			cy.get('.site-left').first().click();////
 			cy.wait(3000)
 			cy.get('p').contains('Avg Daily Overtime Hours').parent().parent().find('svg').eq(1).realHover()
 			cy.contains('Avg. overtime hours each worker puts in daily.').should('be.visible')
 		  }) 
 
 		  it('Insights-Worker - Verify Avg check-in time tooltip on hover', ()=>{
-//			cy.get('.site-left').first().click();////
 			cy.wait(3000)
 			cy.get('p').contains('Avg check-in time').parent().parent().find('svg').eq(1).realHover()
 			cy.contains('Avg. daily check-in time of a worker.').should('be.visible')
 		  })
 
 		  it('Insight-Worker validate Average daily work hour Graphs',{tags:'@smoke'}, () => {
-			cy.intercept('POST', '**/api/empinsight/graph/avgWorkHour*').as('workerTable');
 		
 		
-			cy.wait('@workerTable').then((interception) => {
+			cy.wait('@averageWorkHourTable').then((interception) => {
 				expect(interception.response.statusCode).to.eq(200);
 		
 				const data = interception.response.body || [];
@@ -269,7 +265,6 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 
 
 		it('Insight-Worker validate daily over time', () => {
-			cy.intercept('POST', '**/api/empinsight/graph/overtime*').as('overtimeTable');
 			cy.get('p').contains('Avg Daily Overtime Hours').click({force: true});
 		
 			cy.wait('@overtimeTable').then((interception) => {
