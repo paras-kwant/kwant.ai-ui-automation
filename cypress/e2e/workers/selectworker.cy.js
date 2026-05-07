@@ -18,7 +18,7 @@ describe(
 
     it(
       'should display correct total worker count when selecting all workers via header checkbox',
-      { tags: ["Story:Select All Workers Header", "Severity:critical", "@smoke"] },
+      { tags: ["Story:Select All Workers Header", "Severity:critical", "@worker"] },
       () => {
         cy.get(workforceSelector.tableRow).should('be.visible');
 
@@ -79,7 +79,7 @@ describe(
 
     it(
       'should display correct total worker count when selecting all workers from action menu',
-      { tags: ["Story:Select All Workers Action Menu", "Severity:critical", "@smoke"] },
+      { tags: ["Story:Select All Workers Action Menu", "Severity:critical", "@worker"] },
       () => {
         cy.get(workforceSelector.tableRow)
           .should('be.visible');

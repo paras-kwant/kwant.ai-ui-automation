@@ -120,7 +120,7 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
     cy.get('[label="Save"] button').should('be.disabled');
   });
 
-  it('Insight-Company - reset the column setting',{tags:'@smoke'}, () => {
+  it('Insight-Company - reset the column setting',{}, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('[label="Reset to default"] button').should('be.visible').click();
@@ -199,7 +199,7 @@ describe("Insight-Company Module - column", { tags: ["Epic:WorkForce", "Feature:
 
   });
 
-  it('Insight-Company - clicking on the x icon should close the column setting drawer',{tags:'@smoke'}, () => {
+  it('Insight-Company - clicking on the x icon should close the column setting drawer',{}, () => {
     cy.get(workforceSelector.tableRow).should('exist');
     cy.get('[clip-path="url(#table_chart_svg__a)"]').first().click({ force: true });
     cy.get('.columns-drawer-header').contains('Column Settings').should('be.visible');

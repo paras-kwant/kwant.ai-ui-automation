@@ -26,7 +26,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   };
 
-  it('Insights-Company - verify the UI of the filter form', { tags: ["Story:Insights Filter Form UI Verification", "Severity:normal", "UI", "@smoke"] }, () => {
+  it('Insights-Company - verify the UI of the filter form', { tags: ["Story:Insights Filter Form UI Verification", "Severity:normal", "UI"] }, () => {
     cy.contains('button p', 'Filter').click();
     cy.contains('h1', 'Filters').should('be.visible');
 
@@ -58,7 +58,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
   });
 
   it('Insights-Company - verify the options button in the filter button (UI random)', {
-    tags: ["Story:Insights Filter Options UI Random", "Severity:normal", "UI", "@smoke"]
+    tags: ["Story:Insights Filter Options UI Random", "Severity:normal", "UI"]
   }, () => {
     cy.contains('button p', 'Filter').click();
     cy.contains('.placeholder', 'Select Company').click();
@@ -111,7 +111,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.contains(' section button', 'Filter').should('be.disabled');
   });
 
-  it('Insights-Company - Verify Company Name Filter', { tags: ["Story:Insights Filter By Company Name", "Severity:critical", "UI", "@smoke"] }, () => {
+  it('Insights-Company - Verify Company Name Filter', { tags: ["Story:Insights Filter By Company Name", "Severity:critical", "UI"] }, () => {
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
 
     cy.contains('button p', 'Filter').click();

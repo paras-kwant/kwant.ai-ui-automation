@@ -14,7 +14,7 @@ describe(
 
     it(
       'Verify remove worker page from Favorite',
-      { tags: ["Story:Remove Favorite", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Remove Favorite", "Severity:critical", "UI",   ] },
       () => {
         cy.get(workforceSelector.tableRow).should('be.visible');
         cy.get('body').then(($body) => {
@@ -41,7 +41,7 @@ describe(
 
     it(
       'Verify adding worker page as favourite',
-      { tags: ["Story:Add Favorite", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Add Favorite", "Severity:critical", "UI",   ] },
       () => {
 
         cy.get(workforceSelector.tableRow).should('be.visible');

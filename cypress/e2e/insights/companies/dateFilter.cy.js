@@ -21,7 +21,7 @@ describe("Insights-Company Module - Calendar & Download Validation", { tags: ["M
   });
 
   it('Insights-Company - Calendar options visible', {
-    tags: ["Story:Validate Calendar Options", "Severity:normal", "UI", "@smoke"]
+    tags: ["Story:Validate Calendar Options", "Severity:normal", "UI"]
   }, () => {
     openCalendar();
     const filters = [

@@ -125,7 +125,7 @@ describe("Worker Module - Add Worker Tests",
       });
   });
 
-  it('Should add worker with only mandatory fields', {tags: ['@smoke'] },
+  it('Should add worker with only mandatory fields', {tags: [] },
   () => {
     let workerId;
     let requestPayload;

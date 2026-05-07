@@ -21,7 +21,7 @@ describe(
 
     it(
       "Validating the search functionality - run twice",
-      { tags: ["Story:Search By Name", "Severity:normal", "@smoke"] },
+      { tags: ["Story:Search By Name", "Severity:normal", " @worker"] },
       () => {
         cy.wait(1500);
         cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
@@ -50,7 +50,7 @@ describe(
 
     it(
       "Search triggers API only when at least 3 letters are entered",
-      { tags: ["Story:Search API Trigger", "Severity:normal", "@smoke"] },
+      { tags: ["Story:Search API Trigger", "Severity:normal", " @worker"] },
       () => {
         cy.wait(2000);
 
@@ -88,7 +88,7 @@ describe(
 
     it(
       "Validating the search functionality for the search with no results",
-      { tags: ["Story:Search No Results", "Severity:normal", "@smoke"] },
+      { tags: ["Story:Search No Results", "Severity:normal", " @worker"] },
       () => {
         cy.get(workforceSelector.searchInput).clear().type("NonExistentName12345");
         cy.get(".empty-body").should("contain.text", "No Results Found");
@@ -224,7 +224,7 @@ describe(
 
     it(
       "Verify search supports case insensitivity (Uppercase, Lowercase, Mixed Case)",
-      { tags: ["Story:Search Case Insensitivity", "Severity:normal", "@smoke"] },
+      { tags: ["Story:Search Case Insensitivity", "Severity:normal", " @worker"] },
       () => {
         cy.wait(2000);
         cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");

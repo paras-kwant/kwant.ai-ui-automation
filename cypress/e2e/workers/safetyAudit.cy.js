@@ -247,7 +247,7 @@ describe(
 
     it(
       'should add a comment to a safety alert and verify it appears in the comment list',
-      { tags: ["Story:Safety Audit Add Comment To Alert", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Safety Audit Add Comment To Alert", "Severity:critical", "UI"] },
       () => {
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
         cy.get(workforceSelector.SafetyAuditPage).click();

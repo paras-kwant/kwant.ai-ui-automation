@@ -174,7 +174,7 @@ describe("WorkForce Companies Module - Add Company", { tags: ["Epic:WorkForce", 
       }); 
   });
   it('WorkForce-Company - Verify adding company with all fields filled', { 
-    tags: ["Story:Add Company Full Fields", "Severity:critical", "UI", "API", "Module:WorkForce-Company","@smoke"] 
+    tags: ["Story:Add Company Full Fields", "Severity:critical", "UI", "API", "Module:WorkForce-Company"] 
   }, () => {
     let companyId
     cy.intercept('POST', '/api/projectTaskTrades').as('addCompany');

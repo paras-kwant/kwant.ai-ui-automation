@@ -28,7 +28,7 @@ describe('Insight Worker - Download',()=>{
 		})
 	})
 
-	it('Insight-Worker Validate that the downloaded file is in .csv format',{tags:'@smoke'}, () => {
+	it('Insight-Worker Validate that the downloaded file is in .csv format',{}, () => {
 		cy.wait(2000)
 		cy.intercept('POST', '/api/empinsight/download').as('downloadApi');
 		cy.wait(1000)
@@ -46,7 +46,7 @@ describe('Insight Worker - Download',()=>{
 	  });
 
 
-	  it('Insight-Worker Validate the ui of the download modal',{tags:'@smoke'}, ()=>{
+	  it('Insight-Worker Validate the ui of the download modal',{}, ()=>{
 		cy.wait(2000)
 		cy.get('.filters_header_right_section button').last().click();
 		cy.get('.dropdown-option').contains('Download').click();

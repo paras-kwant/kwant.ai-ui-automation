@@ -48,7 +48,7 @@ describe("Insight Worker - Search ", { tags: ["Epic:WorkForce", "Feature:Search"
     });
   });
 
-  it("Insights-Worker - Validating the search functionality by worker name - run twice", { tags: ["Story:Insights Search Worker Name Twice", "Severity:critical", "UI", "@smoke"] }, () => {
+  it("Insights-Worker - Validating the search functionality by worker name - run twice", { tags: ["Story:Insights Search Worker Name Twice", "Severity:critical", "UI"] }, () => {
     cy.wrap(null).then(() => {
       expect(workerNames.length, "workerNames should not be empty").to.be.greaterThan(0);
     });
@@ -79,7 +79,7 @@ describe("Insight Worker - Search ", { tags: ["Epic:WorkForce", "Feature:Search"
     });
   });
 
-  it("Insights-Worker - Search triggers API only when at least 3 letters are entered", { tags: ["Story:Insights Search API Triggers After 3 Characters", "Severity:critical", "UI", "@smoke"] }, () => {
+  it("Insights-Worker - Search triggers API only when at least 3 letters are entered", { tags: ["Story:Insights Search API Triggers After 3 Characters", "Severity:critical", "UI"] }, () => {
     searchPage.typeInSearch("a");
     cy.wait(500);
 

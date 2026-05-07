@@ -36,7 +36,7 @@ describe(
 
     it(
       "Verify the table header filter - name",
-      { tags: ["Story:Filter By Name Header", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Filter By Name Header", "Severity:critical", "UI",     ] },
       () => {
         cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
         cy.reload();
@@ -315,7 +315,7 @@ describe(
 
     it(
       'Verify Empty table state for Empty Filter Results',
-      { tags: ["Story:Filter Empty Results Shows No Results", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Filter Empty Results Shows No Results", "Severity:critical", "UI",     ] },
       () => {
         cy.get(".table-header-filter-btn").eq(0).click();
         cy.get(workforceSelector.searchInput).eq(1).type("NonExistentWorkerName");
@@ -484,7 +484,7 @@ describe(
 
     it(
       "Verify the table header filter icon (funnel icon) is visible",
-      { tags: ["Story:Filter Funnel Icon Visible On Headers", "Severity:normal", "UI", "@smoke"] },
+      { tags: ["Story:Filter Funnel Icon Visible On Headers", "Severity:normal", "UI",     ] },
       () => {
         cy.get(workforceSelector.tableColumn).each(($el, index) => {
           if (index >= 3) {
@@ -533,7 +533,7 @@ describe(
 
     it(
       "Verify red dot indicator appears on filter icon when filter is applied",
-      { tags: ["Story:Filter Red Dot Indicator On Active Filter", "Severity:normal", "UI", "@smoke"] },
+      { tags: ["Story:Filter Red Dot Indicator On Active Filter", "Severity:normal", "UI",     ] },
       () => {
         cy.contains(workforceSelector.tableColumn, "Company").find(".table-header-filter-btn").click({ force: true });
 

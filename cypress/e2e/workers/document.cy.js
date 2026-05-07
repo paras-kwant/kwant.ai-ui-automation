@@ -13,7 +13,7 @@ describe("Worker Module - Documents Page",
   })
 
   it("Verify the UI of the document",
-    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
+    { tags: ["Story:Document", "Severity:critical", "UI", ] },
      () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
@@ -197,7 +197,7 @@ describe("Worker Module - Documents Page",
   });
 
   it("Displays yellow row and red warning icon for documents expiring within 7 days", 
-    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
+    { tags: ["Story:Document", "Severity:critical", "UI",  ] },
     () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
@@ -362,7 +362,7 @@ cy.get(workforceSelector.documentPage)
   });
 
   it('should update an existing certificate',
-    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
+    { tags: ["Story:Document", "Severity:critical", "UI",  ] },
      () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
@@ -441,7 +441,7 @@ cy.get(workforceSelector.documentPage)
   });
 
   it("Deleting a certificate", 
-    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
+    { tags: ["Story:Document", "Severity:critical", "UI",  ] },
     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;

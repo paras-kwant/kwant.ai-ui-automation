@@ -17,7 +17,7 @@ describe(
 
     it(
       'Should add a worker by uploading a valid CSV file',
-      { tags: ["Story:Upload Valid CSV Adds Worker", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Upload Valid CSV Adds Worker", "Severity:critical", "UI",    ] },
       () => {
         workerHelper.openUploadModal();
         workerHelper.uploadWorkerCSV('testdata/employeeUpload.csv');
@@ -27,7 +27,7 @@ describe(
 
     it(
       'Should download the worker CSV template successfully',
-      { tags: ["Story:Download Worker CSV Template", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Download Worker CSV Template", "Severity:critical", "UI",    ] },
       () => {
         const downloadsFolder = Cypress.config('downloadsFolder');
         const fileName = 'worker-upload-template.csv';
@@ -121,7 +121,7 @@ describe(
 
     it(
       'Should add a worker via drag-and-drop CSV upload',
-      { tags: ["Story:Upload CSV Via Drag And Drop", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Upload CSV Via Drag And Drop", "Severity:critical", "UI",    ] },
       () => {
         cy.get(workforceSelector.overflowMenu).click();
         cy.get('.dropdown-option').contains('Upload').click();

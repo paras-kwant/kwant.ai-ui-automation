@@ -33,7 +33,7 @@ describe("Insight Company - Search ", { tags: ["Epic:WorkForce", "Feature:Search
     });
   });
 
-  it("Insights-Company - Validating the search functionality - run twice", { tags: ["Story:Insights Search Company Name Twice", "Severity:critical", "UI", "@smoke"] }, () => {
+  it("Insights-Company - Validating the search functionality - run twice", { tags: ["Story:Insights Search Company Name Twice", "Severity:critical", "UI"] }, () => {
     cy.wrap(null).then(() => {
       expect(companyNames.length, "companyNames should not be empty").to.be.greaterThan(0);
     });
@@ -74,7 +74,7 @@ describe("Insight Company - Search ", { tags: ["Epic:WorkForce", "Feature:Search
     });
   });
 
-  it("Insights-Company - Validating the search functionality for the search with no results", { tags: ["Story:Insights Search No Results Found", "Severity:critical", "UI", "@smoke"] }, () => {
+  it("Insights-Company - Validating the search functionality for the search with no results", { tags: ["Story:Insights Search No Results Found", "Severity:critical", "UI"] }, () => {
     searchPage.typeInSearch("NonExistentName12345");
     cy.wait("@companiesApi");
     cy.get(".empty-body").should("contain.text", "No Results Found");

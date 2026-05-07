@@ -246,7 +246,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       });
   });
 
-  it("WorkForce-Company - Verify expired company licence shows red color for close date", { tags: ["Story:Expired Licence Warning", "Severity:critical", "UI", "@smoke"] }, () => {
+  it("WorkForce-Company - Verify expired company licence shows red color for close date", { tags: ["Story:Expired Licence Warning", "Severity:critical", "UI"] }, () => {
     const credID = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join("");
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
@@ -283,7 +283,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       .should("exist");
   });
 
-  it("WorkForce-Company - Deleting a company licence", { tags: ["Story:Delete Company Licence", "Severity:critical", "UI", "@smoke"] }, () => {
+  it("WorkForce-Company - Deleting a company licence", { tags: ["Story:Delete Company Licence", "Severity:critical", "UI"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
     cy.get(workforceSelector.companyDocumentPage).click()

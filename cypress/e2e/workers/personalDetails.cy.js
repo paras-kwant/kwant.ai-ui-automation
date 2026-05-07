@@ -75,7 +75,7 @@ describe(
 
     it(
       "should allow editing and saving all editable fields in the Personal Details section",
-      { tags: ["Story:Personal Details Edit And Save Fields", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Personal Details Edit And Save Fields", "Severity:critical", "UI"] },
       () => {
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
         cy.get(workforceSelector.personalDetailsPage).click();

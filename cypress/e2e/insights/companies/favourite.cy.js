@@ -9,7 +9,7 @@ describe("Insights Company - Favourite Page", { tags: ["Epic:WorkForce", "Featur
     cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('500526306'));
   });
 
-  it(" Insights-Company - Insight Compay Verify remove company from Favorite", { tags: ["Story:Insights Company Remove From Favorite", "Severity:critical", "UI", "@smoke"] }, () => {
+  it(" Insights-Company - Insight Compay Verify remove company from Favorite", { tags: ["Story:Insights Company Remove From Favorite", "Severity:critical", "UI"] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     insightsFavouritePage.clickFavouriteButton();
     insightsFavouritePage.assertToastContains("Removed from favorite");
@@ -17,7 +17,7 @@ describe("Insights Company - Favourite Page", { tags: ["Epic:WorkForce", "Featur
     insightsFavouritePage.assertFavouriteLinkNotExists();
   });
 
-  it("Insights-Company - Verify adding company as favourite", { tags: ["Story:Insights Company Add To Favorite", "Severity:critical", "UI", "@smoke"] }, () => {
+  it("Insights-Company - Verify adding company as favourite", { tags: ["Story:Insights Company Add To Favorite", "Severity:critical", "UI", ] }, () => {
     cy.get(workforceSelector.tableRow).should('be.visible');
     insightsFavouritePage.clickFavouriteButton();
     insightsFavouritePage.assertToastContains("Added to favorite");

@@ -14,7 +14,7 @@ describe(
 
     it(
       "Sending Alert to Worker with Missing Contact Information",
-      { tags: ["Story:Send Alert Missing Contact", "Severity:critical", "UI", "@smoke"] },
+      { tags: ["Story:Send Alert Missing Contact", "Severity:critical", "UI", "@worker"] },
       () => {
         cy.get(workforceSelector.tableRow).first().should("be.visible");
 
@@ -137,7 +137,7 @@ describe(
 
     it(
       "Sending an Alert Message with Template",
-      { tags: ["Story:Send Alert Using Template", "Severity:normal", "@smoke"] },
+      { tags: ["Story:Send Alert Using Template", "Severity:normal", "@worker"] },
       () => {
         cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
           const { firstName, lastName } = workerData;
