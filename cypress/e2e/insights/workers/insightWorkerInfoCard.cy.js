@@ -19,7 +19,7 @@ describe('Insight-Worker Insight Worker Info Card', () => {
     });
   });
 
-  it("Insight-Worker Validate Worker on-site today card displays correct information", function () {
+  it("Insight-Worker Validate Worker on-site today card displays correct information",{tags:"@smoke"}, function () {
     let uiWorkerCount;
     cy.get('.worker_insight_section')
       .contains('Workers On-site Today')
@@ -44,7 +44,7 @@ describe('Insight-Worker Insight Worker Info Card', () => {
   });
 
 
-  it('Insight-Worker Most active zones for selected worker', () => {
+  it('Insight-Worker Most active zones for selected worker',{tags:'@smoke'}, () => {
 	let selectedWorkerName;
 	let selectedWorkerId;
 	let uiZones = [];

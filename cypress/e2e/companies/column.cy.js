@@ -11,7 +11,7 @@ describe("WorkForce Companies Module - column", { tags: ["Epic:WorkForce", "Feat
     cy.cleanUI();
   });
   
-  it('WorkForce-Company - Validate adding and updating column settings', { tags: ["Story:Update Column Settings", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Validate adding and updating column settings', { tags: ["Story:Update Column Settings", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.get('.icon-button button').eq(0).click();
     cy.get('[data-rbd-draggable-id="email"] input[type="checkbox"]').then(($checkbox) => {
       if ($checkbox.is(':checked')) {

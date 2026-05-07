@@ -31,7 +31,7 @@ describe("Insights-Workers Module - Calendar Validation", { tags: ["Module:Insig
   // ─────────────────────────────────────────────────────────────────────────
 
   it('Insights-Workers - Current Week selection highlights correct dates', {
-    tags: ["Story:Current Week Selection", "Severity:normal", "UI", "Module:Insights-Workers"]
+    tags: ["Story:Current Week Selection", "Severity:normal", "UI", "@smoke"]
   }, () => {
     const expectedDates = calendarFilterPage.getCurrentWeekDates();
 
@@ -93,7 +93,7 @@ describe("Insights-Workers Module - Calendar Validation", { tags: ["Module:Insig
   // ─────────────────────────────────────────────────────────────────────────
 
   it('Insights-Workers - Custom Range date selection', {
-    tags: ["Story:Custom Range Selection", "Severity:normal", "UI", "Module:Insights-Workers"]
+    tags: ["Story:Custom Range Selection", "Severity:normal", "UI", "@smoke"]
   }, () => {
     calendarFilterPage.openCalendar();
     calendarFilterPage.clickFilterOption('Custom Range');

@@ -26,7 +26,7 @@ describe("WorkForce Companies Module - Favourite Page", { tags: ["Epic:WorkForce
 		});
 	});
 
-	it("WorkForce-Company - Verify remove company from Favorite", { tags: ["Story:Remove Favorite Company", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify remove company from Favorite", { tags: ["Story:Remove Favorite Company", "Severity:critical", "UI", "@smoke"] }, () => {
 		cy.visit(`/projects/${Cypress.env('PROJECT_ID')}/companies`);
 		cy.get('.top-nav-left-section [role="button"]')
 			.should('be.visible')
@@ -38,7 +38,7 @@ describe("WorkForce Companies Module - Favourite Page", { tags: ["Epic:WorkForce
 		cy.get('[title="Workforce Companies"]').should('not.exist');
 	});
 
-	it("WorkForce-Company - Verify adding company as favourite", { tags: ["Story:Add Favorite Company", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+	it("WorkForce-Company - Verify adding company as favourite", { tags: ["Story:Add Favorite Company", "Severity:critical", "UI", "@smoke"] }, () => {
 		cy.get('.top-nav-left-section [role="button"]').click();
 		cy.get(workforceSelector.toastMessage).contains('Added to favorite');
 		cy.get('.top-nav-left-section [role="button"] [fill="#FACC15"]').should('be.visible');

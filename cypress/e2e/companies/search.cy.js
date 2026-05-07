@@ -11,7 +11,7 @@ describe("WorkForce Companies Module - Search", { tags: ["Epic:WorkForce", "Feat
     cy.cleanUI();
   });
 
-  it("WorkForce-Company - Validating the search functionality - run twice (using TaskTrade API)", { tags: ["Story:Search By Company Name API", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Validating the search functionality - run twice (using TaskTrade API)", { tags: ["Story:Search By Company Name API", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
 
@@ -345,7 +345,7 @@ describe("WorkForce Companies Module - Search", { tags: ["Epic:WorkForce", "Feat
     });
   });
 
-  it("WorkForce-Company - Should perform case-insensitive search with all case variations", { tags: ["Story:Case Insensitive Search", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Should perform case-insensitive search with all case variations", { tags: ["Story:Case Insensitive Search", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.intercept("GET", "**/api/projectTaskTradesForTracking*").as("taskTradeApi");
     cy.intercept("POST", "**/api/projectTaskTrade/filter*").as("searchApi");
 

@@ -24,7 +24,7 @@ describe("WorkForce Companies Module - General Details", { tags: ["Epic:WorkForc
     generalDetailsPage.verifyGeneralDetailsNotVisible();
   });
 
-  it('WorkForce-Company - Validate table values match General Details card', { tags: ["Story:Table Values Match General Details", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Validate table values match General Details card', { tags: ["Story:Table Values Match General Details", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.wait(2000);
     const fieldsToCheck = [
       'E Mail',
@@ -41,7 +41,7 @@ describe("WorkForce Companies Module - General Details", { tags: ["Epic:WorkForc
     generalDetailsPage.validateTableMatchesDetails(fieldsToCheck);
   });
 
-  it('WorkForce-Company - Update the company data and verify the changes persist', { tags: ["Story:Update Company Data Persists", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Update the company data and verify the changes persist', { tags: ["Story:Update Company Data Persists", "Severity:critical", "UI", "@smoke"] }, () => {
     const newEmail = generateRandomEmail();
     const newAddress = generateRandomWorldAddress();
 

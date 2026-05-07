@@ -51,7 +51,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     cy.get(workforceSelector.addCompanyButton).should('be.visible');
   });
 
-  it("WorkForce-Company - Displays red warning icon for company documents expired or expiring today", { tags: ["Story:Expired Document Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Displays red warning icon for company documents expired or expiring today", { tags: ["Story:Expired Document Warning", "Severity:critical", "UI", "@smoke"] }, () => {
     const credentialId = generateCredentialID();
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage()
@@ -87,7 +87,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     });
   });
 
-  it('WorkForce-Company - Should update an existing company certificate', { tags: ["Story:Update Company Document", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Should update an existing company certificate', { tags: ["Story:Update Company Document", "Severity:critical", "UI", "@smoke"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage();
     cy.get(workforceSelector.documentTableRow)
@@ -204,7 +204,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
     });
   });
 
-  it("WorkForce-Company - Deleting a company certificate", { tags: ["Story:Delete Company Document", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Deleting a company certificate", { tags: ["Story:Delete Company Document", "Severity:critical", "UI", "@smoke"] }, () => {
     documents.openCompany('AutoQA Labs');
     documents.openCompanyDocumentsPage();
     cy.get(workforceSelector.documentTableRow)
@@ -246,7 +246,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       });
   });
 
-  it("WorkForce-Company - Verify expired company licence shows red color for close date", { tags: ["Story:Expired Licence Warning", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Verify expired company licence shows red color for close date", { tags: ["Story:Expired Licence Warning", "Severity:critical", "UI", "@smoke"] }, () => {
     const credID = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join("");
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
@@ -283,7 +283,7 @@ describe("WorkForce Companies Module - Documents Page", { tags: ["Epic:WorkForce
       .should("exist");
   });
 
-  it("WorkForce-Company - Deleting a company licence", { tags: ["Story:Delete Company Licence", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it("WorkForce-Company - Deleting a company licence", { tags: ["Story:Delete Company Licence", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.get(workforceSelector.searchInput).clear().type('AutoQA Labs')
     cy.get(workforceSelector.tableRow).contains('AutoQA Labs').click({ force: true });
     cy.get(workforceSelector.companyDocumentPage).click()

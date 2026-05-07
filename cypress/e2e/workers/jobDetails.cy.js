@@ -5,19 +5,35 @@ import { workforceSelector } from "../../support/workforceSelector";
 import "cypress-real-events/support";
 import workerHelper from '../../support/helper/workerHelper.js';
 import "../../support/commands";
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+
 
 describe(
   "Worker Module - Personal Details Page",
   { tags: ["Epic:WorkForce", "Feature:JobDetails", "Module:Workforce-Worker"] },
   () => {
+    before(()=>{
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
+      cy.get(workforceSelector.tableRow).first().should('be.visible').click({force: true});
+      cy.get(workforceSelector.fieldSettingPage).click();
+      cy.get('[type="checkbox"]').then(($checkboxes) => {
+        const anyChecked = [...$checkboxes].some(cb => cb.checked);
+      
+        if (anyChecked) {
+          cy.wrap($checkboxes).uncheck({ force: true });
+        }
+      });
+      cy.wait(1000);
+      cy.get('button p').contains('Update').click({force: true});
+    })
 
     beforeEach(() => {
-      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+      cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
     });
 
     it(
       "Verify the UI of the Job Details drawer",
-      { tags: ["Story:Job Details Drawer UI Verification", "Severity:normal", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Job Details Drawer UI Verification", "Severity:normal", "UI",] },
       () => {
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
         cy.get(workforceSelector.jobDetailsPage).click();
@@ -59,11 +75,11 @@ describe(
 
     it(
       "should allow editing and saving of all editable Job Details fields",
-      { tags: ["Story:Job Details Edit And Save Fields", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+      { tags: ["Story:Job Details Edit And Save Fields", "Severity:critical", "UI",] },
       () => {
         cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
         cy.get(workforceSelector.jobDetailsPage).click();
-        cy.wait(1000);
+        cy.contains('Job Details').should('be.visible');
 
         cy.get(".hover-hoc-container__input__display-value")
           .eq(0)
@@ -93,8 +109,7 @@ describe(
           cy.wrap($randomButton).click({ force: true });
         });
 
-        cy.get(".hover-hoc-container__input__display-value")
-          .eq(2)
+2          .eq(2)
           .realHover()
           .find('.edit-icon > svg')
           .should('be.visible')

@@ -10,11 +10,15 @@ const twilio = require("twilio");
 
 
 module.exports = defineConfig({
+   env: {
+    PROJECT_ID:5007477836
+  },
   e2e: {
     screenshotOnRunFailure: true, 
     viewportWidth: 1440,
     viewportHeight: 900,
     projectId: "qqtmqa",
+    PROJECT_ID:5007477836,
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
@@ -219,6 +223,7 @@ module.exports = defineConfig({
             );
         },
       });
+      require('@cypress/grep/src/plugin')(config)
 
       return config;
     },

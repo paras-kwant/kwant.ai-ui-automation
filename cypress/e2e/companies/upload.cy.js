@@ -12,7 +12,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.cleanUI();
   });
 
-  it('WorkForce-Company - Should add a worker by uploading a valid CSV file', { tags: ["Story:Upload Valid CSV File", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Should add a worker by uploading a valid CSV file', { tags: ["Story:Upload Valid CSV File", "Severity:critical", "UI", "@smoke"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-valid.csv', 'base64').then(fileContent => {
@@ -141,7 +141,7 @@ describe("WorkForce Companies Module - File Upload", { tags: ["Epic:WorkForce", 
     cy.get('section').contains('span', 'CompanyUpload.csv').should('not.exist');
   });
 
-  it('WorkForce-Company - Validate uploading a file with invalid email', { tags: ["Story:Upload File With Invalid Email", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - Validate uploading a file with invalid email', { tags: ["Story:Upload File With Invalid Email", "Severity:critical", "UI", "@smoke"] }, () => {
     workerHelper.openUploadModal();
 
     cy.fixture('testdata/companies/Company-upload-invalidEmail.csv', 'base64').then(fileContent => {

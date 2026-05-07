@@ -3,16 +3,17 @@ const path = require("path");
 const fs = require("fs");
 import { workforceSelector } from "../../support/workforceSelector";
 import workerHelper from '../../support/helper/workerHelper.js';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
 
 describe("Worker Module - Documents Page",
   { tags: ["Epic:WorkForce", "Feature:Add Worker", "Module:Workforce-Worker"]},
    () => {
   beforeEach(() => {
-    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject(PROJECT_ID));
   })
 
   it("Verify the UI of the document",
-    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
      () => {
     cy.get(workforceSelector.tableRow).eq(0).click({ force: true });
     cy.get(workforceSelector.documentPage).click();
@@ -196,7 +197,7 @@ describe("Worker Module - Documents Page",
   });
 
   it("Displays yellow row and red warning icon for documents expiring within 7 days", 
-    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
     () => {
     const credID = Array.from({ length: 16 }, () =>
       Math.floor(Math.random() * 10)
@@ -361,7 +362,7 @@ cy.get(workforceSelector.documentPage)
   });
 
   it('should update an existing certificate',
-    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
      () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;
@@ -440,7 +441,7 @@ cy.get(workforceSelector.documentPage)
   });
 
   it("Deleting a certificate", 
-    { tags: ["Story:Document", "Severity:critical", "UI", "Module:Workforce-Worker"] },
+    { tags: ["Story:Document", "Severity:critical", "UI", "@smoke"] },
     () => {
     cy.readFile("cypress/fixtures/createdWorker.json").then((workerData) => {
       const { firstName, lastName } = workerData;

@@ -21,7 +21,7 @@ describe("Insights-Company Module - Calendar & Download Validation", { tags: ["M
   });
 
   it('Insights-Company - Calendar options visible', {
-    tags: ["Story:Validate Calendar Options", "Severity:normal", "UI", "Module:Insights-Company"]
+    tags: ["Story:Validate Calendar Options", "Severity:normal", "UI", "@smoke"]
   }, () => {
     openCalendar();
     const filters = [
@@ -97,7 +97,7 @@ describe("Insights-Company Module - Calendar & Download Validation", { tags: ["M
   });
 
   it('Insights-Company - Switching filters updates selection', {
-    tags: ["Story:Filter Switching", "Severity:normal", "UI", "Module:Insights-Company"]
+    tags: ["Story:Filter Switching", "Severity:normal", "UI", "smoke"]
   }, () => {
     openCalendar();
     cy.contains('button p', 'Today').click();

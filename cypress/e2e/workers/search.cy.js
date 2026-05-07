@@ -3,6 +3,8 @@ const path = require("path");
 const fs = require("fs");
 import WorkerHelper from '../../support/helper/workerHelper';
 import { workforceSelector } from '../../support/workforceSelector';
+const PROJECT_ID = Cypress.env('PROJECT_ID');
+
 
 describe(
   "Worker Module - Search",
@@ -10,7 +12,7 @@ describe(
   () => {
 
     before(() => {
-      cy.loginAndVisit(() => WorkerHelper.visitWorkersPage());
+      cy.loginAndVisit(() => WorkerHelper.visitWorkersPage(PROJECT_ID));
     });
     
     beforeEach(() => {
@@ -19,7 +21,7 @@ describe(
 
     it(
       "Validating the search functionality - run twice",
-      { tags: ["Story:Search By Name", "Severity:normal", "Module:Workforce-Worker"] },
+      { tags: ["Story:Search By Name", "Severity:normal", "@smoke"] },
       () => {
         cy.wait(1500);
         cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");
@@ -48,7 +50,7 @@ describe(
 
     it(
       "Search triggers API only when at least 3 letters are entered",
-      { tags: ["Story:Search API Trigger", "Severity:normal", "Module:Workforce-Worker"] },
+      { tags: ["Story:Search API Trigger", "Severity:normal", "@smoke"] },
       () => {
         cy.wait(2000);
 
@@ -86,7 +88,7 @@ describe(
 
     it(
       "Validating the search functionality for the search with no results",
-      { tags: ["Story:Search No Results", "Severity:normal", "Module:Workforce-Worker"] },
+      { tags: ["Story:Search No Results", "Severity:normal", "@smoke"] },
       () => {
         cy.get(workforceSelector.searchInput).clear().type("NonExistentName12345");
         cy.get(".empty-body").should("contain.text", "No Results Found");
@@ -222,7 +224,7 @@ describe(
 
     it(
       "Verify search supports case insensitivity (Uppercase, Lowercase, Mixed Case)",
-      { tags: ["Story:Search Case Insensitivity", "Severity:normal", "Module:Workforce-Worker"] },
+      { tags: ["Story:Search Case Insensitivity", "Severity:normal", "@smoke"] },
       () => {
         cy.wait(2000);
         cy.intercept("POST", "/api/filterProjectWorker*").as("workersApi");

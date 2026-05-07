@@ -12,7 +12,7 @@ describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:
     cy.cleanUI();
   });
 
-  it('WorkForce-Company - should display correct total worker count when selecting all workers via header checkbox', { tags: ["Story:Select All Via Header Checkbox", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should display correct total worker count when selecting all workers via header checkbox', { tags: ["Story:Select All Via Header Checkbox", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.get('.workforce-footer')
       .invoke('text')
       .then((text) => {
@@ -32,7 +32,7 @@ describe("WorkForce Companies Module - Selection Functionality", { tags: ["Epic:
       });
   });
 
-  it('WorkForce-Company - should display correct count when a single worker is selected', { tags: ["Story:Single Worker Selection Count", "Severity:critical", "UI", "Module:WorkForce-Company"] }, () => {
+  it('WorkForce-Company - should display correct count when a single worker is selected', { tags: ["Story:Single Worker Selection Count", "Severity:critical", "UI", "@smoke"] }, () => {
     cy.get('[type="checkbox"]')
       .eq(1)
       .check({ force: true });
