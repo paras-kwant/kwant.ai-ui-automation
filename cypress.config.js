@@ -32,6 +32,9 @@ module.exports = defineConfig({
     testIsolation: false,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
     setupNodeEvents(on, config) {
+      const { plugin: grepPlugin } = require('@cypress/grep/plugin')
+      config.expose = config.env    
+      grepPlugin(config)
 
       if (!process.env.CI) {
         on("before:run", () => {
