@@ -1,7 +1,7 @@
 name: Debug Single Cypress Spec with Allure
 
 on:
-  push:
+  # push:
   workflow_dispatch:
 
 jobs:
