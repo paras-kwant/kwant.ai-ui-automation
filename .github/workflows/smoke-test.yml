@@ -277,6 +277,24 @@ jobs:
           find merged-results/auth -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \; 2>/dev/null || true
           find merged-results/screenshots -type f \( -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \; 2>/dev/null || true
 
+      - name: Set Smoke Environment Info              # ✅ ONLY NEW STEP ADDED
+        run: |
+          cat > merged-results/allure-results/environment.properties << EOF
+          Report.Type=🔥 Smoke Tests
+          Environment=UAT
+          Branch=${{ github.ref_name }}
+          Run.Number=${{ github.run_number }}
+          Triggered.By=${{ github.actor }}
+          EOF
+          cat > merged-results/allure-results/executor.json << EOF
+          {
+            "name": "GitHub Actions",
+            "type": "github",
+            "buildName": "🔥 Smoke Run #${{ github.run_number }}",
+            "reportName": "🔥 Smoke Test Report"
+          }
+          EOF
+
       - name: Generate Allure Report
         run: |
           rm -rf allure-report
@@ -291,7 +309,7 @@ jobs:
           publish_dir: ./allure-report
           destination_dir: smoke
           force_orphan: false
-          keep_files: true                        # ✅ only updates changed files = faster
+          keep_files: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
 
@@ -385,4 +403,4 @@ jobs:
               ]
             }')
 
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URLss"
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
