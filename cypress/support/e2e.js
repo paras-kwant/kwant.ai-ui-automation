@@ -3,6 +3,9 @@ import 'cypress-file-upload';
 import '@shelex/cypress-allure-plugin';
 import "cypress-real-events/support";
 
+import { register } from '@cypress/grep'
+register()
+
 Cypress.on('uncaught:exception', (err) => {
   if (typeof err === 'object') {
     console.warn('Ignored uncaught object error:', err);

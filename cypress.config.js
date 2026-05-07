@@ -9,16 +9,13 @@ const twilio = require("twilio");
 
 
 
+
 module.exports = defineConfig({
-   env: {
-    PROJECT_ID:5007477836
-  },
   e2e: {
     screenshotOnRunFailure: true, 
     viewportWidth: 1440,
     viewportHeight: 900,
     projectId: "qqtmqa",
-    PROJECT_ID:5007477836,
     experimentalPromptCommand: true,
     baseUrl: "https://uat.kwant.ai",
     chromeWebSecurity: false,
@@ -32,6 +29,13 @@ module.exports = defineConfig({
     testIsolation: false,
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
     setupNodeEvents(on, config) {
+
+      const { plugin: grepPlugin } = require('@cypress/grep/plugin')
+      config.expose = config.env    // 👈 bridge env to expose
+      grepPlugin(config)
+
+
+
 
       if (!process.env.CI) {
         on("before:run", () => {
@@ -223,7 +227,6 @@ module.exports = defineConfig({
             );
         },
       });
-      require('@cypress/grep/src/plugin')(config)
 
       return config;
     },
