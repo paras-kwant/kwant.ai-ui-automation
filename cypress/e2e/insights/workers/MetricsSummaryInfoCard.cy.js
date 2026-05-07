@@ -5,8 +5,10 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 	beforeEach(() => {
 			cy.intercept('GET', '**/api/projectConfigs**').as('getConfig');
 			cy.intercept('POST', '**/api/insight/company/table*').as('companyTable');
+			cy.intercept('POST', '**/api/empinsight/graph/avgWorkHour*').as('workerTable');
 		
 			cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
+
 			cy.get('.selector-item.last').click()
 		
 			cy.wait('@getConfig').then(({ request }) => {
@@ -18,9 +20,7 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 		})
 
 		it('Insight-Worker validate Average daily work hour',{tags:'@smoke'}, () => {
-			cy.intercept('POST', '**/api/empinsight/graph/avgWorkHour*').as('workerTable');
 		  
-//			cy.get('.site-left').first().click();////
 		  
 			cy.wait('@workerTable').then((interception) => {
 			  expect(interception.response.statusCode).to.eq(200);
