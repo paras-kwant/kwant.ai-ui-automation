@@ -37,7 +37,7 @@ jobs:
           npx cypress run \
             --spec "cypress/e2e/companies/**/*.cy.js" \
             --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
+            --env grepTags=@smoke \
             || echo "⚠️ Companies smoke tests finished with failures"
 
       - name: Upload Companies Allure Results
@@ -84,7 +84,7 @@ jobs:
           npx cypress run \
             --spec "cypress/e2e/workers/**/*.cy.js" \
             --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
+            --env grepTags=@smoke \
             || echo "⚠️ Workers smoke tests finished with failures"
 
       - name: Upload Workers Allure Results
@@ -131,7 +131,7 @@ jobs:
           npx cypress run \
             --spec "cypress/e2e/insights/**/*.cy.js" \
             --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
+            --env grepTags=@smoke \
             || echo "⚠️ Insights smoke tests finished with failures"
 
       - name: Upload Insights Allure Results
@@ -178,7 +178,7 @@ jobs:
           npx cypress run \
             --spec "cypress/e2e/auth/**/*.cy.js" \
             --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
+            --env grepTags=@smoke \
             || echo "⚠️ Auth smoke tests finished with failures"
 
       - name: Upload Auth Allure Results
@@ -284,14 +284,13 @@ jobs:
           allure generate merged-results/allure-results --clean -o allure-report
           echo "✅ Allure smoke report generated with $(find allure-report -type f | wc -l) files"
 
-      - name: Deploy Smoke Report to GitHub Pages
+      - name: Deploy Smoke Report to GitHub Pages  
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GH_PAT }}
           publish_dir: ./allure-report
-          destination_dir: smoke
-          force_orphan: false
-          keep_files: true                        # ✅ only updates changed files = faster
+          destination_dir: smoke                  # ✅ deploys to /smoke subfolder
+          force_orphan: false                     # ✅ keeps regression report intact
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
 
@@ -385,4 +384,4 @@ jobs:
               ]
             }')
 
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URLss"
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URLsss"
