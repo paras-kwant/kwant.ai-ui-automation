@@ -1,6 +1,9 @@
 name: Debug Single Cypress Spec with Allure
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
