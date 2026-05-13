@@ -8,7 +8,7 @@ import companiesHelper from '../../../support/helper/companiesHelper';
 describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:Insights", "Feature:Selection", "Module:Insights-Company"] }, () => {
 
   beforeEach(() => {
-    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage('5795237201'));
+    cy.loginAndVisit(() => companiesHelper.visitCompaniesInsightPage((Cypress.env('PROJECT_ID'))));
     cy.wait(2000);
     cy.get('.selector-item.first').click();
     cy.get('.selector-item.first').should('have.class', 'active');
@@ -190,6 +190,9 @@ describe("Insights Companies Module - Selection Functionality", { tags: ["Epic:I
         cy.log('Label value is:', label);
 
         cy.get('@nonZeroRow').find('.site-label').click();
+        cy.go('back')
+        cy.get('@nonZeroRow').find('.site-label').click();
+
 
         cy.url().should('include', '/insights/workers');
 

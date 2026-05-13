@@ -95,7 +95,7 @@ export const workforceSelector = {
    sendAlertButton:'button p:contains("Send Alert")',
    confirmSendAlertButton:'footer [label="Send Alert"]',
    cancelButton:'button p:contains("Cancel")',
-   licencesTab: '.sc-bVVIoq:contains("Licences")',
+   licencesTab: 'section div:contains("Licences"):first',
    CertificationsTab: '.sc-bVVIoq:contains("Certifications")',
    addCertificationButton: 'button p:contains("Add Certification")',
    backButton: 'button p:contains("Back")',

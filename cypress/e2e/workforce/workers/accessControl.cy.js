@@ -1,0 +1,188 @@
+/// <reference types="cypress" />
+import { workforceSelector } from "../../../support/workforceSelector";
+import "cypress-real-events/support";
+import workerHelper from '../../../support/helper/workerHelper.js';
+import accessControlPage from "../../../pages/workforce/accessControl.js";
+
+// ─── Test Suite ──────────────────────────────────────────────────────────────
+
+describe("Worker Module - Access Control Page Tests", 
+  { tags: ["Epic:WorkForce", "Feature:Access Control", "Module:Workforce-Worker"] }, 
+() => {
+
+  let columnConfigured = false;
+
+  beforeEach(() => {
+    cy.loginAndVisit(() => workerHelper.visitWorkersPageForProject('500526306'));
+    
+    if (!columnConfigured) {
+      accessControlPage.configureColumnSettings();
+      columnConfigured = true;
+    }
+  });
+
+  it("should display all main UI elements correctly", 
+    { tags: ["Story:Access Control UI Elements", "Severity:critical", "UI", "Module:Workforce-Worker"] }, 
+  () => {
+    accessControlPage.openWorkerAccessControl(0);
+
+    cy.get("p").contains("Access Control").should("be.visible");
+
+    accessControlPage.assertExpectedLabels([
+      "Device", "Last Seen On", "Last Seen Time", "NFC", "Battery"
+    ]);
+
+    accessControlPage.assertExpectedToggles([
+      "Motion Mode",
+      "Flag",
+      "Restricted",
+      "Driving Permissions",
+      "Camera Permissions",
+    ]);
+
+    cy.get(".hover-hoc-container__input__display-value")
+      .eq(0)
+      .realHover()
+      .find("svg")
+      .invoke("show")
+      .should("be.visible");
+
+    cy.contains("button p", "Disable").should("be.visible");
+    cy.get(workforceSelector.updateButton).should("be.visible");
+  });
+
+  it("Validate the value in table should match inside the drawer page", 
+    { tags: ["Story:Table vs Drawer Validation", "Severity:critical", "UI", "Module:Workforce-Worker"] }, 
+  () => {
+    const tableValues = {};
+    const fieldMapping = {
+      'Device': 'Device',
+      'Last Seen Location': 'Last Seen On',
+      'Battery': 'Battery',
+      'NFC': 'NFC'
+    };
+
+    cy.wait(2000);
+
+    cy.get(workforceSelector.tableColumn).then(($headers) => {
+      const columnIndices = {};
+      $headers.each((i, el) => {
+        const headerText = Cypress.$(el).text().trim();
+        if (fieldMapping[headerText]) columnIndices[headerText] = i;
+      });
+
+      cy.get(workforceSelector.tableRow).eq(0).then(($row) => {
+        Object.entries(columnIndices).forEach(([columnName, headerIndex]) => {
+          const adjustedIndex = headerIndex - 1;
+          cy.wrap($row)
+            .find('.table_td')
+            .eq(adjustedIndex)
+            .invoke('text')
+            .then((text) => tableValues[columnName] = text.trim());
+        });
+      });
+    }).then(() => {
+      accessControlPage.openWorkerAccessControl(0);
+      cy.wait(1000);
+
+      Object.entries(fieldMapping).forEach(([tableColumn, drawerField]) => {
+        cy.getWorkerField(drawerField).should('have.text', tableValues[tableColumn]);
+      });
+    });
+  });
+
+  it("should allow assigning a random device and persist the value", 
+    { tags: ["Story:Assign Device", "Severity:critical", "UI", "Module:Workforce-Worker"] }, 
+  () => {
+    accessControlPage.openWorkerAccessControl(3);
+    cy.wait(1000);
+
+    accessControlPage.openDeviceEditMode();
+    accessControlPage.selectRandomDevice();
+
+    accessControlPage.getDeviceName().then((deviceName) => {
+      cy.wrap(deviceName.trim()).as("assignedDevice");
+    });
+
+    accessControlPage.clickUpdate();
+    accessControlPage.assertToast("Successfully updated worker.");
+
+    accessControlPage.closeDrawer();
+    accessControlPage.openWorkerAccessControl(3);
+    accessControlPage.assertDeviceIsAssigned();
+  });
+
+  it("should disable the device and remove it from the field", 
+    { tags: ["Story:Disable Device", "Severity:critical", "UI", "Module:Workforce-Worker"] }, 
+  () => {
+    accessControlPage.openWorkerAccessControl(3);
+    accessControlPage.disableWorker();
+    accessControlPage.assertToast("Worker disabled successfully");
+    accessControlPage.assertDeviceIsEmpty();
+  });
+
+  it("should show error toast when enabling Motion Mode without a device", 
+    { tags: ["Story:Motion Mode Validation", "Severity:normal", "UI", "Module:Workforce-Worker"] }, 
+  () => {
+    cy.get(workforceSelector.searchInput).type("No Device {enter}");
+    cy.get(workforceSelector.tableRow).contains("No Device").should("be.visible");
+    accessControlPage.openWorkerAccessControl(0);
+    accessControlPage.enableToggle("Motion Mode");
+    accessControlPage.assertToast(
+      "Motion Mode can only be enabled after assigning the device"
+    );
+})
+
+  it("should generate printable badge without API call", 
+    { tags: ["Story:Print Badge", "Severity:normal", "UI", "Module:Workforce-Worker"] }, 
+  () => {
+    accessControlPage.openWorkerAccessControl(0);
+    cy.window().then((win) => cy.spy(win.URL, 'createObjectURL').as('blobCreated'));
+    cy.contains('button', 'Print Badge', { timeout: 10000 }).click({ force: true });
+    cy.get('@blobCreated').should('have.been.calledOnce');
+  });
+
+  it("should prevent assigning the same device to multiple workers", 
+    { tags: ["Story:Device Assignment Validation", "Severity:critical", "UI", "Module:Workforce-Worker"] }, 
+  () => {
+    cy.get(workforceSelector.tableRow).eq(0).should('be.visible');
+
+    accessControlPage.openWorkerAccessControl(0);
+    cy.wait(1000);
+
+    accessControlPage.getDeviceName().then((text) => {
+      const cleanText = text.replace(/\s/g, '');
+      if (cleanText === "-") {
+        accessControlPage.openDeviceEditMode();
+        accessControlPage.selectRandomDevice();
+        accessControlPage.clickUpdate();
+        accessControlPage.getDeviceName().then((name) => cy.wrap(name.trim()).as("assignedDevice"));
+      } else {
+        cy.wrap(text.trim()).as("assignedDevice");
+      }
+    });
+
+    cy.get('body').click(0, 0);
+    accessControlPage.openWorkerAccessControl(5);
+    accessControlPage.openDeviceEditMode();
+
+    cy.get("@assignedDevice").then((device) => {
+      cy.get('[placeholder="Select Device"]').clear().type(device);
+      cy.get('body').then(($body) => {
+        const $option = $body
+          .find('.select_item_container [role="button"]')
+          .filter((_, el) => el.innerText.includes(device));
+
+        if ($option.length) {
+          cy.wrap($option.first()).click();
+          accessControlPage.clickUpdate();
+          accessControlPage.assertToast(
+            'This device has already been assigned to another worker. Please disable the worker before assigning it again.'
+          );
+        } else {
+          cy.contains("p", "No results were found matching your search criteria.").should("be.visible");
+        }
+      });
+    });
+  });
+})

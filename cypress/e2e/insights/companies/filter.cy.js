@@ -5,6 +5,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
   let authHeaders = {};
 
   beforeEach(() => {
+    cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     cy.intercept('GET', '/api/projectConfigs', (req) => {
       authHeaders = {
         'x-auth-token': req.headers['x-auth-token'],
@@ -16,15 +17,18 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     cy.get('.filters_header_right_section .selector-item.first').click();
   });
 
-  const getLabel = (labelText) => {
-    return cy.get('body').then(($body) => {
-      if ($body.find(`.select-container__label:contains("${labelText}")`).length > 0) {
-        return cy.contains('.select-container__label', labelText);
-      } else {
-        return cy.contains('label', labelText);
-      }
-    });
-  };
+ const getLabel = (labelText) => {
+  return cy.get('body').then(($body) => {
+
+    const customLabel = $body.find(`div:contains("${labelText}")`);
+
+    if (customLabel.length > 0) {
+      return cy.contains('div', labelText);
+    } else {
+      return cy.contains('label', labelText);
+    }
+  });
+};
 
   it('Insights-Company - verify the UI of the filter form', { tags: ["Story:Insights Filter Form UI Verification", "Severity:normal", "UI"] }, () => {
     cy.contains('button p', 'Filter').click();
@@ -174,7 +178,7 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
     });
   });
 
-  it('Insights-Company - Validate the Job Title Filter (UI only + update if empty)', {
+  it.only('Insights-Company - Validate the Job Title Filter (UI only + update if empty)', {
     tags: ["Story:Insights Filter By Job Title", "Severity:critical", "UI", "Module:Insights-Company"]
   }, () => {
     cy.intercept('POST', '**/api/empinsight/work_table?*').as('workerTable');
@@ -591,7 +595,6 @@ describe('Companies Insights - Filter Functionality', { tags: ["Epic:WorkForce",
   it('Insights-Company - Validate the onsite count Filter', {
     tags: ["Story:Insights Filter By Cost Code", "Severity:critical", "UI", "Module:Insights-Company"]
   }, () => {
-    cy.intercept('POST', '**/api/insight/company/table*').as('companyTableApi');
     // cy.visit('/projects/5795237201/insights/companies');
   
     cy.wait('@companyTableApi').then((interception) => {

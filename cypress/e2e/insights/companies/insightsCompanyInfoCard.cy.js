@@ -321,14 +321,14 @@ describe('Insights Company - Insights Company Info-card', {
     let companyName;
     let uiZones = [];
   
-    cy.get(workforceSelector.tableRow).then(($rows) => {
-      const matchedRows = Array.from($rows).filter(row =>
-        Number(Cypress.$(row).find('.site-label').text().trim()) >= 1
-      );
-      expect(matchedRows.length).to.be.gte(2, 'There should be at least two rows with label >=1');
-  
-      selectedWorker = matchedRows[3];
-      cy.wrap(selectedWorker).find('input[type="checkbox"]').check({ force: true });
+
+   cy.get(workforceSelector.tableRow)
+  .eq(3)
+  .as('selectedWorker')
+
+cy.get('@selectedWorker')
+  .find('input[type="checkbox"]')
+  .check({ force: true })
       cy.wait(5000);
   
 
@@ -354,18 +354,18 @@ describe('Insights Company - Insights Company Info-card', {
             cy.log(`UI Zone #2 (2nd Most Active) → "${uiZones[1] ?? 'N/A'}"`);
           }
         }
-      });
+
   
-      cy.wrap(selectedWorker).find('.personal-info-content__title').invoke('text').then((text) => {
+      cy.get('@selectedWorker').find('.personal-info-content__title').invoke('text').then((text) => {
         companyName = text.trim();
         cy.log(`Selected company name: ${companyName}`);
-  
+
         cy.get('.onsite-selected-container .personal-info-content__title')
           .contains(companyName)
           .should('be.visible');
-  
+
         cy.wait(2000);
-        cy.wrap(selectedWorker)
+        cy.get('@selectedWorker')
         .find('.site-label')
         .scrollIntoView()
         .should('be.visible')

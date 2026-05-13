@@ -8,6 +8,7 @@ describe('Insight-Worker Insight Worker Info Card', () => {
   beforeEach(() => {
     cy.intercept('GET', '**/api/projectConfigs**').as('getConfig');
     cy.intercept('POST', '**/api/insight/company/table*').as('companyTable');
+	cy.intercept('POST', '**/api/empinsight/work_table*').as('workerTable');
 
 	cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
     cy.get('.selector-item.last').should('be.visible').click()
@@ -17,6 +18,7 @@ describe('Insight-Worker Insight Worker Info Card', () => {
         'x-auth-project': request.headers['x-auth-project']
       }).as('authHeaders');
     });
+	cy.get(workforceSelector.tableRow).eq(1).should('be.visible');
   });
 
   it("Insight-Worker Validate Worker on-site today card displays correct information",{tags:"@smoke"}, function () {
@@ -200,7 +202,7 @@ describe('Insight-Worker Insight Worker Info Card', () => {
   });
 
 
-  it('Insight-Worker Insights-Company - Validate time spent in active zones matches API percentage', {
+  it('Insight-Worker - Validate time spent in active zones matches API percentage', {
     tags: ["Story:Time in Active Zones Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
     cy.intercept('POST', '**/api/getEmployeeTrackingSummary*').as('getTrackingSummary');
@@ -225,11 +227,10 @@ describe('Insight-Worker Insight Worker Info Card', () => {
     });
   });
 
-  it('Insight-Worker Insights-Company - Validate safety alert for selected worker', {
+  it('Insight-Worker - Validate safety alert for selected worker', {
 	tags: ["Story:Safety Alert Validation", "Severity:critical", "API", "Module:Insights-Company"]
   }, function () {
   
-	cy.intercept('POST', '**/api/empinsight/work_table*').as('workerTable');
 	cy.get(workforceSelector.tableRow)
 	  .eq(1)
 	  .should('be.visible')

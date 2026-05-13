@@ -1,17 +1,13 @@
-name: Cypress Smoke Tests Parallel with Allure
+name: Cypress Smoke Tests with Allure
 
 on:
-  # push:
-  #   branches: [main, master]
-  # pull_request:
-  #   branches: [main, master]
   workflow_dispatch:
 
 jobs:
-  companies-smoke-tests:
-    name: 🏢 Companies Smoke Tests
+  smoke-tests:
+    name: 🔥 Smoke Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 120
     env:
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
@@ -31,174 +27,33 @@ jobs:
           node-version: 20
       - run: npm ci
 
-      - name: Run Companies Smoke Tests
+      - name: Run All Smoke Tests
         run: |
           mkdir -p allure-results
           npx cypress run \
-            --spec "cypress/e2e/companies/**/*.cy.js" \
+            --spec "cypress/e2e/**/*.cy.js" \
             --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
-            || echo "⚠️ Companies smoke tests finished with failures"
+            --env grepTags=@smoke \
+            || echo "⚠️ Smoke tests finished with failures"
 
-      - name: Upload Companies Allure Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: companies-smoke-allure-results
-          path: allure-results
-
-      - name: Upload Companies Screenshots
+      - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: companies-smoke-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-
-  workers-smoke-tests:
-    name: 👷 Workers Smoke Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    env:
-      EMAIL: ${{ secrets.EMAIL }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      GMAIL_USER: ${{ secrets.GMAIL_USER }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
-      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
-      TERM: xterm
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-
-      - name: Run Workers Smoke Tests
-        run: |
-          mkdir -p allure-results
-          npx cypress run \
-            --spec "cypress/e2e/workers/**/*.cy.js" \
-            --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
-            || echo "⚠️ Workers smoke tests finished with failures"
-
-      - name: Upload Workers Allure Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: workers-smoke-allure-results
+          name: smoke-allure-results
           path: allure-results
 
-      - name: Upload Workers Screenshots
+      - name: Upload Screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: workers-smoke-screenshots
+          name: smoke-screenshots
           path: cypress/screenshots
           if-no-files-found: ignore
 
-
-  insights-smoke-tests:
-    name: 📊 Insights Smoke Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    env:
-      EMAIL: ${{ secrets.EMAIL }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      GMAIL_USER: ${{ secrets.GMAIL_USER }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
-      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
-      TERM: xterm
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-
-      - name: Run Insights Smoke Tests
-        run: |
-          mkdir -p allure-results
-          npx cypress run \
-            --spec "cypress/e2e/insights/**/*.cy.js" \
-            --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
-            || echo "⚠️ Insights smoke tests finished with failures"
-
-      - name: Upload Insights Allure Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: insights-smoke-allure-results
-          path: allure-results
-
-      - name: Upload Insights Screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: insights-smoke-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-
-  auth-smoke-tests:
-    name: 🔐 Auth Smoke Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    env:
-      EMAIL: ${{ secrets.EMAIL }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      GMAIL_USER: ${{ secrets.GMAIL_USER }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-      TWILIO_NUMBER: ${{ secrets.TWILIO_NUMBER }}
-      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-      EXPECTED_FROM: ${{ secrets.EXPECTED_FROM }}
-      TERM: xterm
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-
-      - name: Run Auth Smoke Tests
-        run: |
-          mkdir -p allure-results
-          npx cypress run \
-            --spec "cypress/e2e/auth/**/*.cy.js" \
-            --browser chrome --headless \
-            --expose grepTags=@smoke --env grepTags=@smoke \
-            || echo "⚠️ Auth smoke tests finished with failures"
-
-      - name: Upload Auth Allure Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: auth-smoke-allure-results
-          path: allure-results
-
-      - name: Upload Auth Screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: auth-smoke-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-
-  merge-reports:
-    name: 📊 Merge Allure Reports & Deploy
-    needs: [companies-smoke-tests, workers-smoke-tests, insights-smoke-tests, auth-smoke-tests]
+  publish-report:
+    name: 📊 Publish Allure Report
+    needs: [smoke-tests]
     runs-on: ubuntu-latest
     if: always()
     env:
@@ -212,81 +67,31 @@ jobs:
       - name: Install Allure CLI
         run: npm install -g allure-commandline
 
-      - name: Download Companies Allure Results
+      - name: Download Allure Results
         uses: actions/download-artifact@v4
         with:
-          name: companies-smoke-allure-results
-          path: merged-results/companies
+          name: smoke-allure-results
+          path: allure-results
         continue-on-error: true
 
-      - name: Download Workers Allure Results
+      - name: Download Screenshots
         uses: actions/download-artifact@v4
         with:
-          name: workers-smoke-allure-results
-          path: merged-results/workers
+          name: smoke-screenshots
+          path: allure-results/screenshots
         continue-on-error: true
 
-      - name: Download Insights Allure Results
-        uses: actions/download-artifact@v4
-        with:
-          name: insights-smoke-allure-results
-          path: merged-results/insights
-        continue-on-error: true
-
-      - name: Download Auth Allure Results
-        uses: actions/download-artifact@v4
-        with:
-          name: auth-smoke-allure-results
-          path: merged-results/auth
-        continue-on-error: true
-
-      - name: Download Companies Screenshots
-        uses: actions/download-artifact@v4
-        with:
-          name: companies-smoke-screenshots
-          path: merged-results/screenshots/companies
-        continue-on-error: true
-
-      - name: Download Workers Screenshots
-        uses: actions/download-artifact@v4
-        with:
-          name: workers-smoke-screenshots
-          path: merged-results/screenshots/workers
-        continue-on-error: true
-
-      - name: Download Insights Screenshots
-        uses: actions/download-artifact@v4
-        with:
-          name: insights-smoke-screenshots
-          path: merged-results/screenshots/insights
-        continue-on-error: true
-
-      - name: Download Auth Screenshots
-        uses: actions/download-artifact@v4
-        with:
-          name: auth-smoke-screenshots
-          path: merged-results/screenshots/auth
-        continue-on-error: true
-
-      - name: Merge Allure Results
+      - name: Set Environment Info
         run: |
-          mkdir -p merged-results/allure-results
-          find merged-results/companies -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \; 2>/dev/null || true
-          find merged-results/workers -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \; 2>/dev/null || true
-          find merged-results/insights -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \; 2>/dev/null || true
-          find merged-results/auth -type f \( -name "*.json" -o -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \; 2>/dev/null || true
-          find merged-results/screenshots -type f \( -name "*.png" -o -name "*.jpeg" \) -exec cp -n {} merged-results/allure-results/ \; 2>/dev/null || true
-
-      - name: Set Smoke Environment Info              # ✅ ONLY NEW STEP ADDED
-        run: |
-          cat > merged-results/allure-results/environment.properties << EOF
+          mkdir -p allure-results
+          cat > allure-results/environment.properties << EOF
           Report.Type=🔥 Smoke Tests
           Environment=UAT
           Branch=${{ github.ref_name }}
           Run.Number=${{ github.run_number }}
           Triggered.By=${{ github.actor }}
           EOF
-          cat > merged-results/allure-results/executor.json << EOF
+          cat > allure-results/executor.json << EOF
           {
             "name": "GitHub Actions",
             "type": "github",
@@ -297,12 +102,10 @@ jobs:
 
       - name: Generate Allure Report
         run: |
-          rm -rf allure-report
-          mkdir -p allure-report
-          allure generate merged-results/allure-results --clean -o allure-report
-          echo "✅ Allure smoke report generated with $(find allure-report -type f | wc -l) files"
+          allure generate allure-results --clean -o allure-report
+          echo "✅ Allure report generated with $(find allure-report -type f | wc -l) files"
 
-      - name: Deploy Smoke Report to GitHub Pages
+      - name: Deploy Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GH_PAT }}

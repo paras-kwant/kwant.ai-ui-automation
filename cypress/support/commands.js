@@ -99,6 +99,7 @@ Cypress.Commands.add('getTotalWorkers', () => {
 
 Cypress.Commands.add('selectRandomOption', (inputSelector, optionSelector, name = 'option') => {
   cy.get(inputSelector).click();
+  cy.wait(1000)
   cy.get('body').should('be.visible');
 
   cy.get(optionSelector).should('be.visible').then(($options) => {

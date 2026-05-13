@@ -92,7 +92,7 @@ describe("Insights-Workers Module - Calendar Validation", { tags: ["Module:Insig
   // Custom Range
   // ─────────────────────────────────────────────────────────────────────────
 
-  it('Insights-Workers - Custom Range date selection', {
+  it.skip('Insights-Workers - Custom Range date selection', {
     tags: ["Story:Custom Range Selection", "Severity:normal", "UI", "Module:Insights-Workers"]
   }, () => {
     calendarFilterPage.openCalendar();

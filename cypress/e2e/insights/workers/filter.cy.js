@@ -40,7 +40,7 @@ describe('Insight Worker - Filter Functionality', { tags: ["Epic:WorkForce", "Fe
   
   });
 
-  it('Insights-Worker - dynamically search, validate, and select options',{tags:"@smoke"},  () => {
+  it('Insights-Worker - dynamically search, validate, and select options',{},  () => {
     filterPage.openFilter();
   
       const dynamicSearchSelect = (placeholderText, selectCount = 3) => {

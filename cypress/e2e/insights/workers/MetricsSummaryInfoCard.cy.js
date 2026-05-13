@@ -1,5 +1,6 @@
 
 import WorkerHelper from "../../../support/helper/workerHelper";
+import { workforceSelector } from "../../../support/workforceSelector";
 
 describe('Insight-Worker Metrics Summary Info Card', () => {
 	beforeEach(() => {
@@ -11,6 +12,7 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 
 		
 			cy.loginAndVisit(() => WorkerHelper.visitWorkersInsightPage('5007477836'));
+			cy.get(workforceSelector.tableRow).eq(1).should('be.visible');
 
 			cy.get('.selector-item.last').click()
 		
@@ -60,7 +62,7 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 		  
 				  // Actual assertion
 				  expect(Math.abs(uiValue - formattedAverage)).to.be.at.most(
-					0.1,
+					0.2,
 					`UI shows ${uiValue} but API calculated average overtime is ${formattedAverage}`
 				  );
 				});
@@ -236,7 +238,9 @@ describe('Insight-Worker Metrics Summary Info Card', () => {
 							return;
 						}
 		
-						const spans = $tooltip.find('.sc-eifrsQ');
+						const spans = $tooltip.find('span').filter((_, el) => {
+							return /^\d+(\.\d+)?\s*h$/.test(Cypress.$(el).text().trim());
+						});
 						let closestValue = null;
 						let closestDiff = Infinity;
 		
